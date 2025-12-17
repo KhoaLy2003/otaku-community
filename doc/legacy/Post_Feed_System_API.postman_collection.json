@@ -1,0 +1,780 @@
+{
+  "info": {
+    "name": "Post and Feed System API",
+    "description": "Comprehensive API collection for testing the Post and Feed System including posts, feeds, interactions, topics, and media uploads.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api",
+      "type": "string"
+    },
+    {
+      "key": "mediaBaseUrl",
+      "value": "http://localhost:8080/media",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "testUserId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "testPostId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "testTopicId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "testCommentId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Posts API",
+      "item": [
+        {
+          "name": "Create Post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"My Test Post\",\n  \"content\": \"This is a test post created via Postman\",\n  \"mediaUrls\": [],\n  \"topicIds\": [],\n  \"status\": \"PUBLISHED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts"]
+            },
+            "description": "Create a new post with title, content, media URLs, and topics"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Post by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{testPostId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{testPostId}}"]
+            },
+            "description": "Retrieve a specific post by its ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Post Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{testPostId}}/detail",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{testPostId}}", "detail"]
+            },
+            "description": "Get complete post details including comments, topics, and like status"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Post",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Post Title\",\n  \"content\": \"This post has been updated via Postman\",\n  \"mediaUrls\": [],\n  \"topicIds\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{testPostId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{testPostId}}"]
+            },
+            "description": "Update an existing post (owner only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Post",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{testPostId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{testPostId}}"]
+            },
+            "description": "Soft delete a post (owner only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Published Posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts?page=1&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get all published posts with pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Posts by User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/user/{{testUserId}}?page=1&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "user", "{{testUserId}}"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get posts by a specific user"
+          },
+          "response": []
+        },
+        {
+          "name": "Publish Post",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{testPostId}}/publish",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{testPostId}}", "publish"]
+            },
+            "description": "Publish a draft post"
+          },
+          "response": []
+        },
+        {
+          "name": "Convert to Draft",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{testPostId}}/draft",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{testPostId}}", "draft"]
+            },
+            "description": "Convert a published post back to draft"
+          },
+          "response": []
+        },
+        {
+          "name": "Check Post Ownership",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{testPostId}}/owner",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{testPostId}}", "owner"]
+            },
+            "description": "Check if current user owns the post"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Feed API",
+      "item": [
+        {
+          "name": "Get Home Feed",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/feed/home?limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["feed", "home"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "cursor",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get personalized home feed for authenticated user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Explore Feed",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/feed/explore?limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["feed", "explore"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "cursor",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get public explore feed with all published posts"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Topic Feed",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/feed/topic/{{testTopicId}}?limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["feed", "topic", "{{testTopicId}}"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "cursor",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get feed for a specific topic"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Interactions API",
+      "item": [
+        {
+          "name": "Like Post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"postId\": \"{{testPostId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/interactions/likes",
+              "host": ["{{baseUrl}}"],
+              "path": ["interactions", "likes"]
+            },
+            "description": "Like a post"
+          },
+          "response": []
+        },
+        {
+          "name": "Unlike Post",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/interactions/likes/{{testPostId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["interactions", "likes", "{{testPostId}}"]
+            },
+            "description": "Remove like from a post"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Like Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/interactions/likes/{{testPostId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["interactions", "likes", "{{testPostId}}"]
+            },
+            "description": "Get like status for a post"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"postId\": \"{{testPostId}}\",\n  \"content\": \"This is a test comment created via Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/interactions/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["interactions", "comments"]
+            },
+            "description": "Add a comment to a post"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Comment",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"This comment has been updated via Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/interactions/comments/{{testCommentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["interactions", "comments", "{{testCommentId}}"]
+            },
+            "description": "Update user's own comment"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Comment",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/interactions/comments/{{testCommentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["interactions", "comments", "{{testCommentId}}"]
+            },
+            "description": "Delete user's own comment (soft delete)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Comment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/interactions/comments/{{testCommentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["interactions", "comments", "{{testCommentId}}"]
+            },
+            "description": "Get a specific comment by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Post Comments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/interactions/posts/{{testPostId}}/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["interactions", "posts", "{{testPostId}}", "comments"]
+            },
+            "description": "Get all comments for a post"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Post Comments (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/interactions/posts/{{testPostId}}/comments/paginated?page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["interactions", "posts", "{{testPostId}}", "comments", "paginated"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get comments for a post with pagination"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Topics API",
+      "item": [
+        {
+          "name": "Create Topic (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Topic\",\n  \"description\": \"A test topic created via Postman\",\n  \"color\": \"#FF5733\",\n  \"isDefault\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/topics",
+              "host": ["{{baseUrl}}"],
+              "path": ["topics"]
+            },
+            "description": "Create a new topic (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Topics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/topics",
+              "host": ["{{baseUrl}}"],
+              "path": ["topics"]
+            },
+            "description": "Get all active topics with post counts"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Default Topics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/topics/default",
+              "host": ["{{baseUrl}}"],
+              "path": ["topics", "default"]
+            },
+            "description": "Get system-defined default topics"
+          },
+          "response": []
+        },
+        {
+          "name": "Search Topics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/topics/search?query=anime&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["topics", "search"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "anime"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Search topics by name"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Topic by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/topics/{{testTopicId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["topics", "{{testTopicId}}"]
+            },
+            "description": "Get a specific topic by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Topic by Slug",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/topics/slug/anime-discussion",
+              "host": ["{{baseUrl}}"],
+              "path": ["topics", "slug", "anime-discussion"]
+            },
+            "description": "Get a topic by its slug"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Topic (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Topic Name\",\n  \"description\": \"Updated topic description\",\n  \"color\": \"#00FF00\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/topics/{{testTopicId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["topics", "{{testTopicId}}"]
+            },
+            "description": "Update an existing topic (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Topic (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/topics/{{testTopicId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["topics", "{{testTopicId}}"]
+            },
+            "description": "Soft delete a topic (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Topics by Post",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/topics/post/{{testPostId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["topics", "post", "{{testPostId}}"]
+            },
+            "description": "Get all topics associated with a post"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Media API",
+      "item": [
+        {
+          "name": "Upload Media",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "",
+                  "description": "Select an image or video file (JPEG, PNG, GIF, WebP, MP4 - max 5MB)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{mediaBaseUrl}}/upload",
+              "host": ["{{mediaBaseUrl}}"],
+              "path": ["upload"]
+            },
+            "description": "Upload a media file to Cloudinary"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Media",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{mediaBaseUrl}}/sample-public-id",
+              "host": ["{{mediaBaseUrl}}"],
+              "path": ["sample-public-id"]
+            },
+            "description": "Delete a media file by its public ID"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Test Scenarios",
+      "item": [
+        {
+          "name": "Guest Access - Explore Feed",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/feed/explore",
+              "host": ["{{baseUrl}}"],
+              "path": ["feed", "explore"]
+            },
+            "description": "Test guest access to explore feed (should work without auth)"
+          },
+          "response": []
+        },
+        {
+          "name": "Guest Access - Try to Like (Should Fail)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"postId\": \"{{testPostId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/interactions/likes",
+              "host": ["{{baseUrl}}"],
+              "path": ["interactions", "likes"]
+            },
+            "description": "Test guest trying to like a post (should return 401)"
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid Data - Create Post with Empty Title",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"\",\n  \"content\": \"This should fail due to empty title\",\n  \"status\": \"PUBLISHED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts"]
+            },
+            "description": "Test validation error for empty title (should return 400)"
+          },
+          "response": []
+        },
+        {
+          "name": "Not Found - Get Non-existent Post",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posts/00000000-0000-0000-0000-000000000000",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "00000000-0000-0000-0000-000000000000"]
+            },
+            "description": "Test 404 error for non-existent post"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,270 @@
+package com.otaku.community.feature.interaction.service;
+
+import com.otaku.community.common.exception.BadRequestException;
+import com.otaku.community.common.exception.ResourceNotFoundException;
+import com.otaku.community.common.util.SecurityUtils;
+import com.otaku.community.feature.interaction.dto.*;
+import com.otaku.community.feature.interaction.entity.Comment;
+import com.otaku.community.feature.interaction.entity.Reaction;
+import com.otaku.community.feature.interaction.mapper.InteractionMapper;
+import com.otaku.community.feature.interaction.repository.CommentRepository;
+import com.otaku.community.feature.interaction.repository.ReactionRepository;
+import com.otaku.community.feature.post.entity.Post;
+import com.otaku.community.feature.post.entity.PostStats;
+import com.otaku.community.feature.post.repository.PostRepository;
+import com.otaku.community.feature.post.repository.PostStatsRepository;
+import com.otaku.community.feature.post.service.PostStatsService;
+import com.otaku.community.feature.user.entity.User;
+import com.otaku.community.feature.user.service.UserService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class InteractionService {
+
+    private final ReactionRepository reactionRepository;
+    private final CommentRepository commentRepository;
+    private final PostRepository postRepository;
+    private final PostStatsService postStatsService;
+    private final InteractionMapper interactionMapper;
+    private final UserService userService;
+
+    // ===== LIKE OPERATIONS =====
+
+    /**
+     * Like a post
+     */
+    @Transactional
+    public LikeResponse likePost(UUID postId) {
+        log.debug("User attempting to like post {}", postId);
+
+        User user = userService.findByAuth0Id();
+        UUID userId = user.getId();
+
+        // Verify post exists and is published
+        Post post = getPublishedPost(postId);
+
+        // Check if already liked
+        if (reactionRepository.existsByUserIdAndTargetTypeAndTargetId(userId, Reaction.TargetType.POST, postId)) {
+            throw new BadRequestException("Post is already liked by user");
+        }
+
+        // Create reaction record
+        Reaction reaction = Reaction.builder()
+                .userId(userId)
+                .targetType(Reaction.TargetType.POST)
+                .targetId(postId)
+                .reactionType(Reaction.ReactionType.LIKE)
+                .build();
+
+        reactionRepository.save(reaction);
+
+        // Update stats
+        postStatsService.incrementLikeCount(postId);
+        PostStats stats = postStatsService.getPostStats(postId);
+
+        log.info("User {} liked post {}", userId, postId);
+        return interactionMapper.toLikeResponse(postId, true, stats.getLikeCount().longValue());
+    }
+
+    /**
+     * Unlike a post
+     */
+    @Transactional
+    public LikeResponse unlikePost(UUID postId) {
+        log.debug("User attempting to unlike post {}", postId);
+
+        User user = userService.findByAuth0Id();
+        UUID userId = user.getId();
+
+        // Verify post exists
+        Post post = getPublishedPost(postId);
+
+        // Check if like exists
+        if (!reactionRepository.existsByUserIdAndTargetTypeAndTargetId(userId, Reaction.TargetType.POST, postId)) {
+            throw new BadRequestException("Post is not liked by user");
+        }
+
+        // Remove reaction record
+        reactionRepository.deleteByUserIdAndTargetTypeAndTargetId(userId, Reaction.TargetType.POST, postId);
+
+        // Update stats
+        postStatsService.decrementLikeCount(postId);
+        PostStats stats = postStatsService.getPostStats(postId);
+
+        log.info("User {} unliked post {}", userId, postId);
+        return interactionMapper.toLikeResponse(postId, false, stats.getLikeCount().longValue());
+    }
+
+    /**
+     * Get like status for a post and user
+     */
+    @Transactional(readOnly = true)
+    public LikeResponse getLikeStatus(UUID postId) {
+        Post post = getPublishedPost(postId);
+        User user = userService.findByAuth0Id();
+        UUID userId = user.getId();
+        boolean isLiked = userId != null && reactionRepository.existsByUserIdAndTargetTypeAndTargetId(userId, Reaction.TargetType.POST, postId);
+        
+        PostStats stats = postStatsService.getPostStats(postId);
+        return interactionMapper.toLikeResponse(postId, isLiked, stats.getLikeCount().longValue());
+    }
+
+    /**
+     * Get like status for any post (published or draft) - used for post details
+     */
+    @Transactional(readOnly = true)
+    public LikeResponse getLikeStatusForAnyPost(UUID postId, UUID userId) {
+        Post post = postRepository.findById(postId)
+                .filter(p -> p.getDeletedAt() == null) // Not soft deleted
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
+        
+        boolean isLiked = userId != null && reactionRepository.existsByUserIdAndTargetTypeAndTargetId(userId, Reaction.TargetType.POST, postId);
+        
+        PostStats stats = postStatsService.getPostStats(postId);
+        return interactionMapper.toLikeResponse(postId, isLiked, stats.getLikeCount().longValue());
+    }
+
+    // ===== COMMENT OPERATIONS =====
+
+    /**
+     * Create a comment on a post
+     */
+    @Transactional
+    public CommentResponse createComment(CreateCommentRequest request) {
+        log.debug("Creating comment on post {}", request.getPostId());
+
+        // Verify post exists and is published
+        Post post = getPublishedPost(request.getPostId());
+
+        User user = userService.findByAuth0Id();
+
+        Comment parentComment = commentRepository.findByIdAndUserId(request.getParentId(), user.getId())
+                .orElse(null);
+
+        // Create comment
+        Comment comment = Comment.builder()
+                .post(post)
+                .user(user)
+                .content(request.getContent().trim())
+                .parent(parentComment)
+                .build();
+
+        comment = commentRepository.save(comment);
+
+        // Update stats
+        postStatsService.incrementCommentCount(request.getPostId());
+
+        log.info("User created comment {} on post {}", comment.getId(), request.getPostId());
+        return interactionMapper.toCommentResponse(comment);
+    }
+
+    /**
+     * Update a comment (user can only update their own comments)
+     */
+    @Transactional
+    public CommentResponse updateComment(UUID commentId, UpdateCommentRequest request) {
+        log.debug("User updating comment {}", commentId);
+
+        User user = userService.findByAuth0Id();
+        UUID userId = user.getId();
+
+        // Find comment and verify ownership
+        Comment comment = commentRepository.findByIdAndUserId(commentId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Comment not found or access denied"));
+
+        // Update content
+        comment.updateContent(request.getContent().trim());
+        comment = commentRepository.save(comment);
+
+        log.info("User {} updated comment {}", userId, commentId);
+        return interactionMapper.toCommentResponse(comment);
+    }
+
+    /**
+     * Delete a comment (soft delete)
+     */
+    @Transactional
+    public void deleteComment(UUID commentId) {
+        log.debug("User deleting comment {}", commentId);
+
+        User user = userService.findByAuth0Id();
+        UUID userId = user.getId();
+
+        // Find comment and verify ownership
+        Comment comment = commentRepository.findByIdAndUserId(commentId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Comment not found or access denied"));
+
+        // Soft delete the comment
+        comment.softDelete();
+        commentRepository.save(comment);
+
+        // Update stats
+        postStatsService.decrementCommentCount(comment.getPost().getId());
+
+        log.info("User {} deleted comment {}", userId, commentId);
+    }
+
+    /**
+     * Get all comments for a post
+     */
+    @Transactional(readOnly = true)
+    public List<CommentResponse> getCommentsByPost(UUID postId) {
+        // Verify post exists and is not soft deleted
+        if (!postRepository.findByIdAndNotDeleted(postId).isPresent()) {
+            throw new ResourceNotFoundException("Post not found");
+        }
+
+        List<Comment> comments = commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
+        return interactionMapper.toCommentResponseList(comments);
+    }
+
+    /**
+     * Get comments for a post with pagination
+     */
+    @Transactional(readOnly = true)
+    public Page<CommentResponse> getCommentsByPost(UUID postId, Pageable pageable) {
+        // Verify post exists and is not soft deleted
+        if (!postRepository.findByIdAndNotDeleted(postId).isPresent()) {
+            throw new ResourceNotFoundException("Post not found");
+        }
+
+        Page<Comment> comments = commentRepository.findByPostIdOrderByCreatedAtAsc(postId, pageable);
+        return comments.map(interactionMapper::toCommentResponse);
+    }
+
+    /**
+     * Get a specific comment by ID
+     */
+    @Transactional(readOnly = true)
+    public CommentResponse getComment(UUID commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .filter(c -> c.getDeletedAt() == null) // Exclude soft deleted
+                .orElseThrow(() -> new ResourceNotFoundException("Comment not found"));
+
+        return interactionMapper.toCommentResponse(comment);
+    }
+
+    // ===== HELPER METHODS =====
+
+    /**
+     * Get a published post or throw exception
+     */
+    private Post getPublishedPost(UUID postId) {
+        return postRepository.findById(postId)
+                .filter(post -> post.getDeletedAt() == null) // Not soft deleted
+                .filter(Post::isPublished) // Must be published
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found or not published"));
+    }
+
+
+}

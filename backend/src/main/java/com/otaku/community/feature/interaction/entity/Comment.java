@@ -1,0 +1,45 @@
+package com.otaku.community.feature.interaction.entity;
+
+import com.otaku.community.common.entity.BaseEntity;
+import com.otaku.community.feature.post.entity.Post;
+import com.otaku.community.feature.user.entity.User;
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "comments", indexes = {
+        @Index(name = "idx_comments_post_id", columnList = "post_id"),
+        @Index(name = "idx_comments_user_id", columnList = "user_id"),
+        @Index(name = "idx_comments_created_at", columnList = "created_at"),
+        @Index(name = "idx_comments_deleted_at", columnList = "deleted_at"),
+        @Index(name = "idx_comments_parent_id", columnList = "parent_id")
+})
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Comment extends BaseEntity {
+
+    @Column(name = "content", nullable = false, length = 1000)
+    private String content;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "parent_id", nullable = false)
+    private Comment parent;
+
+    /**
+     * Updates the comment content while preserving creation timestamp
+     */
+    public void updateContent(String newContent) {
+        this.content = newContent;
+    }
+}

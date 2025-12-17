@@ -1,0 +1,355 @@
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Alert } from "@/components/ui/Alert";
+import { PostCard, type BasePost } from "@/components/posts/PostCard";
+import { CommentCard } from "@/components/comments/CommentCard";
+import { CommentForm } from "@/components/comments/CommentForm";
+import { postsApi } from "@/lib/api/posts";
+import { commentsApi } from "@/lib/api/comments";
+import { timeAgo } from "@/lib/utils";
+import type { PostWithDetails } from "@/types/post";
+import type { Comment } from "@/types/comment";
+import { useAuth } from '@/hooks/useAuth';
+
+// Interface for comments to be passed to CommentCard
+interface CommentCardData {
+  id: string;
+  author: string;
+  time: string;
+  content: string;
+  votes: number;
+  isOwner?: boolean;
+  replies: CommentCardData[];
+}
+
+// Helper to build a hierarchical comment tree from a flat list
+const buildCommentTree = (
+  comments: Comment[],
+  currentUserId?: string | null,
+  parentId: string | null = null
+): CommentCardData[] => {
+  return comments
+    .filter((comment) => comment.parentId === parentId)
+    .map((comment) => ({
+      id: comment.id,
+      author: comment.author?.name || "Unknown",
+      time: timeAgo(comment.createdAt),
+      content: comment.content,
+      votes: comment.likesCount,
+      isOwner: currentUserId ? comment.author?.id === currentUserId : false,
+      replies: buildCommentTree(comments, currentUserId, comment.id),
+    }))
+    .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+};
+
+export default function PostDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const currentUserId = user?.id;
+
+  const [post, setPost] = useState<PostWithDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [commentsData, setCommentsData] = useState<CommentCardData[]>([]);
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!id) {
+      setError("Post ID is missing.");
+      setLoading(false);
+      return;
+    }
+
+    const fetchPostDetails = async () => {
+      try {
+        const response = await postsApi.getPostDetails(id);
+        if (response.success && response.data) {
+          setPost(response.data);
+          setCommentsData(buildCommentTree(response.data.comments, currentUserId));
+        } else {
+          setError(response.message || "Post not found.");
+        }
+      } catch (err: any) {
+        setError(err.message || "Failed to fetch post details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPostDetails();
+  }, [id, currentUserId]);
+
+  const handleShare = async () => {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    try {
+      await navigator.clipboard.writeText(url);
+      setAlertMessage("Link copied to clipboard");
+      setTimeout(() => setAlertMessage(null), 2500);
+    } catch {
+      setAlertMessage("Unable to copy link");
+    }
+  };
+
+  const handleAddComment = async (value: string) => {
+    if (!id || !user) return;
+    const optimisticComment: CommentCardData = {
+      id: Date.now().toString(),
+      author: user.username,
+      time: "Just now",
+      content: value,
+      votes: 0,
+      isOwner: true,
+      replies: [],
+    };
+    setCommentsData((prev) => [optimisticComment, ...prev]);
+
+    try {
+      const response = await commentsApi.createComment({ postId: id, content: value });
+      if (response.success && response.data) {
+        setCommentsData((prev) =>
+          prev.map((c) => (c.id === optimisticComment.id ? buildCommentTree([response.data], user.id)[0] : c))
+        );
+      }
+    } catch (error) {
+      console.error("Failed to add comment:", error);
+      setCommentsData((prev) => prev.filter((c) => c.id !== optimisticComment.id));
+    }
+  };
+
+  const handleReply = async (parentId: string, content: string) => {
+    if (!id || !user) return;
+    const optimisticReply: CommentCardData = {
+      id: Date.now().toString(),
+      author: user.username,
+      time: "Just now",
+      content: content,
+      votes: 0,
+      isOwner: true,
+      replies: [],
+    };
+
+    const addOptimisticReply = (comments: CommentCardData[]): CommentCardData[] => {
+      return comments.map((comment) => {
+        if (comment.id === parentId) {
+          return { ...comment, replies: [optimisticReply, ...comment.replies] };
+        }
+        if (comment.replies.length > 0) {
+          return { ...comment, replies: addOptimisticReply(comment.replies) };
+        }
+        return comment;
+      });
+    };
+    setCommentsData(addOptimisticReply);
+
+    try {
+      const response = await commentsApi.createComment({ postId: id, content, parentId });
+      if (response.success && response.data) {
+        const newReply: CommentCardData = {
+          id: response.data.id,
+          author: response.data.author.name,
+          time: timeAgo(response.data.createdAt),
+          content: response.data.content,
+          votes: response.data.likesCount,
+          isOwner: response.data.author.id === user.id,
+          replies: [],
+        };
+        const addFinalReply = (comments: CommentCardData[]): CommentCardData[] => {
+          return comments.map(comment => {
+            if (comment.id === parentId) {
+              const filteredReplies = comment.replies.filter(r => r.id !== optimisticReply.id);
+              return { ...comment, replies: [newReply, ...filteredReplies] };
+            }
+            if (comment.replies.length > 0) {
+              return { ...comment, replies: addFinalReply(comment.replies) };
+            }
+            return comment;
+          });
+        }
+        setCommentsData(addFinalReply);
+      }
+    } catch (error) {
+      console.error("Failed to add reply:", error);
+      const removeOptimisticReply = (comments: CommentCardData[]): CommentCardData[] => {
+        return comments.map((comment) => {
+          if (comment.id === parentId) {
+            return { ...comment, replies: comment.replies.filter(r => r.id !== optimisticReply.id) };
+          }
+          if (comment.replies.length > 0) {
+            return { ...comment, replies: removeOptimisticReply(comment.replies) };
+          }
+          return comment;
+        });
+      };
+      setCommentsData(removeOptimisticReply);
+    }
+  };
+
+  const handleEditComment = async (commentId: string, newContent: string) => {
+    const oldComments = commentsData;
+    const updateOptimisticComment = (comments: CommentCardData[]): CommentCardData[] => {
+      return comments.map((comment) => {
+        if (comment.id === commentId) {
+          return { ...comment, content: newContent };
+        }
+        if (comment.replies.length > 0) {
+          return { ...comment, replies: updateOptimisticComment(comment.replies) };
+        }
+        return comment;
+      });
+    };
+    setCommentsData(updateOptimisticComment);
+
+    try {
+      await commentsApi.updateComment(commentId, { content: newContent });
+    } catch (error) {
+      console.error("Failed to edit comment:", error);
+      setCommentsData(oldComments);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    const oldComments = commentsData;
+    const removeOptimisticComment = (comments: CommentCardData[]): CommentCardData[] => {
+      return comments.filter((comment) => {
+        if (comment.id === commentId) return false;
+        if (comment.replies.length > 0) {
+          comment.replies = removeOptimisticComment(comment.replies);
+        }
+        return true;
+      });
+    };
+    setCommentsData(removeOptimisticComment);
+
+    try {
+      await commentsApi.deleteComment(commentId);
+    } catch (error) {
+      console.error("Failed to delete comment:", error);
+      setCommentsData(oldComments);
+    }
+  };
+
+  const handleLikeComment = (commentId: string) => {
+    // API call for liking comments should be implemented here
+  };
+
+  const handleUnlikeComment = (commentId: string) => {
+    // API call for unliking comments should be implemented here
+  };
+
+  if (loading) {
+    return (
+      <div className="mx-auto flex max-w-4xl flex-col gap-4 px-4 py-6">
+        <p>Loading post...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mx-auto flex max-w-4xl flex-col gap-4 px-4 py-6">
+        <Alert variant="error" title="Error">
+          {error}
+        </Alert>
+        <Button
+          variant="outline"
+          color="grey"
+          onClick={() => navigate("/")}
+          className="self-start"
+          size="sm"
+        >
+          ← Back to Feed
+        </Button>
+      </div>
+    );
+  }
+
+  if (!post) {
+    return (
+      <div className="mx-auto flex max-w-4xl flex-col gap-4 px-4 py-6">
+        <Alert variant="info" title="Not Found">
+          Post not found.
+        </Alert>
+        <Button
+          variant="outline"
+          color="grey"
+          onClick={() => navigate("/")}
+          className="self-start"
+          size="sm"
+        >
+          ← Back to Feed
+        </Button>
+      </div>
+    );
+  }
+
+  const adaptedPost: BasePost = {
+    id: post.id,
+    title: post.title,
+    body: post.content,
+    image: post.media && post.media.length > 0 ? post.media[0].mediaUrl : undefined,
+    community: post.topics && post.topics.length > 0 ? post.topics[0].name : 'General',
+    author: post.author.name,
+    time: timeAgo(post.createdAt),
+    votes: post.likesCount,
+    comments: commentsData.length,
+  };
+
+  return (
+    <div className="mx-auto flex max-w-4xl flex-col gap-4 px-4 py-6">
+      <Button
+        variant="outline"
+        color="grey"
+        onClick={() => navigate("/")}
+        className="self-start"
+        size="sm"
+      >
+        ← Back to Feed
+      </Button>
+
+      <PostCard
+        post={adaptedPost}
+        onShare={handleShare}
+        onSave={() => console.log("Save clicked")}
+        onComment={() => console.log("Comment clicked")}
+      />
+
+      {alertMessage && (
+        <Alert variant="info" title="Share">
+          {alertMessage}
+        </Alert>
+      )}
+
+      <Card className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-[#1a1a1b]">
+            {commentsData.length} Comments
+          </h2>
+        </div>
+        <CommentForm onSubmit={handleAddComment} />
+      </Card>
+
+      <div className="space-y-3">
+        {commentsData.map((comment) => (
+          <CommentCard
+            key={comment.id}
+            id={comment.id}
+            author={comment.author}
+            time={comment.time}
+            content={comment.content}
+            votes={comment.votes}
+            isOwner={comment.isOwner}
+            replies={comment.replies}
+            onEdit={handleEditComment}
+            onDelete={handleDeleteComment}
+            onReply={handleReply}
+            onLike={handleLikeComment}
+            onUnlike={handleUnlikeComment}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
