@@ -2,7 +2,6 @@ package com.otaku.community.feature.interaction.service;
 
 import com.otaku.community.common.exception.BadRequestException;
 import com.otaku.community.common.exception.ResourceNotFoundException;
-import com.otaku.community.common.util.SecurityUtils;
 import com.otaku.community.feature.interaction.dto.*;
 import com.otaku.community.feature.interaction.entity.Comment;
 import com.otaku.community.feature.interaction.entity.Reaction;
@@ -12,7 +11,6 @@ import com.otaku.community.feature.interaction.repository.ReactionRepository;
 import com.otaku.community.feature.post.entity.Post;
 import com.otaku.community.feature.post.entity.PostStats;
 import com.otaku.community.feature.post.repository.PostRepository;
-import com.otaku.community.feature.post.repository.PostStatsRepository;
 import com.otaku.community.feature.post.service.PostStatsService;
 import com.otaku.community.feature.user.entity.User;
 import com.otaku.community.feature.user.service.UserService;
@@ -44,23 +42,18 @@ public class InteractionService {
      * Like a post
      */
     @Transactional
-    public LikeResponse likePost(UUID postId) {
+    public LikeResponse likePost(UUID postId, UUID interactionUserId) {
         log.debug("User attempting to like post {}", postId);
 
-        User user = userService.findByAuth0Id();
-        UUID userId = user.getId();
-
-        // Verify post exists and is published
-        Post post = getPublishedPost(postId);
-
         // Check if already liked
-        if (reactionRepository.existsByUserIdAndTargetTypeAndTargetId(userId, Reaction.TargetType.POST, postId)) {
+        if (reactionRepository.existsByUserIdAndTargetTypeAndTargetId(
+                interactionUserId, Reaction.TargetType.POST, postId)) {
             throw new BadRequestException("Post is already liked by user");
         }
 
         // Create reaction record
         Reaction reaction = Reaction.builder()
-                .userId(userId)
+                .userId(interactionUserId)
                 .targetType(Reaction.TargetType.POST)
                 .targetId(postId)
                 .reactionType(Reaction.ReactionType.LIKE)
@@ -72,7 +65,7 @@ public class InteractionService {
         postStatsService.incrementLikeCount(postId);
         PostStats stats = postStatsService.getPostStats(postId);
 
-        log.info("User {} liked post {}", userId, postId);
+        log.info("User {} liked post {}", interactionUserId, postId);
         return interactionMapper.toLikeResponse(postId, true, stats.getLikeCount().longValue());
     }
 
@@ -80,28 +73,23 @@ public class InteractionService {
      * Unlike a post
      */
     @Transactional
-    public LikeResponse unlikePost(UUID postId) {
+    public LikeResponse unlikePost(UUID postId, UUID interactionUserId) {
         log.debug("User attempting to unlike post {}", postId);
 
-        User user = userService.findByAuth0Id();
-        UUID userId = user.getId();
-
-        // Verify post exists
-        Post post = getPublishedPost(postId);
-
         // Check if like exists
-        if (!reactionRepository.existsByUserIdAndTargetTypeAndTargetId(userId, Reaction.TargetType.POST, postId)) {
+        if (!reactionRepository.existsByUserIdAndTargetTypeAndTargetId(
+                interactionUserId, Reaction.TargetType.POST, postId)) {
             throw new BadRequestException("Post is not liked by user");
         }
 
         // Remove reaction record
-        reactionRepository.deleteByUserIdAndTargetTypeAndTargetId(userId, Reaction.TargetType.POST, postId);
+        reactionRepository.deleteByUserIdAndTargetTypeAndTargetId(interactionUserId, Reaction.TargetType.POST, postId);
 
         // Update stats
         postStatsService.decrementLikeCount(postId);
         PostStats stats = postStatsService.getPostStats(postId);
 
-        log.info("User {} unliked post {}", userId, postId);
+        log.info("User {} unliked post {}", interactionUserId, postId);
         return interactionMapper.toLikeResponse(postId, false, stats.getLikeCount().longValue());
     }
 
@@ -109,12 +97,10 @@ public class InteractionService {
      * Get like status for a post and user
      */
     @Transactional(readOnly = true)
-    public LikeResponse getLikeStatus(UUID postId) {
-        Post post = getPublishedPost(postId);
-        User user = userService.findByAuth0Id();
-        UUID userId = user.getId();
-        boolean isLiked = userId != null && reactionRepository.existsByUserIdAndTargetTypeAndTargetId(userId, Reaction.TargetType.POST, postId);
-        
+    public LikeResponse getLikeStatus(UUID postId, UUID interactionUserId) {
+        boolean isLiked = interactionUserId != null
+                && reactionRepository.existsByUserIdAndTargetTypeAndTargetId(interactionUserId, Reaction.TargetType.POST, postId);
+
         PostStats stats = postStatsService.getPostStats(postId);
         return interactionMapper.toLikeResponse(postId, isLiked, stats.getLikeCount().longValue());
     }
@@ -124,12 +110,9 @@ public class InteractionService {
      */
     @Transactional(readOnly = true)
     public LikeResponse getLikeStatusForAnyPost(UUID postId, UUID userId) {
-        Post post = postRepository.findById(postId)
-                .filter(p -> p.getDeletedAt() == null) // Not soft deleted
-                .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
-        
-        boolean isLiked = userId != null && reactionRepository.existsByUserIdAndTargetTypeAndTargetId(userId, Reaction.TargetType.POST, postId);
-        
+        boolean isLiked = userId != null
+                && reactionRepository.existsByUserIdAndTargetTypeAndTargetId(userId, Reaction.TargetType.POST, postId);
+
         PostStats stats = postStatsService.getPostStats(postId);
         return interactionMapper.toLikeResponse(postId, isLiked, stats.getLikeCount().longValue());
     }
@@ -172,21 +155,18 @@ public class InteractionService {
      * Update a comment (user can only update their own comments)
      */
     @Transactional
-    public CommentResponse updateComment(UUID commentId, UpdateCommentRequest request) {
+    public CommentResponse updateComment(UUID commentId, UpdateCommentRequest request, UUID interactionUserId) {
         log.debug("User updating comment {}", commentId);
 
-        User user = userService.findByAuth0Id();
-        UUID userId = user.getId();
-
         // Find comment and verify ownership
-        Comment comment = commentRepository.findByIdAndUserId(commentId, userId)
+        Comment comment = commentRepository.findByIdAndUserId(commentId, interactionUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment not found or access denied"));
 
         // Update content
         comment.updateContent(request.getContent().trim());
         comment = commentRepository.save(comment);
 
-        log.info("User {} updated comment {}", userId, commentId);
+        log.info("User {} updated comment {}", interactionUserId, commentId);
         return interactionMapper.toCommentResponse(comment);
     }
 
@@ -194,14 +174,11 @@ public class InteractionService {
      * Delete a comment (soft delete)
      */
     @Transactional
-    public void deleteComment(UUID commentId) {
+    public void deleteComment(UUID commentId, UUID interactionUserId) {
         log.debug("User deleting comment {}", commentId);
 
-        User user = userService.findByAuth0Id();
-        UUID userId = user.getId();
-
         // Find comment and verify ownership
-        Comment comment = commentRepository.findByIdAndUserId(commentId, userId)
+        Comment comment = commentRepository.findByIdAndUserId(commentId, interactionUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment not found or access denied"));
 
         // Soft delete the comment
@@ -211,7 +188,7 @@ public class InteractionService {
         // Update stats
         postStatsService.decrementCommentCount(comment.getPost().getId());
 
-        log.info("User {} deleted comment {}", userId, commentId);
+        log.info("User {} deleted comment {}", interactionUserId, commentId);
     }
 
     /**
@@ -265,6 +242,4 @@ public class InteractionService {
                 .filter(Post::isPublished) // Must be published
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found or not published"));
     }
-
-
 }

@@ -43,7 +43,7 @@ Does not include (MVP):
 - **Backend**: Java Spring Boot
 - **Database**: PostgreSQL with full-text search capabilities
 - **ORM**: JPA
-- **Frontend**: Next.js 14+ with TypeScript, TailwindCSS, shadcn/ui
+- **Frontend**: React.js 14+ with TypeScript, TailwindCSS, shadcn/ui
 - **Storage**: Cloudinary for image hosting
 - **Authentication**: Auth0
 - **State Management**: TanStack Query for server state

@@ -14,9 +14,10 @@ export function CreatePostCard() {
   return (
     <Card className="space-y-4">
       <div className="flex items-center gap-3">
-        <div
-          className="h-10 w-10 rounded-full"
-          style={{ background: `linear-gradient(135deg, ${Colors.Orange[10]}, ${Colors.Orange[30]})` }}
+        <img
+          src="/logo.svg"
+          alt="App logo"
+          className="h-10 w-10 rounded-full object-cover"
         />
         <TextInput className="flex-1" placeholder="Create Post" />
       </div>

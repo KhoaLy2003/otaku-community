@@ -44,14 +44,14 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     Page<Post> findByStatusAndNotDeletedWithTopics(
             @Param("status") PostStatus status,
             @Param("topicIds") List<UUID> topicIds,
-            Pageable pageable
-    );
+            Pageable pageable);
 
     /**
      * Find all posts by user ID and status that are not soft deleted
      */
     @Query("SELECT p FROM Post p WHERE p.deletedAt IS NULL AND p.userId = :userId AND p.status = :status ORDER BY p.createdAt DESC")
-    Page<Post> findByUserIdAndStatusAndNotDeleted(@Param("userId") UUID userId, @Param("status") PostStatus status, Pageable pageable);
+    Page<Post> findByUserIdAndStatusAndNotDeleted(@Param("userId") UUID userId, @Param("status") PostStatus status,
+            Pageable pageable);
 
     /**
      * Find all posts by user ID and status that are not soft deleted (List version)
@@ -110,47 +110,33 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
             @Param("cursorCreatedAt") Instant cursorCreatedAt,
             @Param("cursorPostId") UUID cursorPostId,
             @Param("topicIds") List<UUID> topicIds,
-            Pageable pageable
-    );
+            Pageable pageable);
 
-    @Query("SELECT p FROM Post p WHERE p.deletedAt IS NULL AND p.status = 'PUBLISHED' " + "AND (p.createdAt < :cursorCreatedAt OR (p.createdAt = :cursorCreatedAt AND p.id < :cursorPostId)) " + "ORDER BY p.createdAt DESC, p.id DESC")
+    @Query("SELECT p FROM Post p WHERE p.deletedAt IS NULL AND p.status = 'PUBLISHED' " +
+            "AND (p.createdAt < :cursorCreatedAt OR (p.createdAt = :cursorCreatedAt AND p.id < :cursorPostId)) " +
+            "ORDER BY p.createdAt DESC, p.id DESC")
     List<Post> findPublishedPostsAfterCursor(
             @Param("cursorCreatedAt") Instant cursorCreatedAt,
             @Param("cursorPostId") UUID cursorPostId,
             Pageable pageable);
 
-    /**
-     * Find published posts by topic ID (first page)
-     */
-//    @Query("SELECT p FROM Post p JOIN PostTopic pt ON p.id = pt.postId " +
-//           "WHERE p.deletedAt IS NULL AND p.status = 'PUBLISHED' AND pt.topicId = :topicId " +
-//           "ORDER BY p.createdAt DESC, p.id DESC")
-//    List<Post> findPublishedPostsByTopicId(@Param("topicId") UUID topicId, Pageable pageable);
+    @Query("SELECT p FROM Post p WHERE p.deletedAt IS NULL AND p.userId = :userId " +
+            "AND (p.createdAt < :cursorCreatedAt OR (p.createdAt = :cursorCreatedAt AND p.id < :cursorPostId)) " +
+            "ORDER BY p.createdAt DESC, p.id DESC")
+    List<Post> findPostsByUserAfterCursor(
+            @Param("userId") UUID userId,
+            @Param("cursorCreatedAt") Instant cursorCreatedAt,
+            @Param("cursorPostId") UUID cursorPostId,
+            Pageable pageable);
 
-    @Query("""
-                SELECT DISTINCT p
-                FROM Post p
-                JOIN p.postTopics pt
-                JOIN pt.topic t
-                WHERE p.deletedAt IS NULL
-                  AND t.id = :topicId
-                  AND p.status = 'PUBLISHED'
-                ORDER BY p.createdAt DESC, p.id DESC
-            """)
-    List<Post> findPublishedPostsByTopicId(
-            @Param("topicId") UUID topicId,
-            Pageable pageable
-    );
-
-    /**
-     * Find published posts by topic ID after cursor for pagination
-     */
-    @Query("SELECT p FROM Post p JOIN PostTopic pt ON p.id = pt.post.id " +
-           "WHERE p.deletedAt IS NULL AND p.status = 'PUBLISHED' AND pt.topic.id = :topicId " +
-           "AND (p.createdAt < :cursorCreatedAt OR (p.createdAt = :cursorCreatedAt AND p.id < :cursorPostId)) " +
-           "ORDER BY p.createdAt DESC, p.id DESC")
-    List<Post> findPublishedPostsByTopicIdAfterCursor(@Param("topicId") UUID topicId,
-                                                    @Param("cursorCreatedAt") java.time.Instant cursorCreatedAt,
-                                                    @Param("cursorPostId") UUID cursorPostId,
-                                                    Pageable pageable);
+    @Query("SELECT p FROM Post p WHERE p.deletedAt IS NULL AND p.userId = :userId AND p.status = :status " +
+            "AND (:cursorCreatedAt IS NULL OR p.createdAt < :cursorCreatedAt OR (p.createdAt = :cursorCreatedAt AND p.id < :cursorPostId)) "
+            +
+            "ORDER BY p.createdAt DESC, p.id DESC")
+    List<Post> findPostsByUserAndStatusAfterCursor(
+            @Param("userId") UUID userId,
+            @Param("status") PostStatus status,
+            @Param("cursorCreatedAt") Instant cursorCreatedAt,
+            @Param("cursorPostId") UUID cursorPostId,
+            Pageable pageable);
 }

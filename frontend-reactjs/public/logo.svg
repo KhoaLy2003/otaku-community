@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 200 200"
+  width="200"
+  height="200"
+>
+  <!-- Background Circle (Japan Sun abstract) -->
+  <circle cx="100" cy="100" r="90" fill="#FFFFFF" />
+
+  <!-- Chat Bubble Shape -->
+  <path
+    d="M40,100
+       Q40,40 100,40
+       Q160,40 160,100
+       Q160,160 100,160
+       L40,160
+       Z"
+    fill="#2D6CDF"
+  />
+
+  <!-- Inner Orange Detail (Interaction) -->
+  <circle cx="100" cy="100" r="35" fill="#FF6B35" />
+
+  <!-- Smile / Notification dot -->
+  <circle cx="130" cy="70" r="12" fill="#FFFFFF" />
+</svg>

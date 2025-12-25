@@ -11,7 +11,7 @@ export function Auth0ProviderWrapper({ children }: Auth0ProviderWrapperProps) {
 
   const onRedirectCallback = (appState?: { returnTo?: string }) => {
     // Navigate to the return URL or default to feed
-    const returnTo = appState?.returnTo || '/feed';
+    const returnTo = appState?.returnTo || '';
     navigate(returnTo);
   };
 

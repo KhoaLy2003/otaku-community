@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Alert } from "@/components/ui/Alert";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { PostCard, type BasePost } from "@/components/posts/PostCard";
 import { CommentCard } from "@/components/comments/CommentCard";
 import { CommentForm } from "@/components/comments/CommentForm";
@@ -47,14 +48,21 @@ const buildCommentTree = (
 export default function PostDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const currentUserId = user?.id;
+
+  // Get returnTo parameter, default to feed
+  const returnTo = searchParams.get('returnTo') || '/';
+  const backButtonText = returnTo.startsWith('/profile') ? '← Back to Profile' : '← Back to Feed';
 
   const [post, setPost] = useState<PostWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [commentsData, setCommentsData] = useState<CommentCardData[]>([]);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (!id) {
@@ -239,6 +247,32 @@ export default function PostDetailPage() {
     // API call for unliking comments should be implemented here
   };
 
+
+  const handleDeletePost = (postId: string) => {
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDeletePost = async () => {
+    if (!id) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await postsApi.deletePost(id);
+      if (response.success) {
+        setShowDeleteDialog(false);
+        navigate(returnTo);
+      } else {
+        setAlertMessage(response.message || 'Failed to delete post');
+        setShowDeleteDialog(false);
+      }
+    } catch (error: any) {
+      setAlertMessage(error.message || 'An error occurred while deleting the post');
+      setShowDeleteDialog(false);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="mx-auto flex max-w-4xl flex-col gap-4 px-4 py-6">
@@ -256,11 +290,11 @@ export default function PostDetailPage() {
         <Button
           variant="outline"
           color="grey"
-          onClick={() => navigate("/")}
+          onClick={() => navigate(returnTo)}
           className="self-start"
           size="sm"
         >
-          ← Back to Feed
+          {backButtonText}
         </Button>
       </div>
     );
@@ -275,11 +309,11 @@ export default function PostDetailPage() {
         <Button
           variant="outline"
           color="grey"
-          onClick={() => navigate("/")}
+          onClick={() => navigate(returnTo)}
           className="self-start"
           size="sm"
         >
-          ← Back to Feed
+          {backButtonText}
         </Button>
       </div>
     );
@@ -289,9 +323,12 @@ export default function PostDetailPage() {
     id: post.id,
     title: post.title,
     body: post.content,
+    media: post.media,
     image: post.media && post.media.length > 0 ? post.media[0].mediaUrl : undefined,
     community: post.topics && post.topics.length > 0 ? post.topics[0].name : 'General',
     author: post.author.name,
+    authorId: post.author.id,
+    authorName: post.author.name,
     time: timeAgo(post.createdAt),
     votes: post.likesCount,
     comments: commentsData.length,
@@ -302,11 +339,11 @@ export default function PostDetailPage() {
       <Button
         variant="outline"
         color="grey"
-        onClick={() => navigate("/")}
+        onClick={() => navigate(returnTo)}
         className="self-start"
         size="sm"
       >
-        ← Back to Feed
+        {backButtonText}
       </Button>
 
       <PostCard
@@ -314,6 +351,7 @@ export default function PostDetailPage() {
         onShare={handleShare}
         onSave={() => console.log("Save clicked")}
         onComment={() => console.log("Comment clicked")}
+        onDelete={handleDeletePost}
       />
 
       {alertMessage && (
@@ -350,6 +388,18 @@ export default function PostDetailPage() {
           />
         ))}
       </div>
+
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={confirmDeletePost}
+        title="Delete post?"
+        message="This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

@@ -18,9 +18,9 @@ export function Header() {
     >
       <div className="flex max-w-[100%] w-full items-center justify-between gap-4 px-4 py-3">
         <Link to="/" className="flex items-center gap-2">
-          <span className="flex h-10 w-10 items-center justify-center text-white rounded-full overflow-hidden">
+          <span className="flex h-10 w-10 items-center justify-center text-white">
             <img
-              src="/logo/logo.svg"
+              src="/logo.svg"
               alt="Logo"
               width={40}
               height={40}
@@ -29,9 +29,6 @@ export function Header() {
           </span>
           <div className="hidden flex-col text-sm font-semibold leading-tight sm:flex">
             <span className="text-[#1a1a1b]">Otaku Community</span>
-            <span className="text-xs font-normal text-[#7c7c7c]">
-              Inspired by Reddit UI
-            </span>
           </div>
         </Link>
 

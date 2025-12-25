@@ -18,13 +18,14 @@ const variantStyles: Record<CardVariant, { backgroundColor: string; borderColor:
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   variant?: CardVariant
+  border?: boolean
 }
 
-export function Card({ className, variant = 'primary', style, ...props }: CardProps) {
+export function Card({ className, variant = 'primary', border = true, style, ...props }: CardProps) {
   const palette = variantStyles[variant]
   return (
     <div
-      className={cn('rounded-lg border p-4', className)}
+      className={cn('rounded-lg p-4', border && 'border', className)}
       style={{ backgroundColor: palette.backgroundColor, borderColor: palette.borderColor, boxShadow: palette.shadow, ...style }}
       {...props}
     />

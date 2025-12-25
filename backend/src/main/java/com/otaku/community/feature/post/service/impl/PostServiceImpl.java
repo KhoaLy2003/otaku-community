@@ -1,12 +1,16 @@
 package com.otaku.community.feature.post.service.impl;
 
+import com.otaku.community.common.dto.CursorInfo;
+import com.otaku.community.common.dto.post.PostAuthorRecord;
+import com.otaku.community.common.dto.post.PostResponseRecord;
 import com.otaku.community.common.exception.BadRequestException;
 import com.otaku.community.common.exception.ResourceNotFoundException;
+import com.otaku.community.common.util.PaginationUtils;
 import com.otaku.community.feature.interaction.dto.CommentResponse;
 import com.otaku.community.feature.interaction.service.InteractionService;
 import com.otaku.community.feature.post.dto.*;
-import com.otaku.community.feature.post.entity.PostStats;
 import com.otaku.community.feature.post.entity.Post;
+import com.otaku.community.feature.post.entity.PostStats;
 import com.otaku.community.feature.post.entity.PostStatus;
 import com.otaku.community.feature.post.mapper.PostMapper;
 import com.otaku.community.feature.post.repository.PostRepository;
@@ -20,7 +24,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +51,7 @@ public class PostServiceImpl implements PostService {
     private final TopicService topicService;
     private final InteractionService interactionService;
     private final UserService userService;
+    private final com.otaku.community.feature.feed.service.FeedService feedService;
 
     @Value("${app.frontend.url:http://localhost:3000}")
     private String frontendUrl;
@@ -87,6 +94,9 @@ public class PostServiceImpl implements PostService {
 
         log.info("Created post with ID: {} for user: {}", savedPost.getId(), userId);
 
+        // Trigger Fan-out on Write
+        feedService.fanOutToFollowers(savedPost);
+
         // Build response with media
         PostResponse response = postMapper.toResponse(savedPost);
 
@@ -124,13 +134,7 @@ public class PostServiceImpl implements PostService {
 
         // Save updated post
         Post updatedPost = postRepository.save(post);
-
         log.info("Updated post with ID: {}", postId);
-
-        // Set stats
-//        PostStats stats = postStatsService.getPostStats(postId);
-//        response.setLikeCount(stats.getLikeCount());
-//        response.setCommentCount(stats.getCommentCount());
 
         return postMapper.toResponse(updatedPost);
     }
@@ -147,7 +151,7 @@ public class PostServiceImpl implements PostService {
         Post post = findPostAndVerifyOwnership(postId);
 
         // Delete all associated media
-        //postMediaService.deleteAllPostMedia(postId);
+        // postMediaService.deleteAllPostMedia(postId);
 
         // Soft delete the post
         post.softDelete();
@@ -156,6 +160,7 @@ public class PostServiceImpl implements PostService {
         log.info("Deleted post with ID: {}", postId);
     }
 
+    // TODO: review
     /**
      * Retrieves a post by ID
      */
@@ -182,7 +187,8 @@ public class PostServiceImpl implements PostService {
     }
 
     /**
-     * Retrieves detailed post information including comments, topics, and like status
+     * Retrieves detailed post information including comments, topics, and like
+     * status
      */
     @Override
     @Transactional(readOnly = true)
@@ -200,7 +206,8 @@ public class PostServiceImpl implements PostService {
         // Get topics associated with this post
         List<TopicResponse> topics = topicService.getTopicsByPostId(postId);
 
-        // Get comments for this post (sorted by creation time ascending as per requirement 4.2)
+        // Get comments for this post (sorted by creation time ascending as per
+        // requirement 4.2)
         List<CommentResponse> comments = interactionService.getCommentsByPost(postId);
 
         // Get like status for current user (requirement 4.3)
@@ -216,8 +223,7 @@ public class PostServiceImpl implements PostService {
         PostDetailResponse.PostAuthorResponse postAuthor = new PostDetailResponse.PostAuthorResponse(
                 post.getUser().getId(),
                 post.getUser().getUsername(),
-                post.getUser().getAvatarUrl()
-        );
+                post.getUser().getAvatarUrl());
 
         // Get media
         List<PostMediaResponse> mediaResponses = postMediaServiceImpl.getPostMedia(postId);
@@ -225,7 +231,7 @@ public class PostServiceImpl implements PostService {
         // Get stats
         PostStats stats = postStatsService.getPostStats(postId);
 
-        //Get thumbnail URL
+        // Get thumbnail URL
         String thumbnailUrl = Optional.ofNullable(mediaResponses)
                 .orElse(List.of())
                 .stream()
@@ -261,9 +267,11 @@ public class PostServiceImpl implements PostService {
         return frontendUrl + "/posts/" + postId;
     }
 
+    // TODO: review
     /**
      * Retrieves posts by user ID
      */
+    @Override
     @Transactional(readOnly = true)
     public Page<PostResponse> getPostsByUser(UUID userId, Pageable pageable) {
         log.debug("Retrieving posts for user: {}", userId);
@@ -275,6 +283,7 @@ public class PostServiceImpl implements PostService {
     /**
      * Retrieves posts by user ID and status
      */
+    @Override
     @Transactional(readOnly = true)
     public Page<PostResponse> getPostsByUserAndStatus(UUID userId, PostStatus status, Pageable pageable) {
         log.debug("Retrieving posts for user: {} with status: {}", userId, status);
@@ -283,16 +292,36 @@ public class PostServiceImpl implements PostService {
         return posts.map(this::mapToResponseWithStats);
     }
 
-    /**
-     * Retrieves all published posts
-     */
-//    @Transactional(readOnly = true)
-//    public Page<PostResponse> getPublishedPosts(Pageable pageable) {
-//        log.debug("Retrieving published posts");
-//
-//        Page<Post> posts = postRepository.findByStatusAndNotDeleted(PostStatus.PUBLISHED, pageable, null);
-//        return posts.map(this::mapToResponseWithStats);
-//    }
+    @Override
+    @Transactional(readOnly = true)
+    public UserPostResponse getPostsByUserName(String userName, PostStatus status, String cursor, Integer limit) {
+        log.debug("Retrieving posts for user: {} with status: {}, cursor: {}, limit: {}", userName, status, cursor,
+                limit);
+
+        User user = userService.getUserByUsername(userName);
+        UUID userId = user.getId();
+
+        int pageSize = PaginationUtils.validateAndGetPageSize(limit);
+        CursorInfo cursorInfo = PaginationUtils.parseCursor(cursor);
+
+        List<Post> posts = getPostsByUserWithCursor(userId, status, cursorInfo, pageSize + 1);
+
+        boolean hasMore = posts.size() > pageSize;
+        if (hasMore) {
+            posts = posts.subList(0, pageSize);
+        }
+
+        String nextCursor = hasMore && !posts.isEmpty() ? PaginationUtils.generateCursor(posts.get(posts.size() - 1))
+                : null;
+
+        List<PostResponseRecord> postResponses = posts.stream().map(this::toPostResponseRecord).toList();
+
+        return UserPostResponse.builder()
+                .posts(postResponses)
+                .nextCursor(nextCursor)
+                .hasMore(hasMore)
+                .build();
+    }
 
     /**
      * Publishes a draft post
@@ -370,5 +399,44 @@ public class PostServiceImpl implements PostService {
         response.setCommentCount(stats.getCommentCount());
 
         return response;
+    }
+
+    private PostResponseRecord toPostResponseRecord(Post post) {
+        return new PostResponseRecord(
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getMedias() != null && !post.getMedias().isEmpty()
+                        ? post.getMedias().get(0).getMediaUrl()
+                        : null,
+                new PostAuthorRecord(
+                        post.getUser().getId(),
+                        post.getUser().getUsername(),
+                        post.getUser().getAvatarUrl()),
+                post.getCreatedAt(),
+                post.getStats().getLikeCount(),
+                post.getStats().getCommentCount());
+    }
+
+    private List<Post> getPostsByUserWithCursor(UUID userId, PostStatus status, CursorInfo cursorInfo, int limit) {
+        Pageable pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "createdAt", "id"));
+
+        if (cursorInfo.createdAt() == null) {
+            // First page
+            if (status != null) {
+                return postRepository.findByUserIdAndStatusAndNotDeleted(userId, status, pageable).getContent();
+            } else {
+                return postRepository.findByUserIdAndNotDeleted(userId, pageable).getContent();
+            }
+        } else {
+            // Subsequent pages with cursor
+            if (status != null) {
+                return postRepository.findPostsByUserAndStatusAfterCursor(
+                        userId, status, cursorInfo.createdAt(), cursorInfo.id(), pageable);
+            } else {
+                return postRepository.findPostsByUserAfterCursor(
+                        userId, cursorInfo.createdAt(), cursorInfo.id(), pageable);
+            }
+        }
     }
 }

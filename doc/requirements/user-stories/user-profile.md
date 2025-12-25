@@ -3,18 +3,23 @@
 ## US-PROFILE-001: View Own Profile
 
 ### As a
+
 Logged-in user
 
 ### I want to
+
 View my own profile
 
 ### So that
+
 I can see how my profile appears to others and access my content
 
 ### Acceptance Criteria
+
 **When** a user clicks on their avatar or username in the navigation:
 
 **Then:**
+
 - The system navigates to the user's profile page
 - The profile displays:
   - Avatar image
@@ -33,16 +38,21 @@ I can see how my profile appears to others and access my content
 ## US-PROFILE-002: Edit Profile
 
 ### As a
+
 Logged-in user
 
 ### I want to
+
 Update my profile information
 
 ### So that
+
 I can keep my profile current and express my interests
 
 ### Acceptance Criteria
+
 **When** a user clicks the **Edit Profile** button:
+
 - The system displays an edit form with current values:
   - Username (editable)
   - Bio (editable, max 500 characters)
@@ -53,6 +63,7 @@ I can keep my profile current and express my interests
 - The user clicks **Save Changes**
 
 **Then:**
+
 - The system validates the input:
   - Username is unique and meets requirements
   - Bio doesn't exceed character limit
@@ -70,21 +81,27 @@ I can keep my profile current and express my interests
 ## US-PROFILE-003: Upload Avatar
 
 ### As a
+
 Logged-in user
 
 ### I want to
+
 Upload a profile picture
 
 ### So that
+
 I can personalize my account and be recognizable to others
 
 ### Acceptance Criteria
+
 **When** a user clicks the **Change Avatar** button in edit profile:
+
 - The system opens a file picker
 - The user selects an image file (JPEG, PNG, GIF, WebP)
 - The file size is under 5MB
 
 **Then:**
+
 - The system displays a preview of the selected image
 - The system shows a crop/adjust tool (optional)
 - The user clicks **Upload**
@@ -94,6 +111,7 @@ I can personalize my account and be recognizable to others
 - A success message is displayed
 
 **Error Cases:**
+
 - If file is too large: "Image must be under 5MB"
 - If file type is invalid: "Please upload a valid image file"
 - If upload fails: "Upload failed, please try again"
@@ -103,18 +121,23 @@ I can personalize my account and be recognizable to others
 ## US-PROFILE-004: View Other User's Profile
 
 ### As a
+
 User (logged in or guest)
 
 ### I want to
+
 View another user's profile
 
 ### So that
+
 I can learn about them and see their content
 
 ### Acceptance Criteria
+
 **When** a user clicks on another user's username or avatar:
 
 **Then:**
+
 - The system navigates to that user's profile page
 - The profile displays:
   - Avatar image
@@ -137,20 +160,26 @@ I can learn about them and see their content
 ## US-PROFILE-005: Follow User
 
 ### As a
+
 Logged-in user
 
 ### I want to
+
 Follow other users
 
 ### So that
+
 I can see their posts in my personalized feed
 
 ### Acceptance Criteria
+
 **When** a user views another user's profile:
+
 - The system displays a **Follow** button
 - The user clicks the **Follow** button
 
 **Then:**
+
 - The system creates a follow relationship
 - The button changes to **Following** or **Unfollow**
 - The follower count increases by 1
@@ -159,6 +188,7 @@ I can see their posts in my personalized feed
 - The follower will now see the followed user's posts in their home feed
 
 **Edge Cases:**
+
 - User cannot follow themselves
 - Following is idempotent (clicking multiple times has same effect)
 
@@ -167,20 +197,26 @@ I can see their posts in my personalized feed
 ## US-PROFILE-006: Unfollow User
 
 ### As a
+
 Logged-in user
 
 ### I want to
+
 Unfollow users I'm currently following
 
 ### So that
+
 I can curate my feed and remove content I'm no longer interested in
 
 ### Acceptance Criteria
+
 **When** a user views a profile they're following:
+
 - The system displays an **Unfollow** or **Following** button
 - The user clicks the button
 
 **Then:**
+
 - The system may show a confirmation dialog (optional)
 - If confirmed, the system removes the follow relationship
 - The button changes back to **Follow**
@@ -190,75 +226,96 @@ I can curate my feed and remove content I'm no longer interested in
 
 ---
 
-## US-PROFILE-007: View Followers List
+## US-PROFILE-007 & 008: View Followers/Following List
 
-### As a
-User (logged in or guest)
+- **As a:** Registered User or Guest
+- **I want to:** Click on the "Followers" or "Following" count on any user profile.
+- **So that:** I can see a list of those users in a modal without leaving the current page.
 
-### I want to
-See who follows a user
+**Acceptance Criteria (AC):**
 
-### So that
-I can discover other community members with similar interests
+1. **Display Mode:** The list **must** be displayed in a **Modal/Dialog**. Clicking the backdrop or a "Close" button will dismiss it.
+2. **User Item UI:** Each row in the list includes:
 
-### Acceptance Criteria
-**When** a user clicks on the "Followers" count on a profile:
+- **Avatar & Username:** Clickable, navigates to the selected user's profile and **closes** the modal.
+- **Bio:** Displayed as a single-line preview (truncated with ellipsis if too long).
+- **Action Button (Follow/Following):**
+- **Self:** Hidden if the user in the list is the current logged-in user.
+- **Not Following:** Displays "Follow" button (Primary style).
+- **Already Following:** Displays "Following" button (Outline/Secondary style).
 
-**Then:**
-- The system displays a modal or page with a list of followers
-- Each follower entry shows:
-  - Avatar
-  - Username
-  - Bio (truncated)
-  - **Follow/Following** button (if logged in and not own profile)
-- The list is paginated (20 per page)
-- The user can click on any follower to view their profile
-- If logged in, the user can follow/unfollow directly from this list
+3. **Pagination:** Implementation of **Infinite Scroll** within the modal container (20 users per fetch).
+4. **Empty State:** Show "No followers found" or "Not following anyone yet" if the list is empty.
+5. **State Sync:** When a user clicks Follow/Unfollow inside the modal, the counts (Followers/Following) on the underlying Profile Page must update immediately without a page reload.
 
 ---
 
-## US-PROFILE-008: View Following List
+#### 2. Technical API Specification
 
-### As a
-User (logged in or guest)
+- **Endpoints:**
+- `GET /api/users/{userId}/followers?page={n}&size=20`
+- `GET /api/users/{userId}/following?page={n}&size=20`
 
-### I want to
-See who a user is following
+- **Response Structure:**
 
-### So that
-I can discover interesting accounts and understand their interests
+```json
+{
+  "content": [
+    {
+      "id": "uuid",
+      "username": "string",
+      "avatarUrl": "string",
+      "bio": "string",
+      "isFollowing": "boolean"
+    }
+  ],
+  "pageable": { ... },
+  "last": boolean,
+  "totalElements": number
+}
 
-### Acceptance Criteria
-**When** a user clicks on the "Following" count on a profile:
+```
 
-**Then:**
-- The system displays a modal or page with a list of followed users
-- Each entry shows:
-  - Avatar
-  - Username
-  - Bio (truncated)
-  - **Follow/Following** button (if logged in and not own profile)
-- The list is paginated (20 per page)
-- The user can click on any user to view their profile
-- If logged in, the user can follow/unfollow directly from this list
+---
+
+#### 3. Database & Backend Integration
+
+- **Table:** `user_follows` (follower_id, followed_id)
+- **Query Optimization:** \* Use `idx_follower_id` for "Following" queries.
+- Use `idx_followed_id` for "Followers" queries.
+
+- **Business Logic:** Ensure that the `isFollowing` boolean in the response is calculated based on the context of the **currently logged-in user**.
+
+---
+
+#### 4. Frontend Implementation Guidelines
+
+- **State Management:** Use `Zustand` to manage `isOpen`, `modalType` (FOLLOWERS/FOLLOWING), and `targetUserId`.
+- **Data Fetching:** Use `tanstack/react-query` with `useInfiniteQuery` for seamless scrolling.
+- **Navigation:** Ensure `react-router-dom` navigation triggers the closing of the modal to prevent UI overlay issues.
 
 ---
 
 ## US-PROFILE-009: View User's Posts
 
 ### As a
+
 User (logged in or guest)
 
 ### I want to
+
 See all posts created by a specific user
 
 ### So that
+
 I can browse their content and contributions
 
 ### Acceptance Criteria
+
 **When** a user is on another user's profile:
 
 **Then:**
+
 - The system displays all posts by that user below the profile information
 - Posts are shown in reverse chronological order (newest first)
 - Each post displays:

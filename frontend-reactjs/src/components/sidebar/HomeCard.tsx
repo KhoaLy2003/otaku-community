@@ -19,10 +19,7 @@ export function HomeCard() {
           Check in with favorite topics, follow creators, and share travel plans with the community.
         </p>
         <div className="flex flex-col gap-2">
-          <Button color="blue">Create Post</Button>
-          <Button variant="outline" color="blue">
-            Create Community
-          </Button>
+          <Button color="blue">Create Community</Button>
         </div>
       </div>
     </Card>

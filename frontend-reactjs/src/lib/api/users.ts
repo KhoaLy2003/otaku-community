@@ -1,6 +1,6 @@
-import { apiClient } from './client';
-import type { ApiResponse, PaginatedResponse } from '../../types/api';
-import type { User, UserProfile } from '../../types/user';
+import { apiClient } from "./client";
+import type { ApiResponse, PaginatedResponse } from "../../types/api";
+import type { User, UserListItem, UserProfile } from "../../types/user";
 
 export interface UpdateProfileData {
   username?: string;
@@ -39,15 +39,10 @@ export const usersApi = {
   /**
    * Sync user data with backend (replaces Next.js API route)
    */
-  syncUser: async (data: UserSyncRequest): Promise<ApiResponse<UserSyncResponse>> => {
-    return apiClient.post<ApiResponse<UserSyncResponse>>('/users/sync', data);
-  },
-
-  /**
-   * Get current user profile
-   */
-  getCurrentUser: async (): Promise<ApiResponse<UserSyncResponse>> => {
-    return apiClient.get<ApiResponse<UserSyncResponse>>('/users/me');
+  syncUser: async (
+    data: UserSyncRequest
+  ): Promise<ApiResponse<UserSyncResponse>> => {
+    return apiClient.post<ApiResponse<UserSyncResponse>>("/users/sync", data);
   },
 
   /**
@@ -58,17 +53,30 @@ export const usersApi = {
   },
 
   /**
-   * Get user by username
+   * Get current user profile
    */
-  getUserByUsername: async (username: string): Promise<ApiResponse<UserProfile>> => {
-    return apiClient.get<ApiResponse<UserProfile>>(`/users/username/${username}`);
+  getCurrentUser: async (): Promise<ApiResponse<UserProfile>> => {
+    return apiClient.get<ApiResponse<UserProfile>>(`/users/me`);
+  },
+
+  /**
+   * Get user profile by username
+   */
+  getUserProfile: async (
+    username: string
+  ): Promise<ApiResponse<UserProfile>> => {
+    return apiClient.get<ApiResponse<UserProfile>>(
+      `/users/username/${username}`
+    );
   },
 
   /**
    * Update user profile
    */
-  updateProfile: async (data: UpdateProfileData): Promise<ApiResponse<User>> => {
-    return apiClient.put<ApiResponse<User>>('/users/me', data);
+  updateProfile: async (
+    data: UpdateProfileData
+  ): Promise<ApiResponse<User>> => {
+    return apiClient.put<ApiResponse<User>>("/users/me", data);
   },
 
   /**
@@ -91,14 +99,14 @@ export const usersApi = {
   getFollowers: async (
     userId: string,
     params?: { page?: number; limit?: number }
-  ): Promise<ApiResponse<PaginatedResponse<User>>> => {
+  ): Promise<ApiResponse<PaginatedResponse<UserListItem>>> => {
     const queryParams = new URLSearchParams();
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
 
     const query = queryParams.toString();
-    return apiClient.get<ApiResponse<PaginatedResponse<User>>>(
-      `/users/${userId}/followers${query ? `?${query}` : ''}`
+    return apiClient.get<ApiResponse<PaginatedResponse<UserListItem>>>(
+      `/users/${userId}/followers${query ? `?${query}` : ""}`
     );
   },
 
@@ -108,14 +116,14 @@ export const usersApi = {
   getFollowing: async (
     userId: string,
     params?: { page?: number; limit?: number }
-  ): Promise<ApiResponse<PaginatedResponse<User>>> => {
+  ): Promise<ApiResponse<PaginatedResponse<UserListItem>>> => {
     const queryParams = new URLSearchParams();
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
 
     const query = queryParams.toString();
-    return apiClient.get<ApiResponse<PaginatedResponse<User>>>(
-      `/users/${userId}/following${query ? `?${query}` : ''}`
+    return apiClient.get<ApiResponse<PaginatedResponse<UserListItem>>>(
+      `/users/${userId}/following${query ? `?${query}` : ""}`
     );
   },
 };
