@@ -3,6 +3,7 @@ import { Card } from "../ui/Card";
 import { Colors } from "../../constants/colors";
 import { Button } from "../ui/Button";
 import { CommentForm } from "./CommentForm";
+import { Link } from "react-router-dom";
 import {
   ArrowBigUp,
   ArrowBigDown,
@@ -90,7 +91,9 @@ export function CommentCard({
           {/* Header */}
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2 text-xs text-[#7c7c7c]">
-              <span className="font-semibold text-[#1a1a1b]">{author}</span>
+              <Link to={`/profile/${author}`} className="font-semibold text-[#1a1a1b] hover:underline">
+                {author}
+              </Link>
               <span>•</span>
               <span>{time}</span>
               {votes !== 0 && (

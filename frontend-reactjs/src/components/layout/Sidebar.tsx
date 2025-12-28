@@ -86,6 +86,12 @@ export function Sidebar() {
                 <li key={item.id}>
                   <Link
                     to={item.href}
+                    onClick={(e) => {
+                      if (isActive && item.id === "home") {
+                        e.preventDefault();
+                        window.dispatchEvent(new CustomEvent("REFRESH_FEED"));
+                      }
+                    }}
                     className={cn(
                       "flex items-center gap-3 px-3 py-2 rounded-md transition",
                       "hover:bg-[#F6F7F8]",

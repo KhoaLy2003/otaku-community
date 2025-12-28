@@ -4,6 +4,10 @@ import com.otaku.community.feature.post.dto.CreatePostRequest;
 import com.otaku.community.feature.post.dto.PostDetailResponse;
 import com.otaku.community.feature.post.dto.PostResponse;
 import com.otaku.community.feature.post.dto.UpdatePostRequest;
+import com.otaku.community.feature.post.dto.UserPostResponse;
+import com.otaku.community.feature.post.entity.PostStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
@@ -15,4 +19,16 @@ public interface PostService {
     void deletePost(UUID postId);
 
     PostDetailResponse getPostDetail(UUID postId);
+
+    Page<PostResponse> getPostsByUser(UUID userId, Pageable pageable);
+
+    Page<PostResponse> getPostsByUserAndStatus(UUID userId, PostStatus status, Pageable pageable);
+
+    UserPostResponse getPostsByUserName(String userName, PostStatus status, String cursor, Integer limit);
+
+    PostResponse publishPost(UUID postId);
+
+    PostResponse makeDraft(UUID postId);
+
+    boolean isPostOwner(UUID postId);
 }

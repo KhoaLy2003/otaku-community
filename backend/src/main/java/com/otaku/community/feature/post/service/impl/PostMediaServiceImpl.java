@@ -11,8 +11,15 @@ import com.otaku.community.feature.post.mapper.PostMediaMapper;
 import com.otaku.community.feature.post.repository.PostMediaRepository;
 import com.otaku.community.feature.post.repository.PostRepository;
 import com.otaku.community.feature.post.service.PostMedialService;
+import com.otaku.community.feature.user.entity.User;
+import com.otaku.community.feature.user.service.UserService;
+import com.otaku.community.common.dto.CursorInfo;
+import com.otaku.community.common.util.PaginationUtils;
+import com.otaku.community.feature.post.dto.UserMediaResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,7 +42,7 @@ public class PostMediaServiceImpl implements PostMedialService {
      * Upload and save media files for a post
      */
     @Override
-    @Transactional
+    @Transactional()
     public List<PostMediaResponse> uploadPostMedia(UUID postId, List<MultipartFile> files) {
         log.debug("Uploading {} media files for post {}", files.size(), postId);
 
@@ -44,18 +51,19 @@ public class PostMediaServiceImpl implements PostMedialService {
 
         post.getMedias().clear();
         postRepository.flush();
-        
+
         List<PostMediaResponse> responses = new ArrayList<>();
-        
+
         for (int i = 0; i < files.size(); i++) {
             MultipartFile file = files.get(i);
-            
+
             // Upload to cloud storage
             MediaUploadResponse uploadResponse = mediaService.uploadMedia(file);
-            
+
             // Determine media type
-            PostMedia.MediaType mediaType = determineMediaType(uploadResponse.getResourceType(), uploadResponse.getFormat());
-            
+            PostMedia.MediaType mediaType = determineMediaType(uploadResponse.getResourceType(),
+                    uploadResponse.getFormat());
+
             // Create PostMedia entity
             PostMedia postMedia = PostMedia.builder()
                     .postId(postId)
@@ -64,15 +72,15 @@ public class PostMediaServiceImpl implements PostMedialService {
                     .thumbnailUrl(generateThumbnailUrl(uploadResponse))
                     .width(uploadResponse.getWidth())
                     .height(uploadResponse.getHeight())
-                    .durationSec(null) // TODO: Extract duration for videos if needed
+                    .durationSec(null)
                     .orderIndex(i)
                     .build();
-            
+
             // Save to database
             PostMedia savedMedia = postMediaRepository.save(postMedia);
             log.debug("Uploaded media {} for post {}", savedMedia.getId(), postId);
         }
-        
+
         log.info("Successfully uploaded {} media files for post {}", files.size(), postId);
         return responses;
     }
@@ -83,12 +91,12 @@ public class PostMediaServiceImpl implements PostMedialService {
     @Transactional
     public List<PostMediaResponse> addPostMediaFromUrls(UUID postId, List<PostMediaRequest> mediaRequests) {
         log.debug("Adding {} media URLs for post {}", mediaRequests.size(), postId);
-        
+
         List<PostMediaResponse> responses = new ArrayList<>();
-        
+
         for (int i = 0; i < mediaRequests.size(); i++) {
             PostMediaRequest request = mediaRequests.get(i);
-            
+
             PostMedia postMedia = PostMedia.builder()
                     .postId(postId)
                     .mediaType(request.getMediaType())
@@ -99,12 +107,12 @@ public class PostMediaServiceImpl implements PostMedialService {
                     .durationSec(request.getDurationSec())
                     .orderIndex(i)
                     .build();
-            
+
             PostMedia savedMedia = postMediaRepository.save(postMedia);
-//            PostMediaResponse response = postMediaMapper.toResponse(savedMedia);
-//            responses.add(response);
+            // PostMediaResponse response = postMediaMapper.toResponse(savedMedia);
+            // responses.add(response);
         }
-        
+
         log.info("Successfully added {} media URLs for post {}", mediaRequests.size(), postId);
         return responses;
     }
@@ -124,9 +132,9 @@ public class PostMediaServiceImpl implements PostMedialService {
     @Transactional
     public List<PostMediaResponse> updateMediaOrder(UUID postId, List<UUID> mediaIds) {
         log.debug("Updating media order for post {}", postId);
-        
+
         List<PostMedia> mediaList = postMediaRepository.findByPostIdOrderByOrderIndexAsc(postId);
-        
+
         // Update order based on provided IDs
         for (int i = 0; i < mediaIds.size(); i++) {
             UUID mediaId = mediaIds.get(i);
@@ -134,13 +142,13 @@ public class PostMediaServiceImpl implements PostMedialService {
                     .filter(m -> m.getId().equals(mediaId))
                     .findFirst()
                     .orElse(null);
-            
+
             if (media != null) {
                 media.setOrderIndex(i);
                 postMediaRepository.save(media);
             }
         }
-        
+
         return getPostMedia(postId);
     }
 
@@ -150,20 +158,20 @@ public class PostMediaServiceImpl implements PostMedialService {
     @Transactional
     public void deletePostMedia(UUID postId, UUID mediaId) {
         log.debug("Deleting media {} from post {}", mediaId, postId);
-        
+
         PostMedia media = postMediaRepository.findById(mediaId)
                 .filter(m -> m.getPostId().equals(postId))
                 .orElseThrow(() -> new RuntimeException("Media not found or doesn't belong to this post"));
-        
+
         // Delete from cloud storage (extract public ID from URL)
         String publicId = extractPublicIdFromUrl(media.getMediaUrl());
         if (publicId != null) {
             mediaService.deleteMedia(publicId);
         }
-        
+
         // Delete from database
         postMediaRepository.delete(media);
-        
+
         log.info("Deleted media {} from post {}", mediaId, postId);
     }
 
@@ -173,9 +181,9 @@ public class PostMediaServiceImpl implements PostMedialService {
     @Transactional
     public void deleteAllPostMedia(UUID postId) {
         log.debug("Deleting all media for post {}", postId);
-        
+
         List<PostMedia> mediaList = postMediaRepository.findByPostIdOrderByOrderIndexAsc(postId);
-        
+
         for (PostMedia media : mediaList) {
             // Delete from cloud storage
             String publicId = extractPublicIdFromUrl(media.getMediaUrl());
@@ -183,10 +191,10 @@ public class PostMediaServiceImpl implements PostMedialService {
                 mediaService.deleteMedia(publicId);
             }
         }
-        
+
         // Delete all from database
         postMediaRepository.deleteByPostId(postId);
-        
+
         log.info("Deleted all media for post {}", postId);
     }
 
@@ -225,7 +233,8 @@ public class PostMediaServiceImpl implements PostMedialService {
     private String extractPublicIdFromUrl(String url) {
         try {
             // Extract public ID from Cloudinary URL
-            // Example: https://res.cloudinary.com/demo/image/upload/v1234567890/folder/filename.jpg
+            // Example:
+            // https://res.cloudinary.com/demo/image/upload/v1234567890/folder/filename.jpg
             String[] parts = url.split("/");
             if (parts.length >= 2) {
                 String lastPart = parts[parts.length - 1];
@@ -240,5 +249,39 @@ public class PostMediaServiceImpl implements PostMedialService {
             log.warn("Failed to extract public ID from URL: {}", url, e);
         }
         return null;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserMediaResponse getUserMedia(UUID userId, String cursor, Integer limit) {
+        log.debug("Getting media for user: {}, cursor: {}, limit: {}", userId, cursor, limit);
+
+        int pageSize = PaginationUtils.validateAndGetPageSize(limit);
+        CursorInfo cursorInfo = PaginationUtils.parseCursor(cursor);
+
+        List<PostMedia> mediaList;
+        Pageable pageable = PageRequest.of(0, pageSize + 1);
+
+        if (cursorInfo.createdAt() == null) {
+            mediaList = postMediaRepository.findMediaByUser(userId, pageable);
+        } else {
+            mediaList = postMediaRepository.findMediaByUserAfterCursor(userId, cursorInfo.createdAt(), cursorInfo.id(),
+                    pageable);
+        }
+
+        boolean hasMore = mediaList.size() > pageSize;
+        if (hasMore) {
+            mediaList = mediaList.subList(0, pageSize);
+        }
+
+        String nextCursor = hasMore && !mediaList.isEmpty()
+                ? PaginationUtils.generateCursor(mediaList.get(mediaList.size() - 1))
+                : null;
+
+        return UserMediaResponse.builder()
+                .media(postMediaMapper.toResponseList(mediaList))
+                .nextCursor(nextCursor)
+                .hasMore(hasMore)
+                .build();
     }
 }

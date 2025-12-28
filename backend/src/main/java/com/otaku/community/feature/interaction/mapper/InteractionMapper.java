@@ -15,9 +15,6 @@ import java.util.UUID;
 @Component
 public class InteractionMapper {
 
-    @Autowired
-    private UserMapper userMapper;
-
     /**
      * Convert Comment entity to CommentResponse DTO
      */

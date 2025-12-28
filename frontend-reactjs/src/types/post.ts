@@ -1,13 +1,14 @@
-import type { Comment } from './comment'
+import type { Comment } from "./comment";
 
-export type PostStatus = 'DRAFT' | 'PUBLISHED';
-export type MediaType = 'IMAGE' | 'VIDEO' | 'GIF';
+export type PostStatus = "DRAFT" | "PUBLISHED";
+export type MediaType = "IMAGE" | "VIDEO" | "GIF";
 
 export interface PostMedia {
   id: string;
+  postId: string;
   mediaUrl: string;
-  type: MediaType;
-  order: number;
+  mediaType: MediaType;
+  orderIndex: number;
 }
 
 export interface PostTopic {
@@ -34,6 +35,7 @@ export interface PostWithDetails extends Post {
   author: {
     id: string;
     name: string;
+    displayName?: string;
     avatar?: string;
   };
 }

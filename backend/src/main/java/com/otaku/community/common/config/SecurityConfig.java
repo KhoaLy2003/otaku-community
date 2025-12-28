@@ -72,8 +72,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
                         .requestMatchers(HttpMethod.GET, "/health", "/docs/**", "/swagger-ui/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/posts/**", "/topics/**", "/users/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/feed/explore/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/feed/explore/**").permitAll()
 
                         // Authenticated endpoints
                         .requestMatchers("/posts/**", "/comments/**", "/likes/**").authenticated()

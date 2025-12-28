@@ -38,6 +38,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   color?: ButtonColor;
   icon?: ReactNode;
   iconPosition?: "left" | "right";
+  isLoading?: boolean;
 }
 
 export function Button({
@@ -47,6 +48,7 @@ export function Button({
   color = "blue",
   icon,
   iconPosition = "left",
+  isLoading = false,
   children,
   ...props
 }: ButtonProps) {
@@ -55,29 +57,39 @@ export function Button({
   const style =
     variant === "filled"
       ? {
-          backgroundColor: c.main,
-          color: c.textOnFilled,
-          borderColor: c.main,
-        }
+        backgroundColor: c.main,
+        color: c.textOnFilled,
+        borderColor: c.main,
+      }
       : {
-          backgroundColor: Colors.Grey.White,
-          color: c.main,
-          borderColor: c.main,
-        };
+        backgroundColor: Colors.Grey.White,
+        color: c.main,
+        borderColor: c.main,
+      };
 
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-2 border transition-opacity hover:opacity-90",
+        "inline-flex items-center justify-center gap-2 border transition-opacity hover:opacity-90 disabled:opacity-70 disabled:cursor-not-allowed",
         sizeStyles[size],
         className
       )}
       style={style}
+      disabled={isLoading || props.disabled}
       {...props}
     >
-      {icon && iconPosition === "left" && icon}
-      <span>{children}</span>
-      {icon && iconPosition === "right" && icon}
+      {isLoading ? (
+        <div className="flex items-center gap-2">
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+          <span>Loading...</span>
+        </div>
+      ) : (
+        <>
+          {icon && iconPosition === "left" && icon}
+          <span>{children}</span>
+          {icon && iconPosition === "right" && icon}
+        </>
+      )}
     </button>
   );
 }
