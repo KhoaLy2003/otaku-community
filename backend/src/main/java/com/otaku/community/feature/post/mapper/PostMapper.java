@@ -12,9 +12,9 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(
-    componentModel = MappingConstants.ComponentModel.SPRING,
-    uses = {UserMapper.class},
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
+        componentModel = MappingConstants.ComponentModel.SPRING,
+        uses = {UserMapper.class},
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
 )
 public interface PostMapper {
 
@@ -28,7 +28,7 @@ public interface PostMapper {
 
     @Mapping(source = "user.id", target = "userId")
     @Mapping(target = "media", ignore = true)
-    @Mapping(target = "likeCount", ignore = true)
+    @Mapping(target = "likesCount", ignore = true)
     @Mapping(target = "commentCount", ignore = true)
     PostResponse toResponse(Post post);
 

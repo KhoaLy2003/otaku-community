@@ -41,7 +41,7 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "sticky top-[57px] h-[calc(100vh-57px)] border-r transition-all duration-300 bg-white hidden md:block",
+        "sticky top-0 h-full border-r transition-all duration-300 bg-white hidden md:block",
         isCollapsed ? "w-16" : "w-64"
       )}
       style={{ borderColor: Colors.Grey[20] }}

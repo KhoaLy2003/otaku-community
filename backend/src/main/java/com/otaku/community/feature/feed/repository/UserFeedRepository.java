@@ -17,12 +17,12 @@ public interface UserFeedRepository extends JpaRepository<UserFeed, UUID> {
     Slice<UserFeed> findAllByUserId(UUID userId, Pageable pageable);
 
     @Query("""
-    SELECT uf
-    FROM UserFeed uf
-    WHERE uf.userId = :userId
-    AND uf.createdAt < :cursorCreatedAt OR (uf.createdAt = :cursorCreatedAt AND uf.postId < :cursorPostId)
-    ORDER BY uf.createdAt DESC, uf.postId DESC
-    """)
+            SELECT uf
+            FROM UserFeed uf
+            WHERE uf.userId = :userId
+            AND uf.createdAt < :cursorCreatedAt OR (uf.createdAt = :cursorCreatedAt AND uf.postId < :cursorPostId)
+            ORDER BY uf.createdAt DESC, uf.postId DESC
+            """)
     Slice<UserFeed> findHomeFeedByCursor(
             @Param("userId") UUID userId,
             @Param("cursorCreatedAt") Instant cursorCreatedAt,

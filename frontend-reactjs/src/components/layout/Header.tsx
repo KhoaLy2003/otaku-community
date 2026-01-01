@@ -7,6 +7,8 @@ import { TextInput } from "../ui/TextInput";
 import { UserMenu } from "./UserMenu";
 import { useAuth } from "../../hooks/useAuth";
 
+import { NotificationBadge } from '../notification/NotificationBadge';
+
 export function Header() {
   const { auth0User, isLoading } = useAuth();
   const navigate = useNavigate();
@@ -51,16 +53,14 @@ export function Header() {
           leadingIcon={<Search className="h-5 w-5 text-[#7c7c7c]" />}
         />
 
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="hidden items-center gap-5 md:flex">
           <IconButton aria-label="Messages">
             <MessageCircle className="h-5 w-5" />
           </IconButton>
           <IconButton aria-label="Chat">
             <Send className="h-5 w-5" />
           </IconButton>
-          <IconButton aria-label="Notifications">
-            <Bell className="h-5 w-5" />
-          </IconButton>
+          <NotificationBadge />
           <Button variant="outline" color="orange">
             Get App
           </Button>

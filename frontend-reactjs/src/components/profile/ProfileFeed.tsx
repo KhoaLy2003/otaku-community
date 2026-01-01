@@ -137,7 +137,8 @@ export const ProfileFeed: React.FC<ProfileFeedProps> = ({ username, activeTab })
         authorId: post.author.id,
         authorName: post.author.name,
         time: timeAgo(post.createdAt),
-        votes: post.likeCount,
+        likesCount: post.likesCount,
+        isLiked: post.isLiked || false,
         comments: post.commentCount,
     }));
 

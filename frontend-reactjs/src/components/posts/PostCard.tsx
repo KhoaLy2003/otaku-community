@@ -1,6 +1,4 @@
 import {
-  ArrowBigDown,
-  ArrowBigUp,
   Bookmark,
   MessageSquare,
   MoreHorizontal,
@@ -11,11 +9,14 @@ import {
 import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate, useLocation, Link } from "react-router-dom";
+import { interactionsApi } from "../../lib/api/interactions";
 import { Card } from "../ui/Card";
 import { Colors } from "../../constants/colors";
 import { cn } from "../../lib/utils";
 import type { PostMedia } from "../../types/post";
 import { PostMediaGallery } from "./PostMediaGallery";
+import { Heart } from "lucide-react";
+import { UserListModal } from "../users/UserListModal";
 
 export interface BasePost {
   id: string;
@@ -27,7 +28,8 @@ export interface BasePost {
   authorId: string;
   authorName: string;
   time: string;
-  votes: number;
+  likesCount: number;
+  isLiked: boolean;
   comments: number;
   flair?: string;
   media?: PostMedia[];
@@ -60,7 +62,6 @@ export function PostCard({
 
   return (
     <Card className={cn("flex overflow-hidden p-0", className)} border={border} style={{ padding: 0 }}>
-      <VoteColumn votes={post.votes} variant={variant} />
       <div className="flex flex-1 flex-col">
         {post.media && post.media.length > 0 ? (
           <PostMediaGallery media={post.media} title={post.title} />
@@ -94,35 +95,7 @@ export function PostCard({
   );
 }
 
-export function VoteColumn({
-  votes,
-  variant = "primary",
-}: {
-  votes: number;
-  variant?: "primary" | "secondary";
-}) {
-  return (
-    <div
-      className="flex w-16 flex-col items-center gap-1 py-4 text-[#7c7c7c]"
-      style={{
-        backgroundColor:
-          variant === "primary" ? Colors.Grey[10] : Colors.Grey.White,
-      }}
-    >
-      <ArrowBigUp
-        className="h-6 w-6 cursor-pointer"
-        color={Colors.Orange[30]}
-      />
-      <span className="text-sm font-semibold text-[#1a1a1b]">
-        {/* {votes.toLocaleString()} */}
-      </span>
-      <ArrowBigDown
-        className="h-6 w-6 cursor-pointer"
-        color={Colors.Blue[40]}
-      />
-    </div>
-  );
-}
+
 
 function PostActions({
   post,
@@ -137,12 +110,21 @@ function PostActions({
   onComment?: () => void;
   onDelete?: (postId: string) => void;
 }) {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const isOwner = user?.id === post.authorId;
   const [showMenu, setShowMenu] = useState(false);
+  const [isLiked, setIsLiked] = useState(post.isLiked);
+  const [likesCount, setLikesCount] = useState(post.likesCount);
+  const [isLiking, setIsLiking] = useState(false);
+  const [showLikesModal, setShowLikesModal] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setIsLiked(post.isLiked);
+    setLikesCount(post.likesCount);
+  }, [post.isLiked, post.likesCount]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -162,6 +144,40 @@ function PostActions({
     navigate(`/posts/${post.id}/edit?returnTo=${returnTo}`);
   };
 
+  const handleLike = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      // Redirect to login or show auth modal
+      navigate('/login', { state: { from: location } });
+      return;
+    }
+
+    if (isLiking) return;
+
+    // Optimistic update
+    const newIsLiked = !isLiked;
+    setIsLiked(newIsLiked);
+    setLikesCount(prev => newIsLiked ? prev + 1 : Math.max(0, prev - 1));
+    setIsLiking(true);
+
+    try {
+      if (newIsLiked) {
+        await interactionsApi.likePost(post.id);
+      } else {
+        await interactionsApi.unlikePost(post.id);
+      }
+    } catch (error) {
+      // Rollback on error
+      setIsLiked(!newIsLiked);
+      setLikesCount(prev => !newIsLiked ? prev + 1 : Math.max(0, prev - 1));
+      console.error('Error toggling like:', error);
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -172,6 +188,18 @@ function PostActions({
 
   return (
     <div className="mt-4 flex flex-wrap items-center gap-3 text-xs font-semibold text-[#7c7c7c]">
+      <Action
+        icon={Heart}
+        label={`${likesCount}`}
+        onClick={handleLike}
+        onLabelClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setShowLikesModal(true);
+        }}
+        active={isLiked}
+        activeColor="text-red-500"
+      />
       <Action
         icon={MessageSquare}
         label={`${post.comments} Comments`}
@@ -225,6 +253,13 @@ function PostActions({
           </div>
         )}
       </div>
+
+      <UserListModal
+        isOpen={showLikesModal}
+        onClose={() => setShowLikesModal(false)}
+        targetId={post.id}
+        listType="likes"
+      />
     </div>
   );
 }
@@ -308,18 +343,38 @@ function Action({
   icon: Icon,
   label,
   onClick,
+  onLabelClick,
+  active,
+  activeColor = "text-[#1a1a1b]",
 }: {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
-  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement | HTMLSpanElement>) => void;
+  onLabelClick?: (e: React.MouseEvent<HTMLSpanElement>) => void;
+  active?: boolean;
+  activeColor?: string;
 }) {
   return (
-    <button
-      onClick={onClick}
-      className="flex items-center gap-1 rounded px-2 py-1 transition hover:bg-[#f6f7f8]"
+    <div
+      className={cn(
+        "flex items-center rounded transition hover:bg-[#f6f7f8]",
+        active ? activeColor : "text-[#7c7c7c]"
+      )}
     >
-      <Icon className="h-4 w-4" />
-      {label && <span>{label}</span>}
-    </button>
+      <button
+        onClick={onClick}
+        className="flex items-center gap-1 p-2 focus:outline-none"
+      >
+        <Icon className={cn("h-4 w-4", active && "fill-current")} />
+      </button>
+      {label && (
+        <span
+          className="pr-2 cursor-pointer hover:underline py-2"
+          onClick={onLabelClick || onClick}
+        >
+          {label}
+        </span>
+      )}
+    </div>
   );
 }

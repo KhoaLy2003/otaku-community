@@ -231,7 +231,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, isOwnProfile
                 <UserListModal
                     isOpen={userListModal.isOpen}
                     onClose={closeUserListModal}
-                    userId={currentUser.id}
+                    targetId={currentUser.id}
                     listType={userListModal.listType}
                     onUpdateSuccess={refreshProfileData}
                 />

@@ -3,7 +3,6 @@ package com.otaku.community.feature.post.dto;
 import com.otaku.community.feature.interaction.dto.CommentResponse;
 import com.otaku.community.feature.post.entity.PostStatus;
 import com.otaku.community.feature.topic.dto.TopicResponse;
-import com.otaku.community.feature.user.dto.UserResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,9 +25,9 @@ public class PostDetailResponse {
     private PostStatus status;
     private PostAuthorResponse author;
     private List<TopicResponse> topics;
-    private Integer likeCount;
+    private Integer likesCount;
     private Integer commentCount;
-    private Boolean isLikedByCurrentUser;
+    private Boolean isLiked;
     private List<CommentResponse> comments;
     private String shareableUrl;
     private Instant createdAt;
@@ -37,7 +36,6 @@ public class PostDetailResponse {
     public record PostAuthorResponse(
             UUID id,
             String name,
-            String avatar
-    ) {
+            String avatar) {
     }
 }

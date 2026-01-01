@@ -89,7 +89,7 @@ public class UserService {
         }
 
         User savedUser = userRepository.save(user);
-        log.info("User updated: {}", savedUser.getId());
+        log.debug("User updated: {}", savedUser.getId());
 
         return userMapper.toResponse(savedUser);
     }
@@ -140,7 +140,7 @@ public class UserService {
 
                     if (updated) {
                         User savedUser = userRepository.save(existingUser);
-                        log.info("User updated during sync: {}", savedUser.getId());
+                        log.debug("User updated during sync: {}", savedUser.getId());
                         return savedUser;
                     }
 
@@ -159,7 +159,7 @@ public class UserService {
                             .build();
 
                     User savedUser = userRepository.save(newUser);
-                    log.info("New user created during sync: {}", savedUser.getId());
+                    log.debug("New user created during sync: {}", savedUser.getId());
                     return savedUser;
                 });
 

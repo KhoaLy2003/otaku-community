@@ -1,10 +1,12 @@
 # Auth0 User Synchronization Feature
 
-This document describes the Auth0 user synchronization feature that keeps user data in sync between Auth0 and the application database.
+This document describes the Auth0 user synchronization feature that keeps user data in sync between Auth0 and the
+application database.
 
 ## Overview
 
 The Auth0 sync feature provides:
+
 - Automatic user creation when a new user logs in via Auth0
 - User data synchronization between Auth0 and the database
 - Secure JWT token validation
@@ -13,11 +15,13 @@ The Auth0 sync feature provides:
 ## API Endpoints
 
 ### POST /users/sync
+
 Synchronizes user data between Auth0 and the database.
 
 **Authentication**: Required (JWT Bearer token)
 
 **Request Body**:
+
 ```json
 {
   "auth0Id": "auth0|123456789",
@@ -31,6 +35,7 @@ Synchronizes user data between Auth0 and the database.
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -53,11 +58,13 @@ Synchronizes user data between Auth0 and the database.
 ```
 
 ### GET /users/me
+
 Gets the current authenticated user's profile.
 
 **Authentication**: Required (JWT Bearer token)
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -77,6 +84,7 @@ Gets the current authenticated user's profile.
 ## How It Works
 
 ### 1. User Login Flow
+
 1. User logs in via Auth0 in the frontend
 2. Frontend receives JWT access token from Auth0
 3. Frontend calls `/users/sync` with user data and JWT token
@@ -84,18 +92,21 @@ Gets the current authenticated user's profile.
 5. User can now make authenticated requests
 
 ### 2. JWT Token Validation
+
 - Validates token signature using Auth0's public keys
 - Checks token issuer matches Auth0 domain
 - Validates audience claim matches API identifier
 - Extracts user information from JWT claims
 
 ### 3. User Synchronization Logic
+
 - **New User**: Creates user record in database with Auth0 data
 - **Existing User**: Updates user record with latest Auth0 data
 - **Username Conflicts**: Automatically generates unique username by appending numbers
 - **Email Conflicts**: Logs warning but doesn't update if email is taken by another user
 
 ### 4. Security Features
+
 - JWT subject must match request auth0Id
 - All user operations require valid JWT token
 - CORS configured for frontend domain
@@ -104,6 +115,7 @@ Gets the current authenticated user's profile.
 ## Configuration
 
 ### Environment Variables
+
 ```yaml
 auth0:
   audience: ${AUTH0_AUDIENCE:https://api.otaku-community.com}
@@ -114,6 +126,7 @@ cors:
 ```
 
 ### Auth0 Setup
+
 1. Create Auth0 API with identifier matching `auth0.audience`
 2. Configure Auth0 Application to use the API
 3. Set up CORS in Auth0 Dashboard for your frontend domain
@@ -122,6 +135,7 @@ cors:
 ## Database Schema
 
 The `users` table includes:
+
 - `auth0_id`: Unique Auth0 user identifier (from JWT subject)
 - `email`: User email from Auth0
 - `username`: Unique username (auto-generated if conflicts)
@@ -132,12 +146,14 @@ The `users` table includes:
 ## Error Handling
 
 ### Common Errors
+
 - **400 Bad Request**: Auth0 ID mismatch, validation errors
 - **401 Unauthorized**: Invalid or missing JWT token
 - **404 Not Found**: User not found (for /users/me after sync)
 - **409 Conflict**: Username/email conflicts (handled automatically)
 
 ### Error Response Format
+
 ```json
 {
   "success": false,
@@ -149,11 +165,13 @@ The `users` table includes:
 ## Testing
 
 ### Unit Tests
+
 - `UserSyncIntegrationTest`: Tests sync endpoint functionality
 - Covers new user creation, existing user updates, validation errors
 - Uses Spring Security Test for JWT mocking
 
 ### Manual Testing
+
 ```bash
 # Get JWT token from Auth0
 TOKEN="your-jwt-token"
@@ -177,6 +195,7 @@ curl http://localhost:8080/api/users/me \
 ## Frontend Integration
 
 ### React/Next.js Example
+
 ```javascript
 import { useAuth0 } from '@auth0/auth0-react';
 
@@ -223,13 +242,16 @@ const syncUser = async () => {
 ## Troubleshooting
 
 ### Common Issues
+
 1. **Token Validation Fails**: Check Auth0 domain and audience configuration
 2. **CORS Errors**: Verify CORS settings match frontend URL
 3. **Username Conflicts**: Check unique username generation logic
 4. **Database Errors**: Verify PostgreSQL connection and schema
 
 ### Debug Logging
+
 Enable debug logging in `application.yml`:
+
 ```yaml
 logging:
   level:

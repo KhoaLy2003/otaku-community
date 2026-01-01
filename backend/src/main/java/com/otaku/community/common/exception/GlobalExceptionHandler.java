@@ -68,7 +68,7 @@ public class GlobalExceptionHandler {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
-        
+
         log.error("Validation errors: {}", errors);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)

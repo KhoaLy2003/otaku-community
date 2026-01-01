@@ -63,11 +63,11 @@ const CreatePostPage: React.FC = () => {
     Array.from(files).forEach((file) => {
       const isImage = file.type.startsWith('image/')
       const isVideo = file.type.startsWith('video/')
-      
+
       if (isImage || isVideo) {
         const id = Date.now().toString() + Math.random().toString(36).substr(2, 9)
         const preview = URL.createObjectURL(file)
-        
+
         setUploadedFiles((prev) => [
           ...prev,
           { id, file, preview, type: isImage ? 'image' : 'video' }
@@ -99,13 +99,13 @@ const CreatePostPage: React.FC = () => {
   }
 
   const nextImage = () => {
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev < uploadedFiles.length - 1 ? prev + 1 : 0
     )
   }
 
   const prevImage = () => {
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev > 0 ? prev - 1 : uploadedFiles.length - 1
     )
   }
@@ -131,12 +131,12 @@ const CreatePostPage: React.FC = () => {
         topicIds: [selectedTopic],
         files,
       })
-      
+
       setStatus(mode === 'draft' ? 'draft' : 'posted')
-      
+
       // Cleanup preview URLs
       uploadedFiles.forEach(file => URL.revokeObjectURL(file.preview))
-      
+
       // Navigate back after a delay
       setTimeout(() => {
         navigate('/')
@@ -153,7 +153,7 @@ const CreatePostPage: React.FC = () => {
   const images = uploadedFiles.filter(f => f.type === 'image')
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-4 px-4 py-6">
+    <div className="mx-auto flex flex-col gap-4">
       <Button
         variant="outline"
         color="grey"
@@ -212,9 +212,8 @@ const CreatePostPage: React.FC = () => {
             <div className="space-y-4">
               {uploadedFiles.length === 0 ? (
                 <label
-                  className={`flex min-h-[220px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-sm text-[#7c7c7c] ${
-                    loading ? 'cursor-not-allowed bg-gray-100' : 'cursor-pointer hover:bg-[#F6F7F8]'
-                  } transition`}
+                  className={`flex min-h-[220px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-sm text-[#7c7c7c] ${loading ? 'cursor-not-allowed bg-gray-100' : 'cursor-pointer hover:bg-[#F6F7F8]'
+                    } transition`}
                   style={{ borderColor: Colors.Grey[30] }}
                 >
                   <input
@@ -304,9 +303,8 @@ const CreatePostPage: React.FC = () => {
                                 {images.map((_, idx) => (
                                   <div
                                     key={idx}
-                                    className={`h-2 rounded-full transition-all ${
-                                      idx === currentImageIndex ? 'w-6 bg-white' : 'w-2 bg-white/50'
-                                    }`}
+                                    className={`h-2 rounded-full transition-all ${idx === currentImageIndex ? 'w-6 bg-white' : 'w-2 bg-white/50'
+                                      }`}
                                   />
                                 ))}
                               </div>

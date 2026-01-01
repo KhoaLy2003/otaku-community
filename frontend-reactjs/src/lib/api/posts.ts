@@ -1,5 +1,9 @@
 import { apiClient, type ApiError } from "./client";
-import type { ApiResponse, CursorPaginatedResponse } from "../../types/api";
+import type {
+  ApiResponse,
+  CursorPaginatedResponse,
+  PaginatedResponse,
+} from "../../types/api";
 import type {
   Post,
   PostWithDetails,
@@ -7,6 +11,7 @@ import type {
   PostStatus,
   FeedPost,
 } from "../../types/post";
+import type { UserListItem } from "../../types/user";
 
 export interface CreatePostRequest {
   title: string;
@@ -205,6 +210,23 @@ export const postsApi = {
   ): Promise<ApiResponse<null>> => {
     return apiClient.delete<ApiResponse<null>>(
       `/posts/${postId}/media/${mediaId}`
+    );
+  },
+
+  /**
+   * Get users who liked a post
+   */
+  getPostLikes: async (
+    postId: string,
+    params?: { page?: number; limit?: number }
+  ): Promise<ApiResponse<PaginatedResponse<UserListItem>>> => {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+
+    const query = queryParams.toString();
+    return apiClient.get<ApiResponse<PaginatedResponse<UserListItem>>>(
+      `/posts/${postId}/likes${query ? `?${query}` : ""}`
     );
   },
 };

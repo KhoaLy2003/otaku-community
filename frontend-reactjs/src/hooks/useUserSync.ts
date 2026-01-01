@@ -1,7 +1,12 @@
-import { useState, useCallback } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
-import { syncUserWithBackend, getCurrentUser, handleUserSyncError } from '../lib/auth-sync';
-import type { UserSyncResponse } from '../lib/api';
+import { useState, useCallback } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
+import {
+  syncUserWithBackend,
+  getCurrentUser,
+  handleUserSyncError,
+} from "../lib/auth-sync";
+import type { UserSyncResponse } from "../lib/api";
+import { useNotificationStore } from "../store/useNotificationStore";
 
 export interface UseUserSyncReturn {
   syncUser: () => Promise<UserSyncResponse | null>;
@@ -19,6 +24,7 @@ export function useUserSync(): UseUserSyncReturn {
   const { user: auth0User, isAuthenticated } = useAuth0();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { setUnreadCount } = useNotificationStore();
 
   const clearError = useCallback(() => {
     setError(null);
@@ -26,7 +32,7 @@ export function useUserSync(): UseUserSyncReturn {
 
   const syncUser = useCallback(async (): Promise<UserSyncResponse | null> => {
     if (!isAuthenticated || !auth0User) {
-      setError('User not authenticated');
+      setError("User not authenticated");
       return null;
     }
 
@@ -35,6 +41,9 @@ export function useUserSync(): UseUserSyncReturn {
 
     try {
       const syncedUser = await syncUserWithBackend(auth0User);
+      if (syncedUser) {
+        setUnreadCount(syncedUser.unreadNotificationCount);
+      }
       return syncedUser;
     } catch (err) {
       const errorMessage = handleUserSyncError(err);
@@ -45,26 +54,27 @@ export function useUserSync(): UseUserSyncReturn {
     }
   }, [isAuthenticated, auth0User]);
 
-  const refreshUser = useCallback(async (): Promise<UserSyncResponse | null> => {
-    if (!isAuthenticated) {
-      setError('User not authenticated');
-      return null;
-    }
+  const refreshUser =
+    useCallback(async (): Promise<UserSyncResponse | null> => {
+      if (!isAuthenticated) {
+        setError("User not authenticated");
+        return null;
+      }
 
-    setIsLoading(true);
-    setError(null);
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const currentUser = await getCurrentUser();
-      return currentUser;
-    } catch (err) {
-      const errorMessage = handleUserSyncError(err);
-      setError(errorMessage);
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isAuthenticated]);
+      try {
+        const currentUser = await getCurrentUser();
+        return currentUser;
+      } catch (err) {
+        const errorMessage = handleUserSyncError(err);
+        setError(errorMessage);
+        return null;
+      } finally {
+        setIsLoading(false);
+      }
+    }, [isAuthenticated]);
 
   return {
     syncUser,

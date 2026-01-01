@@ -275,7 +275,7 @@ export default function PostDetailPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto flex max-w-4xl flex-col gap-4 px-4 py-6">
+      <div className="mx-auto flex max-w-4xl flex-col gap-4">
         <p>Loading post...</p>
       </div>
     );
@@ -283,7 +283,7 @@ export default function PostDetailPage() {
 
   if (error) {
     return (
-      <div className="mx-auto flex max-w-4xl flex-col gap-4 px-4 py-6">
+      <div className="mx-auto flex max-w-4xl flex-col gap-4">
         <Alert variant="error" title="Error">
           {error}
         </Alert>
@@ -302,7 +302,7 @@ export default function PostDetailPage() {
 
   if (!post) {
     return (
-      <div className="mx-auto flex max-w-4xl flex-col gap-4 px-4 py-6">
+      <div className="mx-auto flex max-w-4xl flex-col gap-4">
         <Alert variant="info" title="Not Found">
           Post not found.
         </Alert>
@@ -330,12 +330,13 @@ export default function PostDetailPage() {
     authorId: post.author.id,
     authorName: post.author.name,
     time: timeAgo(post.createdAt),
-    votes: post.likesCount,
-    comments: commentsData.length,
+    likesCount: post.likesCount,
+    isLiked: post.isLiked,
+    comments: post.comments.length,
   };
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-4 px-4 py-6">
+    <div className="mx-auto flex flex-col gap-4">
       <Button
         variant="outline"
         color="grey"

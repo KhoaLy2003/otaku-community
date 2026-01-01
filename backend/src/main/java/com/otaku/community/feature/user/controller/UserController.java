@@ -3,12 +3,14 @@ package com.otaku.community.feature.user.controller;
 import com.otaku.community.common.annotation.CurrentUserId;
 import com.otaku.community.common.dto.ApiResponse;
 import com.otaku.community.common.dto.PageResponse;
-import com.otaku.community.feature.topic.dto.TopicResponse;
+import com.otaku.community.feature.notification.service.NotificationService;
 import com.otaku.community.feature.user.dto.UpdateUserRequest;
 import com.otaku.community.feature.user.dto.UserProfileResponse;
 import com.otaku.community.feature.user.dto.UserResponse;
+import com.otaku.community.feature.user.dto.UserSummaryDto;
 import com.otaku.community.feature.user.dto.UserSyncRequest;
 import com.otaku.community.feature.user.dto.UserSyncResponse;
+import com.otaku.community.feature.user.entity.User;
 import com.otaku.community.feature.user.service.UserFollowService;
 import com.otaku.community.feature.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,12 +22,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.*;
-
-import com.otaku.community.feature.user.dto.UserSummaryDto;
-import com.otaku.community.feature.user.entity.User;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
@@ -37,6 +42,7 @@ public class UserController {
 
     private final UserService userService;
     private final UserFollowService userFollowService;
+    private final NotificationService notificationService;
 
     @GetMapping("/username/{username}")
     @Operation(summary = "Get user profile by username", description = "Retrieves a user's public profile by their username")
@@ -87,6 +93,7 @@ public class UserController {
                 request.getUsername(),
                 request.getAvatarUrl());
         response.setNewUser(isNewUser);
+        response.setUnreadNotificationCount(notificationService.getUnreadCount(response.getId()).getCount());
 
         return ResponseEntity.ok(ApiResponse.success(
                 isNewUser ? "User created successfully" : "User synchronized successfully",

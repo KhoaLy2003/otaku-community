@@ -21,17 +21,65 @@ import { PublicRoute } from './components/auth/PublicRoute'
 import { Auth0ProviderWrapper } from './components/auth/Auth0ProviderWrapper'
 import { AuthProvider } from './lib/contexts/AuthContext'
 import { AuthGuard } from './components/auth/AuthGuard'
+import WebSocketProvider from './components/socket/WebSocketProvider'
+import { ToastProvider } from './components/ui/ToastProvider'
+import { MainLayout } from './components/layout/MainLayout'
 
 function App() {
   return (
     <Router>
       <Auth0ProviderWrapper>
         <AuthProvider>
+          <WebSocketProvider />
           <AuthGuard>
             <div className="min-h-screen bg-gray-50">
+              <ToastProvider />
               <Routes>
                 {/* Public routes */}
-                <Route path={ROUTES.HOME} element={<HomePage />} />
+                <Route element={<MainLayout />}>
+                  <Route path={ROUTES.HOME} element={<HomePage />} />
+                  <Route
+                    path="/profile/:username"
+                    element={
+                      <ProtectedRoute>
+                        <ProfilePage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/create-post"
+                    element={
+                      <ProtectedRoute>
+                        <CreatePostPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/posts/:id"
+                    element={
+                      <ProtectedRoute>
+                        <PostDetailPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/posts/:id/edit"
+                    element={
+                      <ProtectedRoute>
+                        <EditPostPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/settings"
+                    element={
+                      <ProtectedRoute>
+                        <SettingsPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                </Route>
+
                 <Route
                   path={ROUTES.LOGIN}
                   element={
@@ -68,46 +116,6 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <FeedPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/create-post"
-                  element={
-                    <ProtectedRoute>
-                      <CreatePostPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/posts/:id"
-                  element={
-                    <ProtectedRoute>
-                      <PostDetailPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/posts/:id/edit"
-                  element={
-                    <ProtectedRoute>
-                      <EditPostPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/profile/:username"
-                  element={
-                    <ProtectedRoute>
-                      <ProfilePage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/settings"
-                  element={
-                    <ProtectedRoute>
-                      <SettingsPage />
                     </ProtectedRoute>
                   }
                 />

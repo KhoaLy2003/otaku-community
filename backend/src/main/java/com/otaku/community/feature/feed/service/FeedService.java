@@ -6,6 +6,8 @@ import com.otaku.community.feature.feed.dto.FeedResponse;
 import com.otaku.community.feature.feed.entity.UserFeed;
 import com.otaku.community.feature.feed.mapper.FeedMapper;
 import com.otaku.community.feature.feed.repository.UserFeedRepository;
+import com.otaku.community.feature.interaction.entity.Reaction;
+import com.otaku.community.feature.interaction.repository.ReactionRepository;
 import com.otaku.community.feature.post.entity.Post;
 import com.otaku.community.feature.post.entity.PostStatus;
 import com.otaku.community.feature.post.repository.PostRepository;
@@ -22,7 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -36,12 +40,14 @@ public class FeedService {
     private final UserFeedRepository userFeedRepository;
     private final FeedMapper feedMapper;
     private final UserFollowRepository userFollowRepository;
+    private final ReactionRepository reactionRepository;
 
     /**
      * Get home feed for authenticated user (followed users and topics)
      * Strategy:
      * 1. Check `user_feed` table (Fan-out on Write cache).
-     * 2. If empty (new user/no follows), fallback to Explore Feed (Fan-out on Read).
+     * 2. If empty (new user/no follows), fallback to Explore Feed (Fan-out on
+     * Read).
      */
     public FeedResponse getHomeFeed(String cursor, Integer limit, UUID currentUserId) {
         log.debug("Getting home feed for user: {}", currentUserId);
@@ -62,13 +68,12 @@ public class FeedService {
                     currentUserId,
                     cursorInfo.createdAt(),
                     cursorInfo.id(),
-                    pageable
-            );
+                    pageable);
         }
 
         if (userFeedSlice.isEmpty()) {
-            log.info("User {} has empty feed, falling back to Explore Feed", currentUserId);
-            return getExploreFeed(cursor, limit, null);
+            log.debug("User {} has empty feed, falling back to Explore Feed", currentUserId);
+            return getExploreFeed(cursor, limit, null, currentUserId);
         }
 
         List<UserFeed> feedEntries = userFeedSlice.getContent();
@@ -89,10 +94,10 @@ public class FeedService {
         }
 
         // 4. Handle Pagination
-        return getFeedResponse(pageSize, orderedPosts);
+        return getFeedResponse(pageSize, orderedPosts, currentUserId);
     }
 
-    private FeedResponse getFeedResponse(int pageSize, List<Post> orderedPosts) {
+    private FeedResponse getFeedResponse(int pageSize, List<Post> orderedPosts, UUID currentUserId) {
         boolean hasMore = orderedPosts.size() > pageSize;
         if (hasMore) {
             orderedPosts = orderedPosts.subList(0, pageSize);
@@ -102,8 +107,23 @@ public class FeedService {
                 ? PaginationUtils.generateCursor(orderedPosts.get(orderedPosts.size() - 1))
                 : null;
 
+        // Determine which posts are liked by the current user
+        Set<UUID> likedPostIds = new HashSet<>();
+        if (currentUserId != null && !orderedPosts.isEmpty()) {
+            List<UUID> postIds = orderedPosts.stream().map(Post::getId).toList();
+            likedPostIds = reactionRepository.findLikedTargetIds(
+                    currentUserId,
+                    Reaction.TargetType.POST,
+                    Reaction.ReactionType.LIKE,
+                    postIds);
+        }
+
+        final Set<UUID> finalLikedPostIds = likedPostIds;
+
         return FeedResponse.builder()
-                .posts(orderedPosts.stream().map(feedMapper::toFeedPostResponse).toList())
+                .posts(orderedPosts.stream()
+                        .map(post -> feedMapper.toFeedPostResponse(post, finalLikedPostIds.contains(post.getId())))
+                        .toList())
                 .nextCursor(nextCursor)
                 .hasMore(hasMore)
                 .build();
@@ -112,7 +132,7 @@ public class FeedService {
     /**
      * Get explore feed (all published posts)
      */
-    public FeedResponse getExploreFeed(String cursor, Integer limit, List<UUID> topicIds) {
+    public FeedResponse getExploreFeed(String cursor, Integer limit, List<UUID> topicIds, UUID currentUserId) {
         log.debug("Getting explore feed with cursor: {}, limit: {}", cursor, limit);
 
         int pageSize = PaginationUtils.validateAndGetPageSize(limit);
@@ -120,7 +140,7 @@ public class FeedService {
 
         List<Post> posts = getPublishedPostsWithCursor(cursorInfo, pageSize + 1, topicIds);
 
-        return getFeedResponse(pageSize, posts);
+        return getFeedResponse(pageSize, posts, currentUserId);
     }
 
     /**
@@ -129,7 +149,7 @@ public class FeedService {
      */
     @Transactional
     public void fanOutToFollowers(Post post) {
-        log.info("Fan-out triggered for post: {}", post.getId());
+        log.debug("Fan-out triggered for post: {}", post.getId());
 
         // 1. Find all followers of the post's author
         List<UserFollow> follows = userFollowRepository.findAllByFollowedId(post.getUserId());
@@ -138,11 +158,11 @@ public class FeedService {
                 .toList();
 
         if (followerIds.isEmpty()) {
-            log.info("No followers to fan-out to for user: {}", post.getUserId());
+            log.debug("No followers to fan-out to for user: {}", post.getUserId());
             return;
         }
 
-        log.info("Fan-out to {} followers", followerIds.size());
+        log.debug("Fan-out to {} followers", followerIds.size());
         // 2. Create feed entries for each follower
         List<UserFeed> feedEntries = followerIds.stream()
                 .map(followerId -> UserFeed.builder()
@@ -166,7 +186,7 @@ public class FeedService {
      */
     @Transactional
     public void backfillFeed(UUID followerId, UUID followedId) {
-        log.info("Backfilling feed for follower: {} from followed user: {}", followerId, followedId);
+        log.debug("Backfilling feed for follower: {} from followed user: {}", followerId, followedId);
 
         // 1. Fetch recent posts from the followed user
         Pageable pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "createdAt"));
@@ -191,7 +211,7 @@ public class FeedService {
      */
     @Transactional
     public void removeFeedEntries(UUID followerId, UUID followedId) {
-        log.info("Removing feed entries for follower: {} from unfollowed user: {}", followerId, followedId);
+        log.debug("Removing feed entries for follower: {} from unfollowed user: {}", followerId, followedId);
         userFeedRepository.deleteByUserIdAndAuthorId(followerId, followedId);
     }
 

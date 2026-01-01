@@ -1,21 +1,19 @@
 package com.otaku.community.feature.post.service.impl;
 
+import com.otaku.community.common.dto.CursorInfo;
 import com.otaku.community.common.exception.ResourceNotFoundException;
+import com.otaku.community.common.util.PaginationUtils;
 import com.otaku.community.feature.media.dto.MediaUploadResponse;
 import com.otaku.community.feature.media.service.MediaService;
 import com.otaku.community.feature.post.dto.PostMediaRequest;
 import com.otaku.community.feature.post.dto.PostMediaResponse;
+import com.otaku.community.feature.post.dto.UserMediaResponse;
 import com.otaku.community.feature.post.entity.Post;
 import com.otaku.community.feature.post.entity.PostMedia;
 import com.otaku.community.feature.post.mapper.PostMediaMapper;
 import com.otaku.community.feature.post.repository.PostMediaRepository;
 import com.otaku.community.feature.post.repository.PostRepository;
 import com.otaku.community.feature.post.service.PostMedialService;
-import com.otaku.community.feature.user.entity.User;
-import com.otaku.community.feature.user.service.UserService;
-import com.otaku.community.common.dto.CursorInfo;
-import com.otaku.community.common.util.PaginationUtils;
-import com.otaku.community.feature.post.dto.UserMediaResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -81,7 +79,7 @@ public class PostMediaServiceImpl implements PostMedialService {
             log.debug("Uploaded media {} for post {}", savedMedia.getId(), postId);
         }
 
-        log.info("Successfully uploaded {} media files for post {}", files.size(), postId);
+        log.debug("Successfully uploaded {} media files for post {}", files.size(), postId);
         return responses;
     }
 
@@ -113,7 +111,7 @@ public class PostMediaServiceImpl implements PostMedialService {
             // responses.add(response);
         }
 
-        log.info("Successfully added {} media URLs for post {}", mediaRequests.size(), postId);
+        log.debug("Successfully added {} media URLs for post {}", mediaRequests.size(), postId);
         return responses;
     }
 
@@ -172,7 +170,7 @@ public class PostMediaServiceImpl implements PostMedialService {
         // Delete from database
         postMediaRepository.delete(media);
 
-        log.info("Deleted media {} from post {}", mediaId, postId);
+        log.debug("Deleted media {} from post {}", mediaId, postId);
     }
 
     /**
@@ -195,7 +193,7 @@ public class PostMediaServiceImpl implements PostMedialService {
         // Delete all from database
         postMediaRepository.deleteByPostId(postId);
 
-        log.info("Deleted all media for post {}", postId);
+        log.debug("Deleted all media for post {}", postId);
     }
 
     /**

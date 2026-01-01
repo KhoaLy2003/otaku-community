@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class FeedMapper {
-    public PostResponseRecord toFeedPostResponse(Post post) {
+    public PostResponseRecord toFeedPostResponse(Post post, Boolean isLiked) {
         return new PostResponseRecord(
                 post.getId(),
                 post.getTitle(),
@@ -18,11 +18,10 @@ public class FeedMapper {
                 new PostAuthorRecord(
                         post.getUser().getId(),
                         post.getUser().getUsername(),
-                        post.getUser().getAvatarUrl()
-                ),
+                        post.getUser().getAvatarUrl()),
                 post.getCreatedAt(),
                 post.getStats().getLikeCount(),
-                post.getStats().getCommentCount()
-        );
+                post.getStats().getCommentCount(),
+                isLiked);
     }
 }

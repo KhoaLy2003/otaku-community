@@ -101,7 +101,8 @@ export function FeedList() {
       authorId: post.author.id,
       authorName: post.author.name,
       time: timeAgo(post.createdAt),
-      votes: post.likeCount,
+      likesCount: post.likesCount,
+      isLiked: post.isLiked || false,
       comments: post.commentCount,
     }))
   }

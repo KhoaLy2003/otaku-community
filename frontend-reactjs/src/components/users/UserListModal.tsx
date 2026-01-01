@@ -1,18 +1,21 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../../hooks/useAuth';
 import { Modal } from '../ui/Modal';
 import { UserCard } from './UserCard';
 import { usersApi } from '../../lib/api/users';
+import { postsApi } from '../../lib/api/posts';
 import type { UserListItem } from '../../types/user';
 
 interface UserListModalProps {
     isOpen: boolean;
     onClose: () => void;
-    userId: string;
-    listType: 'followers' | 'following';
+    targetId: string;
+    listType: 'followers' | 'following' | 'likes';
     onUpdateSuccess?: () => void;
 }
 
-export const UserListModal: React.FC<UserListModalProps> = ({ isOpen, onClose, userId, listType, onUpdateSuccess }) => {
+export const UserListModal: React.FC<UserListModalProps> = ({ isOpen, onClose, targetId, listType, onUpdateSuccess }) => {
+    const { user: currentUser } = useAuth();
     const [users, setUsers] = useState<UserListItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [processingFollowId, setProcessingFollowId] = useState<string | null>(null);
@@ -21,8 +24,14 @@ export const UserListModal: React.FC<UserListModalProps> = ({ isOpen, onClose, u
         if (!isOpen) return;
         setLoading(true);
         try {
-            const apiCall = listType === 'followers' ? usersApi.getFollowers : usersApi.getFollowing;
-            const response = await apiCall(userId, { limit: 20 });
+            let response;
+            if (listType === 'likes') {
+                response = await postsApi.getPostLikes(targetId, { limit: 20 });
+            } else {
+                const apiCall = listType === 'followers' ? usersApi.getFollowers : usersApi.getFollowing;
+                response = await apiCall(targetId, { limit: 20 });
+            }
+
             if (response.success && response.data?.data) {
                 setUsers(response.data.data);
             }
@@ -32,7 +41,7 @@ export const UserListModal: React.FC<UserListModalProps> = ({ isOpen, onClose, u
         } finally {
             setLoading(false);
         }
-    }, [isOpen, listType, userId]);
+    }, [isOpen, listType, targetId]);
 
     useEffect(() => {
         fetchUsers();
@@ -46,13 +55,26 @@ export const UserListModal: React.FC<UserListModalProps> = ({ isOpen, onClose, u
             const userToUpdate = users.find(u => u.id === targetUserId);
             if (!userToUpdate) return;
 
-            if (userToUpdate.isFollowing) {
+            const isCurrentlyFollowing = userToUpdate.isFollowing;
+            if (isCurrentlyFollowing) {
                 await usersApi.unfollowUser(targetUserId);
             } else {
                 await usersApi.followUser(targetUserId);
             }
-            // Refetch to get the most updated follow statuses for everyone in the list
-            fetchUsers();
+
+            // Update local state instead of refetching everything
+            setUsers(prevUsers => {
+                // If we're looking at our OWN following list and we unfollowed someone, remove them
+                if (listType === 'following' && targetId === currentUser?.id && isCurrentlyFollowing) {
+                    return prevUsers.filter(u => u.id !== targetUserId);
+                }
+
+                // Otherwise just toggle the following status
+                return prevUsers.map(u =>
+                    u.id === targetUserId ? { ...u, isFollowing: !isCurrentlyFollowing } : u
+                );
+            });
+
             if (onUpdateSuccess) {
                 onUpdateSuccess();
             }
@@ -81,7 +103,7 @@ export const UserListModal: React.FC<UserListModalProps> = ({ isOpen, onClose, u
                                 isFollowing={user.isFollowing}
                                 onFollowToggle={handleFollowToggle}
                                 isProcessing={processingFollowId === user.id}
-                                isOwnCard={user.id === userId}
+                                isOwnCard={user.id === currentUser?.id}
                             />
                         ))}
                     </div>

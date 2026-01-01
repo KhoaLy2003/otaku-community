@@ -2,7 +2,11 @@ package com.otaku.community.feature.interaction.controller;
 
 import com.otaku.community.common.annotation.CurrentUserId;
 import com.otaku.community.common.dto.ApiResponse;
-import com.otaku.community.feature.interaction.dto.*;
+import com.otaku.community.feature.interaction.dto.CommentResponse;
+import com.otaku.community.feature.interaction.dto.CreateCommentRequest;
+import com.otaku.community.feature.interaction.dto.LikeRequest;
+import com.otaku.community.feature.interaction.dto.LikeResponse;
+import com.otaku.community.feature.interaction.dto.UpdateCommentRequest;
 import com.otaku.community.feature.interaction.service.InteractionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -14,7 +18,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;

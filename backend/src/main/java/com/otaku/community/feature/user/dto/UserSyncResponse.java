@@ -23,6 +23,7 @@ public class UserSyncResponse {
     private String location;
     private String role;
     private boolean isNewUser;
+    private long unreadNotificationCount;
     private Instant createdAt;
     private Instant updatedAt;
 }

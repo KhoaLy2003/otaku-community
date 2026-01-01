@@ -5,6 +5,7 @@ import { env } from '../env';
 import { AuthContext, type AuthContextValue } from './auth-context';
 import { apiClient } from '../api';
 import { syncUserWithBackend, handleUserSyncError } from '../auth-sync';
+import { useNotificationStore } from '../../store/useNotificationStore';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Auth0 React SDK hooks
@@ -21,6 +22,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [syncLoading, setSyncLoading] = useState(true);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const { setUnreadCount } = useNotificationStore();
 
   // Get access token from Auth0
   const getAccessToken = useCallback(async (): Promise<string | null> => {
@@ -65,7 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const syncUser = async () => {
       setSyncLoading(true);
-      
+
       try {
         const token = await getAccessToken();
         if (!token) {
@@ -76,6 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Use the new sync utility
         const syncedUser = await syncUserWithBackend(auth0User);
         setUser(syncedUser as any); // Type conversion for compatibility
+        setUnreadCount(syncedUser.unreadNotificationCount);
       } catch (error) {
         const errorMessage = handleUserSyncError(error);
         console.error('Error syncing user:', errorMessage);
@@ -125,6 +128,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Use the new sync utility
       const syncedUser = await syncUserWithBackend(auth0User);
       setUser(syncedUser as any); // Type conversion for compatibility
+      setUnreadCount(syncedUser.unreadNotificationCount);
     } catch (error) {
       const errorMessage = handleUserSyncError(error);
       console.error('Failed to refresh auth:', errorMessage);

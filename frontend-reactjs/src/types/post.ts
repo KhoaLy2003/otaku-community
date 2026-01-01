@@ -52,7 +52,8 @@ export interface FeedPost {
     avatar?: string;
   };
   createdAt: string;
-  likeCount: number;
+  likesCount: number;
   commentCount: number;
+  isLiked?: boolean;
   topics: PostTopic[];
 }

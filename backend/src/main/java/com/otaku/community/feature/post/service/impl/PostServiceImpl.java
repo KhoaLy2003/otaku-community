@@ -7,8 +7,15 @@ import com.otaku.community.common.exception.BadRequestException;
 import com.otaku.community.common.exception.ResourceNotFoundException;
 import com.otaku.community.common.util.PaginationUtils;
 import com.otaku.community.feature.interaction.dto.CommentResponse;
+import com.otaku.community.feature.interaction.entity.Reaction;
+import com.otaku.community.feature.interaction.repository.ReactionRepository;
 import com.otaku.community.feature.interaction.service.InteractionService;
-import com.otaku.community.feature.post.dto.*;
+import com.otaku.community.feature.post.dto.CreatePostRequest;
+import com.otaku.community.feature.post.dto.PostDetailResponse;
+import com.otaku.community.feature.post.dto.PostMediaResponse;
+import com.otaku.community.feature.post.dto.PostResponse;
+import com.otaku.community.feature.post.dto.UpdatePostRequest;
+import com.otaku.community.feature.post.dto.UserPostResponse;
 import com.otaku.community.feature.post.entity.Post;
 import com.otaku.community.feature.post.entity.PostStats;
 import com.otaku.community.feature.post.entity.PostStatus;
@@ -52,6 +59,7 @@ public class PostServiceImpl implements PostService {
     private final InteractionService interactionService;
     private final UserService userService;
     private final com.otaku.community.feature.feed.service.FeedService feedService;
+    private final ReactionRepository reactionRepository;
 
     @Value("${app.frontend.url:http://localhost:3000}")
     private String frontendUrl;
@@ -92,7 +100,7 @@ public class PostServiceImpl implements PostService {
 
         savedPost = postRepository.save(savedPost);
 
-        log.info("Created post with ID: {} for user: {}", savedPost.getId(), userId);
+        log.debug("Created post with ID: {} for user: {}", savedPost.getId(), userId);
 
         // Trigger Fan-out on Write
         feedService.fanOutToFollowers(savedPost);
@@ -101,7 +109,7 @@ public class PostServiceImpl implements PostService {
         PostResponse response = postMapper.toResponse(savedPost);
 
         // Set stats
-        response.setLikeCount(stats.getLikeCount());
+        response.setLikesCount(stats.getLikeCount());
         response.setCommentCount(stats.getCommentCount());
 
         return response;
@@ -134,7 +142,7 @@ public class PostServiceImpl implements PostService {
 
         // Save updated post
         Post updatedPost = postRepository.save(post);
-        log.info("Updated post with ID: {}", postId);
+        log.debug("Updated post with ID: {}", postId);
 
         return postMapper.toResponse(updatedPost);
     }
@@ -157,10 +165,11 @@ public class PostServiceImpl implements PostService {
         post.softDelete();
         postRepository.save(post);
 
-        log.info("Deleted post with ID: {}", postId);
+        log.debug("Deleted post with ID: {}", postId);
     }
 
     // TODO: review
+
     /**
      * Retrieves a post by ID
      */
@@ -180,7 +189,7 @@ public class PostServiceImpl implements PostService {
 
         // Set stats
         PostStats stats = postStatsService.getPostStats(postId);
-        response.setLikeCount(stats.getLikeCount());
+        response.setLikesCount(stats.getLikeCount());
         response.setCommentCount(stats.getCommentCount());
 
         return response;
@@ -250,9 +259,9 @@ public class PostServiceImpl implements PostService {
                 .status(post.getStatus())
                 .author(postAuthor)
                 .topics(topics)
-                .likeCount(stats.getLikeCount())
+                .likesCount(stats.getLikeCount())
                 .commentCount(stats.getCommentCount())
-                .isLikedByCurrentUser(isLikedByCurrentUser)
+                .isLiked(isLikedByCurrentUser)
                 .comments(comments)
                 .shareableUrl(shareableUrl)
                 .createdAt(post.getCreatedAt())
@@ -268,6 +277,7 @@ public class PostServiceImpl implements PostService {
     }
 
     // TODO: review
+
     /**
      * Retrieves posts by user ID
      */
@@ -314,7 +324,25 @@ public class PostServiceImpl implements PostService {
         String nextCursor = hasMore && !posts.isEmpty() ? PaginationUtils.generateCursor(posts.get(posts.size() - 1))
                 : null;
 
-        List<PostResponseRecord> postResponses = posts.stream().map(this::toPostResponseRecord).toList();
+        // Determine which posts are liked by the current user
+        Set<UUID> likedPostIds = new HashSet<>();
+        try {
+            User currentUser = userService.findByAuth0Id();
+            if (currentUser != null && !posts.isEmpty()) {
+                List<UUID> postIds = posts.stream().map(Post::getId).toList();
+                likedPostIds = reactionRepository.findLikedTargetIds(
+                        currentUser.getId(),
+                        Reaction.TargetType.POST,
+                        Reaction.ReactionType.LIKE,
+                        postIds);
+            }
+        } catch (Exception e) {
+            // Ignored, user might not be authenticated
+        }
+
+        final Set<UUID> finalLikedPostIds = likedPostIds;
+        List<PostResponseRecord> postResponses = posts.stream()
+                .map(post -> toPostResponseRecord(post, finalLikedPostIds.contains(post.getId()))).toList();
 
         return UserPostResponse.builder()
                 .posts(postResponses)
@@ -336,7 +364,7 @@ public class PostServiceImpl implements PostService {
         post.publish();
         Post publishedPost = postRepository.save(post);
 
-        log.info("Published post with ID: {}", postId);
+        log.debug("Published post with ID: {}", postId);
         return mapToResponseWithStats(publishedPost);
     }
 
@@ -353,7 +381,7 @@ public class PostServiceImpl implements PostService {
         post.makeDraft();
         Post draftPost = postRepository.save(post);
 
-        log.info("Converted post to draft with ID: {}", postId);
+        log.debug("Converted post to draft with ID: {}", postId);
         return mapToResponseWithStats(draftPost);
     }
 
@@ -395,13 +423,13 @@ public class PostServiceImpl implements PostService {
 
         // Set stats
         PostStats stats = postStatsService.getPostStats(post.getId());
-        response.setLikeCount(stats.getLikeCount());
+        response.setLikesCount(stats.getLikeCount());
         response.setCommentCount(stats.getCommentCount());
 
         return response;
     }
 
-    private PostResponseRecord toPostResponseRecord(Post post) {
+    private PostResponseRecord toPostResponseRecord(Post post, Boolean isLiked) {
         return new PostResponseRecord(
                 post.getId(),
                 post.getTitle(),
@@ -415,7 +443,8 @@ public class PostServiceImpl implements PostService {
                         post.getUser().getAvatarUrl()),
                 post.getCreatedAt(),
                 post.getStats().getLikeCount(),
-                post.getStats().getCommentCount());
+                post.getStats().getCommentCount(),
+                isLiked);
     }
 
     private List<Post> getPostsByUserWithCursor(UUID userId, PostStatus status, CursorInfo cursorInfo, int limit) {

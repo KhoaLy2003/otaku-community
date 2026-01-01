@@ -51,7 +51,7 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
      */
     @Query("SELECT p FROM Post p WHERE p.deletedAt IS NULL AND p.userId = :userId AND p.status = :status ORDER BY p.createdAt DESC")
     Page<Post> findByUserIdAndStatusAndNotDeleted(@Param("userId") UUID userId, @Param("status") PostStatus status,
-            Pageable pageable);
+                                                  Pageable pageable);
 
     /**
      * Find all posts by user ID and status that are not soft deleted (List version)

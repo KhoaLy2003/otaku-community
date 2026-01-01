@@ -26,11 +26,11 @@ public class CurrentUserIdArgumentResolver implements HandlerMethodArgumentResol
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-            NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         String auth0Id = SecurityUtils.getCurrentAuth0Id();
 
         if (auth0Id == null) {
-            throw new ResourceNotFoundException("User", "auth0Id", "null");
+            return null;
         }
 
         User user = userRepository.findByAuth0Id(auth0Id)

@@ -1,26 +1,37 @@
 package com.otaku.community.feature.interaction.service;
 
+import com.otaku.community.common.dto.PageResponse;
 import com.otaku.community.common.exception.BadRequestException;
 import com.otaku.community.common.exception.ResourceNotFoundException;
-import com.otaku.community.feature.interaction.dto.*;
+import com.otaku.community.feature.interaction.dto.CommentResponse;
+import com.otaku.community.feature.interaction.dto.CreateCommentRequest;
+import com.otaku.community.feature.interaction.dto.LikeResponse;
+import com.otaku.community.feature.interaction.dto.UpdateCommentRequest;
 import com.otaku.community.feature.interaction.entity.Comment;
 import com.otaku.community.feature.interaction.entity.Reaction;
 import com.otaku.community.feature.interaction.mapper.InteractionMapper;
 import com.otaku.community.feature.interaction.repository.CommentRepository;
 import com.otaku.community.feature.interaction.repository.ReactionRepository;
+import com.otaku.community.feature.notification.entity.Notification;
+import com.otaku.community.feature.notification.listener.NotificationEventListener;
 import com.otaku.community.feature.post.entity.Post;
 import com.otaku.community.feature.post.entity.PostStats;
 import com.otaku.community.feature.post.repository.PostRepository;
 import com.otaku.community.feature.post.service.PostStatsService;
+import com.otaku.community.feature.user.dto.UserSummaryDto;
 import com.otaku.community.feature.user.entity.User;
+import com.otaku.community.feature.user.service.UserFollowService;
 import com.otaku.community.feature.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,6 +46,8 @@ public class InteractionService {
     private final PostStatsService postStatsService;
     private final InteractionMapper interactionMapper;
     private final UserService userService;
+    private final UserFollowService userFollowService;
+    private final ApplicationEventPublisher eventPublisher;
 
     // ===== LIKE OPERATIONS =====
 
@@ -65,7 +78,22 @@ public class InteractionService {
         postStatsService.incrementLikeCount(postId);
         PostStats stats = postStatsService.getPostStats(postId);
 
-        log.info("User {} liked post {}", interactionUserId, postId);
+        log.debug("User {} liked post {}", interactionUserId, postId);
+
+        // Publish Notification Event
+        postRepository.findById(postId).ifPresent(post -> {
+            if (!post.getUserId().equals(interactionUserId)) {
+                eventPublisher.publishEvent(
+                        new NotificationEventListener.NotificationEvent(
+                                post.getUserId(),
+                                interactionUserId,
+                                Notification.NotificationType.LIKE,
+                                postId,
+                                Notification.TargetType.POST,
+                                "liked your post"));
+            }
+        });
+
         return interactionMapper.toLikeResponse(postId, true, stats.getLikeCount().longValue());
     }
 
@@ -89,7 +117,7 @@ public class InteractionService {
         postStatsService.decrementLikeCount(postId);
         PostStats stats = postStatsService.getPostStats(postId);
 
-        log.info("User {} unliked post {}", interactionUserId, postId);
+        log.debug("User {} unliked post {}", interactionUserId, postId);
         return interactionMapper.toLikeResponse(postId, false, stats.getLikeCount().longValue());
     }
 
@@ -99,7 +127,8 @@ public class InteractionService {
     @Transactional(readOnly = true)
     public LikeResponse getLikeStatus(UUID postId, UUID interactionUserId) {
         boolean isLiked = interactionUserId != null
-                && reactionRepository.existsByUserIdAndTargetTypeAndTargetId(interactionUserId, Reaction.TargetType.POST, postId);
+                && reactionRepository.existsByUserIdAndTargetTypeAndTargetId(interactionUserId,
+                Reaction.TargetType.POST, postId);
 
         PostStats stats = postStatsService.getPostStats(postId);
         return interactionMapper.toLikeResponse(postId, isLiked, stats.getLikeCount().longValue());
@@ -115,6 +144,32 @@ public class InteractionService {
 
         PostStats stats = postStatsService.getPostStats(postId);
         return interactionMapper.toLikeResponse(postId, isLiked, stats.getLikeCount().longValue());
+    }
+
+    /**
+     * Get paginated users who liked a post
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<UserSummaryDto> getPostLikes(UUID postId, UUID currentUserId, int page, int limit) {
+        log.debug("Fetching likes for post {}", postId);
+
+        // Verify post exists
+        postRepository.findByIdAndNotDeleted(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
+
+        Pageable pageable = PageRequest.of(page - 1, limit);
+        Page<Reaction> likesPage = reactionRepository.findByTargetTypeAndTargetIdAndReactionTypeOrderByCreatedAtDesc(
+                Reaction.TargetType.POST, postId, Reaction.ReactionType.LIKE, pageable);
+
+        if (likesPage.isEmpty()) {
+            return PageResponse.of(Collections.emptyList(), page, limit, 0);
+        }
+
+        List<UUID> userIds = likesPage.getContent().stream()
+                .map(Reaction::getUserId)
+                .toList();
+
+        return userFollowService.getUsersWithStatus(userIds, currentUserId, page, limit, likesPage.getTotalElements());
     }
 
     // ===== COMMENT OPERATIONS =====
@@ -147,7 +202,20 @@ public class InteractionService {
         // Update stats
         postStatsService.incrementCommentCount(request.getPostId());
 
-        log.info("User created comment {} on post {}", comment.getId(), request.getPostId());
+        log.debug("User created comment {} on post {}", comment.getId(), request.getPostId());
+
+        // Publish Notification Event
+        if (!post.getUserId().equals(user.getId())) {
+            eventPublisher.publishEvent(
+                    new NotificationEventListener.NotificationEvent(
+                            post.getUserId(),
+                            user.getId(),
+                            Notification.NotificationType.COMMENT,
+                            post.getId(),
+                            Notification.TargetType.POST,
+                            "commented on your post"));
+        }
+
         return interactionMapper.toCommentResponse(comment);
     }
 
@@ -166,7 +234,7 @@ public class InteractionService {
         comment.updateContent(request.getContent().trim());
         comment = commentRepository.save(comment);
 
-        log.info("User {} updated comment {}", interactionUserId, commentId);
+        log.debug("User {} updated comment {}", interactionUserId, commentId);
         return interactionMapper.toCommentResponse(comment);
     }
 
@@ -188,7 +256,7 @@ public class InteractionService {
         // Update stats
         postStatsService.decrementCommentCount(comment.getPost().getId());
 
-        log.info("User {} deleted comment {}", interactionUserId, commentId);
+        log.debug("User {} deleted comment {}", interactionUserId, commentId);
     }
 
     /**
@@ -201,9 +269,11 @@ public class InteractionService {
             throw new ResourceNotFoundException("Post not found");
         }
 
-        List<Comment> comments = commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
+        List<Comment> comments = commentRepository.findByPostIdOrderByCreatedAtDesc(postId);
         return interactionMapper.toCommentResponseList(comments);
     }
+
+    //TODO: review
 
     /**
      * Get comments for a post with pagination
@@ -215,9 +285,11 @@ public class InteractionService {
             throw new ResourceNotFoundException("Post not found");
         }
 
-        Page<Comment> comments = commentRepository.findByPostIdOrderByCreatedAtAsc(postId, pageable);
+        Page<Comment> comments = commentRepository.findByPostIdOrderByCreatedAtDesc(postId, pageable);
         return comments.map(interactionMapper::toCommentResponse);
     }
+
+    //TODO: review
 
     /**
      * Get a specific comment by ID

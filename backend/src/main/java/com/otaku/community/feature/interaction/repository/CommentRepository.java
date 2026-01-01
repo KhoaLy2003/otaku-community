@@ -19,14 +19,14 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
      * Find all comments for a post (excluding soft deleted)
      * Ordered by creation time ascending
      */
-    @Query("SELECT c FROM Comment c WHERE c.post.id = :postId AND c.deletedAt IS NULL ORDER BY c.createdAt ASC")
-    List<Comment> findByPostIdOrderByCreatedAtAsc(@Param("postId") UUID postId);
+    @Query("SELECT c FROM Comment c WHERE c.post.id = :postId AND c.deletedAt IS NULL ORDER BY c.createdAt DESC")
+    List<Comment> findByPostIdOrderByCreatedAtDesc(@Param("postId") UUID postId);
 
     /**
      * Find all comments for a post with pagination (excluding soft deleted)
      */
     @Query("SELECT c FROM Comment c WHERE c.post.id = :postId AND c.deletedAt IS NULL ORDER BY c.createdAt ASC")
-    Page<Comment> findByPostIdOrderByCreatedAtAsc(@Param("postId") UUID postId, Pageable pageable);
+    Page<Comment> findByPostIdOrderByCreatedAtDesc(@Param("postId") UUID postId, Pageable pageable);
 
     /**
      * Count active comments for a post (excluding soft deleted)

@@ -1,14 +1,15 @@
 # Media Upload Module
 
-This module handles media file uploads and management for the Otaku Community platform using Cloudinary as the storage service.
+This module handles media file uploads and management for the Otaku Community platform using Cloudinary as the storage
+service.
 
 ## Features
 
 - **File Upload**: Upload images and videos to Cloudinary
 - **File Validation**: Comprehensive validation for file type, size, and format
-- **Supported Formats**: 
-  - Images: JPEG, PNG, GIF, WebP
-  - Videos: MP4
+- **Supported Formats**:
+    - Images: JPEG, PNG, GIF, WebP
+    - Videos: MP4
 - **File Size Limit**: 5MB per file
 - **Secure URLs**: Returns secure HTTPS URLs for uploaded media
 - **File Deletion**: Remove media files from Cloudinary storage
@@ -16,25 +17,32 @@ This module handles media file uploads and management for the Otaku Community pl
 ## Components
 
 ### MediaService
+
 Core service for handling media operations:
+
 - `uploadMedia(MultipartFile file)`: Upload a file to Cloudinary
 - `deleteMedia(String publicId)`: Delete a file from Cloudinary
 
 ### MediaValidator
+
 Utility class for file validation:
+
 - File type validation (JPEG, PNG, GIF, WebP, MP4)
 - File size validation (max 5MB)
 - File extension validation
 - Content type validation
 
 ### MediaController
+
 REST endpoints for media operations:
+
 - `POST /media/upload`: Upload a media file
 - `DELETE /media/{publicId}`: Delete a media file
 
 ## API Endpoints
 
 ### Upload Media
+
 ```http
 POST /api/media/upload
 Content-Type: multipart/form-data
@@ -44,6 +52,7 @@ file: <multipart-file>
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -61,12 +70,14 @@ file: <multipart-file>
 ```
 
 ### Delete Media
+
 ```http
 DELETE /api/media/{publicId}
 Authorization: Bearer <token>
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,

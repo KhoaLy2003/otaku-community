@@ -10,7 +10,7 @@ public record PostResponseRecord(
         String image,
         PostAuthorRecord author,
         Instant createdAt,
-        Integer likeCount,
-        Integer commentCount
-) {
+        Integer likesCount,
+        Integer commentCount,
+        Boolean isLiked) {
 }

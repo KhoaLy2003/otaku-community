@@ -200,7 +200,7 @@ const EditPostPage: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="mx-auto flex max-w-4xl flex-col gap-4 px-4 py-6">
+            <div className="mx-auto flex flex-col gap-4">
                 <p>Loading post details...</p>
             </div>
         )
@@ -210,7 +210,7 @@ const EditPostPage: React.FC = () => {
     const hasMultipleImages = images.length > 1
 
     return (
-        <div className="mx-auto flex max-w-4xl flex-col gap-4 px-4 py-6">
+        <div className="mx-auto flex flex-col gap-4">
             <Button
                 variant="outline"
                 color="grey"

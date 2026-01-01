@@ -23,7 +23,7 @@ public class PostResponse {
     private PostStatus status;
     private UUID userId;
     private UserResponse user;
-    private Integer likeCount;
+    private Integer likesCount;
     private Integer commentCount;
     private Instant createdAt;
     private Instant updatedAt;

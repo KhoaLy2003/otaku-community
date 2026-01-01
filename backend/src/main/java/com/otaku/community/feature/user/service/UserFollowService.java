@@ -4,22 +4,28 @@ import com.otaku.community.common.dto.PageResponse;
 import com.otaku.community.common.exception.BadRequestException;
 import com.otaku.community.common.exception.ResourceNotFoundException;
 import com.otaku.community.feature.feed.service.FeedService;
+import com.otaku.community.feature.notification.entity.Notification;
+import com.otaku.community.feature.notification.listener.NotificationEventListener;
+import com.otaku.community.feature.user.dto.UserSummaryDto;
+import com.otaku.community.feature.user.entity.User;
 import com.otaku.community.feature.user.entity.UserFollow;
 import com.otaku.community.feature.user.repository.UserFollowRepository;
 import com.otaku.community.feature.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.otaku.community.feature.user.dto.UserSummaryDto;
-import com.otaku.community.feature.user.entity.User;
-import org.springframework.data.domain.PageImpl;
-
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -32,6 +38,7 @@ public class UserFollowService {
     private final UserFollowRepository userFollowRepository;
     private final UserRepository userRepository;
     private final FeedService feedService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public void followUser(UUID followerId, UUID followedId) {
         if (followerId.equals(followedId)) {
@@ -43,7 +50,7 @@ public class UserFollowService {
         }
 
         if (userFollowRepository.existsByFollowerIdAndFollowedId(followerId, followedId)) {
-            log.info("User {} is already following {}", followerId, followedId);
+            log.debug("User {} is already following {}", followerId, followedId);
             return;
         }
 
@@ -53,10 +60,20 @@ public class UserFollowService {
                 .build();
 
         userFollowRepository.save(follow);
-        log.info("User {} followed {}", followerId, followedId);
+        log.debug("User {} followed {}", followerId, followedId);
 
         // Trigger Feed Backfill
         feedService.backfillFeed(followerId, followedId);
+
+        // Publish Notification Event
+        eventPublisher.publishEvent(
+                new NotificationEventListener.NotificationEvent(
+                        followedId,
+                        followerId,
+                        Notification.NotificationType.FOLLOW,
+                        followerId,
+                        Notification.TargetType.USER,
+                        "started following you"));
     }
 
     public void unfollowUser(UUID followerId, UUID followedId) {
@@ -66,20 +83,20 @@ public class UserFollowService {
         }
 
         userFollowRepository.deleteByFollowerIdAndFollowedId(followerId, followedId);
-        log.info("User {} unfollowed {}", followerId, followedId);
+        log.debug("User {} unfollowed {}", followerId, followedId);
 
         // Trigger Feed Cleanup
         feedService.removeFeedEntries(followerId, followedId);
-    }
 
-    @Transactional(readOnly = true)
-    public Page<UserFollow> getFollowers(UUID userId, Pageable pageable) {
-        return userFollowRepository.findAllByFollowedId(userId, pageable);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<UserFollow> getFollowing(UUID userId, Pageable pageable) {
-        return userFollowRepository.findAllByFollowerId(userId, pageable);
+        // Publish Notification Event
+        eventPublisher.publishEvent(
+                new NotificationEventListener.NotificationEvent(
+                        followedId,
+                        followerId,
+                        Notification.NotificationType.UNFOLLOW,
+                        followerId,
+                        Notification.TargetType.USER,
+                        "unfollowed you"));
     }
 
     @Transactional(readOnly = true)
@@ -113,7 +130,7 @@ public class UserFollowService {
                 .map(UserFollow::getFollowerId)
                 .toList();
 
-        return mapToUserSummaryPage(followerIds, currentUserId, followsPage, page, limit);
+        return getUsersWithStatus(followerIds, currentUserId, page, limit, followsPage.getTotalElements());
     }
 
     @Transactional(readOnly = true)
@@ -133,12 +150,16 @@ public class UserFollowService {
                 .map(UserFollow::getFollowedId)
                 .toList();
 
-        return mapToUserSummaryPage(followedIds, currentUserId, followsPage, page, limit);
+        return getUsersWithStatus(followedIds, currentUserId, page, limit, followsPage.getTotalElements());
     }
 
-    private PageResponse<UserSummaryDto> mapToUserSummaryPage(List<UUID> userIds, UUID currentUserId,
-                                                              Page<UserFollow> sourcePage,
-                                                              int page, int limit) {
+    @Transactional(readOnly = true)
+    public PageResponse<UserSummaryDto> getUsersWithStatus(List<UUID> userIds, UUID currentUserId,
+                                                           int page, int limit, long totalElements) {
+        if (userIds.isEmpty()) {
+            return PageResponse.of(Collections.emptyList(), page, limit, totalElements);
+        }
+
         // 3. Fetch User entities
         Map<UUID, User> userMap = userRepository.findAllById(userIds).stream()
                 .collect(Collectors.toMap(User::getId, Function.identity()));
@@ -170,6 +191,6 @@ public class UserFollowService {
                 .filter(Objects::nonNull)
                 .toList();
 
-        return PageResponse.of(content, page, limit, sourcePage.getTotalElements());
+        return PageResponse.of(content, page, limit, totalElements);
     }
 }

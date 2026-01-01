@@ -22,11 +22,11 @@ public class PostStatsService {
     @Transactional
     public PostStats initializePostStats(UUID postId) {
         log.debug("Initializing stats for post {}", postId);
-        
+
         PostStats stats = PostStats.builder()
                 .postId(postId)
                 .build();
-        
+
         return postStatsRepository.save(stats);
     }
 

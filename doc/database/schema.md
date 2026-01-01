@@ -1,3 +1,28 @@
+-- public.notifications definition
+
+-- Drop table
+
+-- DROP TABLE public.notifications;
+
+CREATE TABLE public.notifications (
+id uuid NOT NULL,
+created_at timestamptz(6) NOT NULL,
+deleted_at timestamptz(6) NULL,
+updated_at timestamptz(6) NOT NULL,
+is_read bool NOT NULL,
+notification_type varchar(255) NOT NULL,
+preview varchar(255) NULL,
+recipient_id uuid NOT NULL,
+sender_id uuid NULL,
+target_id uuid NULL,
+target_type varchar(255) NULL,
+CONSTRAINT notifications_notification_type_check CHECK (((notification_type)::text = ANY ((ARRAY['LIKE'::character varying, 'COMMENT'::character varying, 'REPLY'::character varying, 'FOLLOW'::character varying, 'UNFOLLOW'::character varying, 'MENTION'::character varying, 'SYSTEM'::character varying])::text[]))),
+CONSTRAINT notifications_pkey PRIMARY KEY (id),
+CONSTRAINT notifications_target_type_check CHECK (((target_type)::text = ANY ((ARRAY['POST'::character varying, 'COMMENT'::character varying, 'USER'::character varying])::text[])))
+);
+CREATE INDEX idx_notifications_recipient_created ON public.notifications USING btree (recipient_id, created_at DESC);
+CREATE INDEX idx_notifications_unread ON public.notifications USING btree (recipient_id);
+
 -- public.topics definition
 
 -- Drop table

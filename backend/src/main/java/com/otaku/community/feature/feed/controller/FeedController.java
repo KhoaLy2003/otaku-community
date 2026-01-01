@@ -12,7 +12,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;
@@ -53,11 +56,12 @@ public class FeedController {
     public ResponseEntity<ApiResponse<FeedResponse>> getExploreFeed(
             @Parameter(description = "Cursor for pagination") @RequestParam(required = false) String cursor,
             @Parameter(description = "Number of posts to return (max 50)") @RequestParam(required = false) Integer limit,
-            @Parameter(description = "Filter posts by topic IDs") @RequestParam(required = false) List<UUID> topicIds) {
+            @Parameter(description = "Filter posts by topic IDs") @RequestParam(required = false) List<UUID> topicIds,
+            @CurrentUserId UUID currentUserId) {
 
         log.debug("Getting explore feed with cursor: {}, limit: {}", cursor, limit);
 
-        FeedResponse feed = feedService.getExploreFeed(cursor, limit, topicIds);
+        FeedResponse feed = feedService.getExploreFeed(cursor, limit, topicIds, currentUserId);
 
         return ResponseEntity.ok(ApiResponse.success(feed));
     }

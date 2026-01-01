@@ -9,10 +9,9 @@ import com.otaku.community.feature.topic.dto.TopicRequest;
 import com.otaku.community.feature.topic.dto.TopicResponse;
 import com.otaku.community.feature.topic.dto.UpdateTopicRequest;
 import com.otaku.community.feature.topic.entity.Topic;
-import com.otaku.community.feature.topic.entity.PostTopic;
 import com.otaku.community.feature.topic.mapper.TopicMapper;
-import com.otaku.community.feature.topic.repository.TopicRepository;
 import com.otaku.community.feature.topic.repository.PostTopicRepository;
+import com.otaku.community.feature.topic.repository.TopicRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -21,7 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -53,7 +51,7 @@ public class TopicService {
         Topic topic = topicMapper.toEntity(request);
         Topic savedTopic = topicRepository.save(topic);
 
-        log.info("Topic created: {} with slug: {}", savedTopic.getName(), savedTopic.getSlug());
+        log.debug("Topic created: {} with slug: {}", savedTopic.getName(), savedTopic.getSlug());
         return topicMapper.toResponse(savedTopic);
     }
 
@@ -141,7 +139,7 @@ public class TopicService {
         }
 
         Topic savedTopic = topicRepository.save(topic);
-        log.info("Topic updated: {}", savedTopic.getId());
+        log.debug("Topic updated: {}", savedTopic.getId());
 
         Long postsCount = postTopicRepository.countPostsByTopicId(topicId);
         return topicMapper.toResponseWithPostsCount(savedTopic, postsCount);
@@ -159,7 +157,7 @@ public class TopicService {
         // Remove all post-topic associations
         postTopicRepository.deleteByTopicId(topicId);
 
-        log.info("Topic deleted: {}", topicId);
+        log.debug("Topic deleted: {}", topicId);
     }
 
     @Transactional

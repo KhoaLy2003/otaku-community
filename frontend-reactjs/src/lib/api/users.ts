@@ -31,6 +31,7 @@ export interface UserSyncResponse {
   location?: string;
   role: string;
   isNewUser: boolean;
+  unreadNotificationCount: number;
   createdAt: string;
   updatedAt: string;
 }

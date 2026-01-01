@@ -4,8 +4,6 @@ import com.otaku.community.feature.interaction.dto.CommentResponse;
 import com.otaku.community.feature.interaction.dto.LikeResponse;
 import com.otaku.community.feature.interaction.entity.Comment;
 import com.otaku.community.feature.user.entity.User;
-import com.otaku.community.feature.user.mapper.UserMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;

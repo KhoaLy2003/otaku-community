@@ -62,8 +62,8 @@ public class SecurityUtils {
     public static boolean hasRole(String role) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null &&
-               authentication.getAuthorities().stream()
-                       .anyMatch(auth -> auth.getAuthority().equals(role));
+                authentication.getAuthorities().stream()
+                        .anyMatch(auth -> auth.getAuthority().equals(role));
     }
 
     public static Jwt getCurrentJwt() {

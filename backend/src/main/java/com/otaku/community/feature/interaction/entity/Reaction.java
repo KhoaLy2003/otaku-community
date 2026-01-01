@@ -2,22 +2,35 @@ package com.otaku.community.feature.interaction.entity;
 
 import com.otaku.community.common.entity.BaseEntity;
 import com.otaku.community.feature.user.entity.User;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.UUID;
 
 @Entity
-@Table(name = "reactions", 
-       uniqueConstraints = {
-           @UniqueConstraint(name = "uk_reactions_user_target", 
-                           columnNames = {"user_id", "target_type", "target_id"})
-       },
-       indexes = {
-           @Index(name = "idx_reactions_target", columnList = "target_type, target_id"),
-           @Index(name = "idx_reactions_user_id", columnList = "user_id"),
-           @Index(name = "idx_reactions_type", columnList = "reaction_type")
-       })
+@Table(name = "reactions",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_reactions_user_target",
+                        columnNames = {"user_id", "target_type", "target_id"})
+        },
+        indexes = {
+                @Index(name = "idx_reactions_target", columnList = "target_type, target_id"),
+                @Index(name = "idx_reactions_user_id", columnList = "user_id"),
+                @Index(name = "idx_reactions_type", columnList = "reaction_type")
+        })
 @Getter
 @Setter
 @NoArgsConstructor

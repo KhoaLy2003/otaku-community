@@ -1,8 +1,16 @@
 package com.otaku.community.feature.topic.entity;
 
 import com.otaku.community.common.entity.BaseEntity;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "topics", indexes = {
@@ -44,7 +52,7 @@ public class Topic extends BaseEntity {
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Topic name cannot be null or empty");
         }
-        
+
         return name.toLowerCase()
                 .replaceAll("[^a-z0-9\\s-]", "")
                 .replaceAll("\\s+", "-")

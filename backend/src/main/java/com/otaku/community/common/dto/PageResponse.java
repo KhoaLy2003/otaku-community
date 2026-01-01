@@ -30,7 +30,7 @@ public class PageResponse<T> {
 
     public static <T> PageResponse<T> of(List<T> data, int page, int limit, long total) {
         int totalPages = (int) Math.ceil((double) total / limit);
-        
+
         PaginationMeta pagination = PaginationMeta.builder()
                 .page(page)
                 .limit(limit)
