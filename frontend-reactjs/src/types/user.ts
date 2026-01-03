@@ -1,3 +1,9 @@
+export enum ProfileVisibility {
+  PUBLIC = "PUBLIC",
+  FOLLOWERS_ONLY = "FOLLOWERS_ONLY",
+  PRIVATE = "PRIVATE",
+}
+
 export interface User {
   id: string;
   username: string;
@@ -5,10 +11,11 @@ export interface User {
   displayName?: string;
   avatar?: string;
   avatarUrl?: string;
-  coverImage?: string;
+  coverImageUrl?: string;
   bio?: string;
   interests?: string[]; //TODO: missing in UI
   location?: string;
+  profileVisibility?: ProfileVisibility;
   website?: string;
   joinedAt?: string;
   createdAt: string;
@@ -16,10 +23,11 @@ export interface User {
 }
 
 export interface UserProfile extends User {
-  followersCount: number;
-  followingCount: number;
-  postsCount: number;
+  followersCount: number | null;
+  followingCount: number | null;
+  postsCount: number | null;
   isFollowing: boolean;
+  isRestricted: boolean;
 }
 
 export interface UserListItem {
@@ -28,4 +36,19 @@ export interface UserListItem {
   avatarUrl: string;
   bio: string | null;
   isFollowing: boolean;
+  profileVisibility: ProfileVisibility;
+}
+
+export interface LoginHistory {
+  id: string;
+  ipAddress: string;
+  userAgent: string;
+  createdAt: string;
+}
+
+export interface ActivityLog {
+  id: string;
+  actionType: string;
+  metadata: string;
+  createdAt: string;
 }

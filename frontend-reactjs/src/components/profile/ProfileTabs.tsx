@@ -6,15 +6,18 @@ type TabType = 'posts' | 'replies' | 'media' | 'likes';
 interface ProfileTabsProps {
     activeTab: TabType;
     onTabChange: (tab: TabType) => void;
+    isRestricted?: boolean;
 }
 
-export const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, onTabChange }) => {
-    const tabs: { id: TabType; label: string }[] = [
-        { id: 'posts', label: 'Posts' },
-        { id: 'replies', label: 'Replies' },
-        { id: 'media', label: 'Media' },
-        { id: 'likes', label: 'Likes' },
-    ];
+export const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, onTabChange, isRestricted }) => {
+    const tabs: { id: TabType; label: string }[] = isRestricted
+        ? [{ id: 'posts', label: 'Posts' }]
+        : [
+            { id: 'posts', label: 'Posts' },
+            { id: 'replies', label: 'Replies' },
+            { id: 'media', label: 'Media' },
+            { id: 'likes', label: 'Likes' },
+        ];
 
     return (
         <div className="flex border-b border-gray-200 bg-white sticky top-0 z-10 overflow-x-auto no-scrollbar">

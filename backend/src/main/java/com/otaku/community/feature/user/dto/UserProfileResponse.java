@@ -1,5 +1,6 @@
 package com.otaku.community.feature.user.dto;
 
+import com.otaku.community.feature.user.entity.ProfileVisibility;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,12 +18,15 @@ public class UserProfileResponse {
     private String username;
     private String email;
     private String avatarUrl;
+    private String coverImageUrl;
     private String bio;
     private String[] interests;
     private String location;
+    private ProfileVisibility profileVisibility;
     private Long followersCount;
     private Long followingCount;
     private Long postsCount;
     private Boolean isFollowing;
+    private Boolean isRestricted;
     private Instant createdAt;
 }

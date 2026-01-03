@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MapPin, Link as LinkIcon, Calendar } from 'lucide-react';
+import { MapPin, Link as LinkIcon, Calendar, Shield } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { EditProfileModal } from './EditProfileModal';
@@ -11,9 +11,10 @@ import { UserListModal } from '../users/UserListModal';
 interface ProfileHeaderProps {
     user: UserProfile;
     isOwnProfile?: boolean;
+    onFollowChange?: () => void;
 }
 
-export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, isOwnProfile }) => {
+export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, isOwnProfile, onFollowChange }) => {
     const [showAllInterests, setShowAllInterests] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [currentUser, setCurrentUser] = useState(user);
@@ -39,6 +40,11 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, isOwnProfile
 
         if (isUpdatingFollow) return;
 
+        // Prevent following private accounts
+        if (!currentUser.isFollowing && user.profileVisibility === 'PRIVATE') {
+            return;
+        }
+
         setIsUpdatingFollow(true);
         try {
             if (currentUser.isFollowing) {
@@ -56,6 +62,8 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, isOwnProfile
                     followersCount: (prev.followersCount || 0) + 1
                 }));
             }
+            // Trigger parent refresh to update restriction status
+            if (onFollowChange) onFollowChange();
         } catch (error) {
             console.error('Failed to toggle follow status:', error);
         } finally {
@@ -73,6 +81,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, isOwnProfile
                     followingCount: response.data.followingCount,
                     isFollowing: response.data.isFollowing
                 }));
+                if (onFollowChange) onFollowChange();
             }
         } catch (error) {
             console.error('Failed to refresh profile data:', error);
@@ -93,9 +102,9 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, isOwnProfile
             <div className="bg-white border-b border-gray-200">
                 {/* Cover Image */}
                 <div className="h-48 md:h-64 bg-gray-200 overflow-hidden relative">
-                    {user.coverImage ? (
+                    {user.coverImageUrl ? (
                         <img
-                            src={user.coverImage}
+                            src={user.coverImageUrl}
                             alt="Cover"
                             className="w-full h-full object-cover"
                         />
@@ -110,7 +119,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, isOwnProfile
                         <div className="relative">
                             <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white overflow-hidden bg-gray-100">
                                 <img
-                                    src={user.avatarUrl || user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
+                                    src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
                                     alt={user.displayName}
                                     className="w-full h-full object-cover"
                                 />
@@ -128,6 +137,11 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, isOwnProfile
                                 >
                                     Edit profile
                                 </Button>
+                            ) : (user.profileVisibility === 'PRIVATE' && !currentUser.isFollowing) ? (
+                                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-400 text-sm font-medium">
+                                    <Shield size={16} />
+                                    Private
+                                </div>
                             ) : (
                                 <Button
                                     variant={currentUser.isFollowing ? "outline" : "filled"}
@@ -158,7 +172,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, isOwnProfile
                         </p>
                     )}
 
-                    {currentUser.interests && currentUser.interests.length > 0 && (
+                    {currentUser.interests && currentUser.interests.length > 0 && !user.isRestricted && (
                         <div className="mt-3">
                             <div className="flex flex-wrap gap-2">
                                 {(showAllInterests ? currentUser.interests : currentUser.interests.slice(0, 8)).map((interest, index) => (
@@ -179,13 +193,13 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, isOwnProfile
                     )}
 
                     <div className="mt-3 flex flex-wrap gap-y-2 gap-x-4 text-gray-500 text-sm md:text-base">
-                        {currentUser.location && (
+                        {currentUser.location && !user.isRestricted && (
                             <div className="flex items-center gap-1">
                                 <MapPin size={18} />
                                 <span>{currentUser.location}</span>
                             </div>
                         )}
-                        {currentUser.website && (
+                        {currentUser.website && !user.isRestricted && (
                             <div className="flex items-center gap-1 text-orange-600 hover:underline">
                                 <LinkIcon size={18} />
                                 <a href={currentUser.website} target="_blank" rel="noopener noreferrer">
@@ -199,22 +213,24 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, isOwnProfile
                         </div>
                     </div>
 
-                    <div className="mt-4 flex gap-5">
-                        <button
-                            className="hover:underline flex items-center gap-1 group"
-                            onClick={() => openUserListModal('following')}
-                        >
-                            <span className="font-bold text-gray-900 group-hover:underline">{currentUser.followingCount || 0}</span>
-                            <span className="text-gray-500">Following</span>
-                        </button>
-                        <button
-                            className="hover:underline flex items-center gap-1 group"
-                            onClick={() => openUserListModal('followers')}
-                        >
-                            <span className="font-bold text-gray-900 group-hover:underline">{currentUser.followersCount || 0}</span>
-                            <span className="text-gray-500">Followers</span>
-                        </button>
-                    </div>
+                    {!user.isRestricted && (
+                        <div className="mt-4 flex gap-5">
+                            <button
+                                className="hover:underline flex items-center gap-1 group"
+                                onClick={() => openUserListModal('following')}
+                            >
+                                <span className="font-bold text-gray-900 group-hover:underline">{currentUser.followingCount || 0}</span>
+                                <span className="text-gray-500">Following</span>
+                            </button>
+                            <button
+                                className="hover:underline flex items-center gap-1 group"
+                                onClick={() => openUserListModal('followers')}
+                            >
+                                <span className="font-bold text-gray-900 group-hover:underline">{currentUser.followersCount || 0}</span>
+                                <span className="text-gray-500">Followers</span>
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 

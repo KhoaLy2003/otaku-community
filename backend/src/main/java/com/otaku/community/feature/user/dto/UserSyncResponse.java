@@ -1,5 +1,6 @@
 package com.otaku.community.feature.user.dto;
 
+import com.otaku.community.feature.user.entity.ProfileVisibility;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,6 +22,8 @@ public class UserSyncResponse {
     private String bio;
     private String[] interests;
     private String location;
+    private ProfileVisibility profileVisibility;
+    private String coverImageUrl;
     private String role;
     private boolean isNewUser;
     private long unreadNotificationCount;

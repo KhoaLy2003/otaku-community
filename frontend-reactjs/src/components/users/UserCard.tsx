@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Shield } from 'lucide-react';
 import { Button } from '../ui/Button';
 import type { UserListItem } from '../../types/user';
 
@@ -47,16 +48,23 @@ export const UserCard: React.FC<UserCardProps> = ({
 
             {!isOwnCard && onFollowToggle && (
                 <div className="ml-4 flex-shrink-0">
-                    <Button
-                        variant={isFollowing ? 'outline' : 'filled'}
-                        color={isFollowing ? 'grey' : 'blue'}
-                        size="sm"
-                        className="px-5"
-                        onClick={handleFollowClick}
-                        disabled={isProcessing}
-                    >
-                        {isFollowing ? 'Following' : 'Follow'}
-                    </Button>
+                    {user.profileVisibility === 'PRIVATE' && !isFollowing ? (
+                        <div className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-md border border-gray-100 flex items-center gap-1">
+                            <Shield size={12} />
+                            Private
+                        </div>
+                    ) : (
+                        <Button
+                            variant={isFollowing ? 'outline' : 'filled'}
+                            color={isFollowing ? 'grey' : 'blue'}
+                            size="sm"
+                            className="px-5"
+                            onClick={handleFollowClick}
+                            disabled={isProcessing}
+                        >
+                            {isFollowing ? 'Following' : 'Follow'}
+                        </Button>
+                    )}
                 </div>
             )}
         </div>

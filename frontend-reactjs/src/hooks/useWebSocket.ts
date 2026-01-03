@@ -49,9 +49,9 @@ export const useWebSocket = () => {
           connectHeaders: {
             Authorization: `Bearer ${token}`,
           },
-          debug: (str) => {
-            console.log("[STOMP] Debug:", str);
-          },
+          // debug: (str) => {
+          //   console.log("[STOMP] Debug:", str);
+          // },
           reconnectDelay: 5000,
           heartbeatIncoming: 4000,
           heartbeatOutgoing: 4000,

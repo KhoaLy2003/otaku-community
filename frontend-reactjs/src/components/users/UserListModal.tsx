@@ -50,11 +50,16 @@ export const UserListModal: React.FC<UserListModalProps> = ({ isOpen, onClose, t
     const handleFollowToggle = async (targetUserId: string) => {
         if (processingFollowId) return;
 
+        const userToUpdate = users.find(u => u.id === targetUserId);
+        if (!userToUpdate) return;
+
+        // Prevent following private accounts
+        if (!userToUpdate.isFollowing && userToUpdate.profileVisibility === 'PRIVATE') {
+            return;
+        }
+
         setProcessingFollowId(targetUserId);
         try {
-            const userToUpdate = users.find(u => u.id === targetUserId);
-            if (!userToUpdate) return;
-
             const isCurrentlyFollowing = userToUpdate.isFollowing;
             if (isCurrentlyFollowing) {
                 await usersApi.unfollowUser(targetUserId);

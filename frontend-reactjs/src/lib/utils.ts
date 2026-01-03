@@ -1,8 +1,8 @@
-import { type ClassValue, clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export function timeAgo(dateString: string): string {
@@ -31,4 +31,9 @@ export function timeAgo(dateString: string): string {
     return Math.floor(interval) + " minutes ago";
   }
   return Math.floor(seconds) + " seconds ago";
+}
+
+export function parseDate(value?: string | number | Date | null): Date | null {
+  if (!value) return null;
+  return value instanceof Date ? value : new Date(value);
 }

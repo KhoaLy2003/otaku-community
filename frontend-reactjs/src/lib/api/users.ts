@@ -1,6 +1,11 @@
 import { apiClient } from "./client";
 import type { ApiResponse, PaginatedResponse } from "../../types/api";
-import type { User, UserListItem, UserProfile } from "../../types/user";
+import {
+  ProfileVisibility,
+  type User,
+  type UserListItem,
+  type UserProfile,
+} from "../../types/user";
 
 export interface UpdateProfileData {
   username?: string;
@@ -8,6 +13,11 @@ export interface UpdateProfileData {
   interests?: string[];
   location?: string;
   avatar?: string;
+  coverImageUrl?: string;
+}
+
+export interface UpdatePrivacyRequest {
+  profileVisibility: ProfileVisibility;
 }
 
 export interface UserSyncRequest {
@@ -126,5 +136,28 @@ export const usersApi = {
     return apiClient.get<ApiResponse<PaginatedResponse<UserListItem>>>(
       `/users/${userId}/following${query ? `?${query}` : ""}`
     );
+  },
+
+  /**
+   * Update avatar and cover images
+   */
+  updateProfileImages: async (
+    avatar?: File,
+    cover?: File
+  ): Promise<ApiResponse<User>> => {
+    const formData = new FormData();
+    if (avatar) formData.append("avatar", avatar);
+    if (cover) formData.append("cover", cover);
+
+    return apiClient.put<ApiResponse<User>>("/v1/users/me/profile", formData);
+  },
+
+  /**
+   * Update profile visibility
+   */
+  updatePrivacy: async (
+    data: UpdatePrivacyRequest
+  ): Promise<ApiResponse<User>> => {
+    return apiClient.put<ApiResponse<User>>("/v1/users/me/privacy", data);
   },
 };

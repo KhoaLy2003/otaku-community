@@ -5,6 +5,7 @@ import { ProfileTabs } from '@/components/profile/ProfileTabs'
 import { ProfileFeed } from '@/components/profile/ProfileFeed'
 import { ProfileMedia } from '@/components/profile/ProfileMedia'
 import { useAuth } from '@/hooks/useAuth'
+import { Shield } from 'lucide-react'
 import { usersApi } from '@/lib/api/users'
 import type { UserProfile } from '@/types/user'
 
@@ -17,30 +18,30 @@ const ProfilePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('posts')
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const fetchProfileData = async () => {
-      // Don't fetch if auth is still loading
-      if (authLoading) return;
+  const fetchProfileData = async () => {
+    // Don't fetch if auth is still loading
+    if (authLoading) return;
 
-      if (!username && !authUser?.username) return;
+    if (!username && !authUser?.username) return;
 
-      setLoading(true);
-      try {
-        const response = username
-          ? await usersApi.getUserProfile(username)
-          : await usersApi.getCurrentUser();
+    setLoading(true);
+    try {
+      const response = username
+        ? await usersApi.getUserProfile(username)
+        : await usersApi.getCurrentUser();
 
-        if (response.success && response.data) {
-          setUser(response.data);
-        }
-      } catch (error) {
-        console.error('Error fetching profile:', error);
-        setUser(null);
-      } finally {
-        setLoading(false);
+      if (response.success && response.data) {
+        setUser(response.data);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchProfileData();
   }, [username, authUser?.username, authLoading]);
 
@@ -57,12 +58,22 @@ const ProfilePage: React.FC = () => {
               <ProfileHeader
                 user={user}
                 isOwnProfile={user.username === authUser?.username}
+                onFollowChange={fetchProfileData}
               />
               <ProfileTabs
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
+                isRestricted={user.isRestricted}
               />
-              {activeTab === 'media' ? (
+              {user.isRestricted ? (
+                <div className="bg-white p-12 text-center rounded-b-lg border-t border-gray-100 italic text-gray-400 flex flex-col items-center">
+                  <div className="bg-gray-50 p-4 rounded-full mb-4">
+                    <Shield size={48} className="text-gray-300" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-700 not-italic">This profile is private</h3>
+                  <p className="text-sm max-w-xs mx-auto mt-2">Only followers of @{user.username} can see their posts and profile details.</p>
+                </div>
+              ) : activeTab === 'media' ? (
                 <ProfileMedia username={user.username} />
               ) : (
                 <ProfileFeed

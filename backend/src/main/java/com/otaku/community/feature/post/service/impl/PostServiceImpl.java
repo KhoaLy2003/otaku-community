@@ -6,6 +6,8 @@ import com.otaku.community.common.dto.post.PostResponseRecord;
 import com.otaku.community.common.exception.BadRequestException;
 import com.otaku.community.common.exception.ResourceNotFoundException;
 import com.otaku.community.common.util.PaginationUtils;
+import com.otaku.community.feature.activity.entity.ActivityType;
+import com.otaku.community.feature.activity.service.ActivityService;
 import com.otaku.community.feature.interaction.dto.CommentResponse;
 import com.otaku.community.feature.interaction.entity.Reaction;
 import com.otaku.community.feature.interaction.repository.ReactionRepository;
@@ -60,6 +62,7 @@ public class PostServiceImpl implements PostService {
     private final UserService userService;
     private final com.otaku.community.feature.feed.service.FeedService feedService;
     private final ReactionRepository reactionRepository;
+    private final ActivityService activityService;
 
     @Value("${app.frontend.url:http://localhost:3000}")
     private String frontendUrl;
@@ -101,6 +104,7 @@ public class PostServiceImpl implements PostService {
         savedPost = postRepository.save(savedPost);
 
         log.debug("Created post with ID: {} for user: {}", savedPost.getId(), userId);
+        activityService.logActivity(user, ActivityType.CREATE_POST, "Post title: " + savedPost.getTitle());
 
         // Trigger Fan-out on Write
         feedService.fanOutToFollowers(savedPost);
@@ -143,6 +147,7 @@ public class PostServiceImpl implements PostService {
         // Save updated post
         Post updatedPost = postRepository.save(post);
         log.debug("Updated post with ID: {}", postId);
+        activityService.logActivity(post.getUser(), ActivityType.UPDATE_POST, "Post ID: " + postId);
 
         return postMapper.toResponse(updatedPost);
     }
@@ -166,6 +171,7 @@ public class PostServiceImpl implements PostService {
         postRepository.save(post);
 
         log.debug("Deleted post with ID: {}", postId);
+        activityService.logActivity(post.getUser(), ActivityType.DELETE_POST, "Post ID: " + postId);
     }
 
     // TODO: review

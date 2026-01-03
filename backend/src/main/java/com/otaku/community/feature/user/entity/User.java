@@ -38,6 +38,9 @@ public class User extends BaseEntity {
     @Column(name = "avatar_url", columnDefinition = "TEXT")
     private String avatarUrl;
 
+    @Column(name = "cover_image_url", columnDefinition = "TEXT")
+    private String coverImageUrl;
+
     @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
 
@@ -51,6 +54,11 @@ public class User extends BaseEntity {
     @Column(name = "role", nullable = false, length = 20)
     @Builder.Default
     private UserRole role = UserRole.USER;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "profile_visibility", nullable = true, length = 20)
+    @Builder.Default
+    private ProfileVisibility profileVisibility = ProfileVisibility.PUBLIC;
 
     public enum UserRole {
         USER, ADMIN

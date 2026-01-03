@@ -4,11 +4,14 @@ import com.otaku.community.common.dto.PageResponse;
 import com.otaku.community.common.exception.ConflictException;
 import com.otaku.community.common.exception.ResourceNotFoundException;
 import com.otaku.community.common.util.SecurityUtils;
+import com.otaku.community.feature.activity.entity.ActivityType;
+import com.otaku.community.feature.activity.service.ActivityService;
 import com.otaku.community.feature.post.repository.PostRepository;
 import com.otaku.community.feature.user.dto.UpdateUserRequest;
 import com.otaku.community.feature.user.dto.UserProfileResponse;
 import com.otaku.community.feature.user.dto.UserResponse;
 import com.otaku.community.feature.user.dto.UserSyncResponse;
+import com.otaku.community.feature.user.entity.ProfileVisibility;
 import com.otaku.community.feature.user.entity.User;
 import com.otaku.community.feature.user.mapper.UserMapper;
 import com.otaku.community.feature.user.repository.UserRepository;
@@ -32,6 +35,7 @@ public class UserService {
     private final UserMapper userMapper;
     private final UserFollowService userFollowService;
     private final PostRepository postRepository;
+    private final ActivityService activityService;
 
     @Transactional(readOnly = true)
     public UserProfileResponse getUserProfileByUsername(String username) {
@@ -50,16 +54,58 @@ public class UserService {
     private UserProfileResponse getProfileResponse(User user) {
         UserProfileResponse response = userMapper.toProfileResponse(user);
 
-        response.setFollowersCount(userFollowService.getFollowersCount(user.getId()));
-        response.setFollowingCount(userFollowService.getFollowingCount(user.getId()));
-        response.setPostsCount(postRepository.countByUserIdAndNotDeleted(user.getId()));
+        boolean isRestricted = isProfileRestricted(user);
+        response.setIsRestricted(isRestricted);
+
+        if (isRestricted) {
+            // Nullify private fields for restricted view
+            response.setBio(null);
+            response.setInterests(null);
+            response.setLocation(null);
+            response.setFollowersCount(null);
+            response.setFollowingCount(null);
+            response.setPostsCount(null);
+        } else {
+            response.setFollowersCount(userFollowService.getFollowersCount(user.getId()));
+            response.setFollowingCount(userFollowService.getFollowingCount(user.getId()));
+            response.setPostsCount(postRepository.countByUserIdAndNotDeleted(user.getId()));
+        }
 
         String auth0Id = SecurityUtils.getCurrentAuth0Id();
-        User currentUser = userRepository.findByAuth0Id(auth0Id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "auth0Id", auth0Id));
-        response.setIsFollowing(userFollowService.isFollowing(currentUser.getId(), user.getId()));
+        if (auth0Id != null) {
+            userRepository.findByAuth0Id(auth0Id).ifPresent(currentUser -> response
+                    .setIsFollowing(userFollowService.isFollowing(currentUser.getId(), user.getId())));
+        }
 
         return response;
+    }
+
+    private boolean isProfileRestricted(User user) {
+        if (user.getProfileVisibility() == ProfileVisibility.PUBLIC) {
+            return false;
+        }
+
+        String auth0Id = SecurityUtils.getCurrentAuth0Id();
+        if (auth0Id == null) {
+            return true; // Not logged in, can't see non-public profile
+        }
+
+        User currentUser = userRepository.findByAuth0Id(auth0Id)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "auth0Id", auth0Id));
+
+        if (currentUser.getId().equals(user.getId())) {
+            return false; // Owner can see their own profile
+        }
+
+        if (user.getProfileVisibility() == ProfileVisibility.PRIVATE) {
+            return true; // Private, only owner can see
+        }
+
+        if (user.getProfileVisibility() == ProfileVisibility.FOLLOWERS_ONLY) {
+            return !userFollowService.isFollowing(currentUser.getId(), user.getId());
+        }
+
+        return false;
     }
 
     @Transactional
@@ -91,6 +137,9 @@ public class UserService {
         User savedUser = userRepository.save(user);
         log.debug("User updated: {}", savedUser.getId());
 
+        activityService.logActivity(savedUser, ActivityType.UPDATE_PROFILE,
+                "Profile updated via generic update endpoint");
+
         return userMapper.toResponse(savedUser);
     }
 
@@ -109,7 +158,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserSyncResponse syncUserFromAuth0(String auth0Id, String email, String username, String avatarUrl) {
+    public UserSyncResponse syncUserFromAuth0(String auth0Id, String email, String username) {
         User syncedUser = userRepository.findByAuth0Id(auth0Id)
                 .map(existingUser -> {
                     // Update existing user with latest Auth0 data
@@ -133,11 +182,6 @@ public class UserService {
                         updated = true;
                     }
 
-                    if (avatarUrl != null && !avatarUrl.equals(existingUser.getAvatarUrl())) {
-                        existingUser.setAvatarUrl(avatarUrl);
-                        updated = true;
-                    }
-
                     if (updated) {
                         User savedUser = userRepository.save(existingUser);
                         log.debug("User updated during sync: {}", savedUser.getId());
@@ -154,7 +198,6 @@ public class UserService {
                             .auth0Id(auth0Id)
                             .email(email)
                             .username(uniqueUsername)
-                            .avatarUrl(avatarUrl)
                             .role(User.UserRole.USER)
                             .build();
 
@@ -164,6 +207,12 @@ public class UserService {
                 });
 
         return userMapper.toSyncResponse(syncedUser);
+    }
+
+    @Transactional(readOnly = true)
+    public User findById(UUID id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
     }
 
     @Transactional(readOnly = true)

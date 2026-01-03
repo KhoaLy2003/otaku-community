@@ -3,6 +3,7 @@ package com.otaku.community.feature.user.controller;
 import com.otaku.community.common.annotation.CurrentUserId;
 import com.otaku.community.common.dto.ApiResponse;
 import com.otaku.community.common.dto.PageResponse;
+import com.otaku.community.feature.activity.service.ActivityService;
 import com.otaku.community.feature.notification.service.NotificationService;
 import com.otaku.community.feature.user.dto.UpdateUserRequest;
 import com.otaku.community.feature.user.dto.UserProfileResponse;
@@ -13,9 +14,11 @@ import com.otaku.community.feature.user.dto.UserSyncResponse;
 import com.otaku.community.feature.user.entity.User;
 import com.otaku.community.feature.user.service.UserFollowService;
 import com.otaku.community.feature.user.service.UserService;
+import com.otaku.community.feature.user.service.UserSettingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +46,8 @@ public class UserController {
     private final UserService userService;
     private final UserFollowService userFollowService;
     private final NotificationService notificationService;
+    private final ActivityService activityService;
+    private final UserSettingService userSettingService;
 
     @GetMapping("/username/{username}")
     @Operation(summary = "Get user profile by username", description = "Retrieves a user's public profile by their username")
@@ -75,7 +80,8 @@ public class UserController {
     @Operation(summary = "Sync user with Auth0", description = "Synchronizes user data between Auth0 and the database")
     public ResponseEntity<ApiResponse<UserSyncResponse>> syncUser(
             @AuthenticationPrincipal Jwt jwt,
-            @Valid @RequestBody UserSyncRequest request) {
+            @Valid @RequestBody UserSyncRequest request,
+            HttpServletRequest httpServletRequest) {
 
         // Verify the auth0Id matches the JWT subject
         String jwtSubject = jwt.getSubject();
@@ -90,10 +96,15 @@ public class UserController {
         UserSyncResponse response = userService.syncUserFromAuth0(
                 request.getAuth0Id(),
                 request.getEmail(),
-                request.getUsername(),
-                request.getAvatarUrl());
+                request.getUsername());
         response.setNewUser(isNewUser);
         response.setUnreadNotificationCount(notificationService.getUnreadCount(response.getId()).getCount());
+
+        // Log login
+        User user = userService.getUserByUsername(response.getUsername());
+        activityService.logLogin(user,
+                httpServletRequest.getRemoteAddr(),
+                httpServletRequest.getHeader("User-Agent"));
 
         return ResponseEntity.ok(ApiResponse.success(
                 isNewUser ? "User created successfully" : "User synchronized successfully",

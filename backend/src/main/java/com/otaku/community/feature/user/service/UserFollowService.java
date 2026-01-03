@@ -3,6 +3,8 @@ package com.otaku.community.feature.user.service;
 import com.otaku.community.common.dto.PageResponse;
 import com.otaku.community.common.exception.BadRequestException;
 import com.otaku.community.common.exception.ResourceNotFoundException;
+import com.otaku.community.feature.activity.entity.ActivityType;
+import com.otaku.community.feature.activity.service.ActivityService;
 import com.otaku.community.feature.feed.service.FeedService;
 import com.otaku.community.feature.notification.entity.Notification;
 import com.otaku.community.feature.notification.listener.NotificationEventListener;
@@ -39,14 +41,18 @@ public class UserFollowService {
     private final UserRepository userRepository;
     private final FeedService feedService;
     private final ApplicationEventPublisher eventPublisher;
+    private final ActivityService activityService;
 
     public void followUser(UUID followerId, UUID followedId) {
         if (followerId.equals(followedId)) {
             throw new BadRequestException("You cannot follow yourself");
         }
 
-        if (!userRepository.existsById(followedId)) {
-            throw new ResourceNotFoundException("User", "id", followedId);
+        User followedUser = userRepository.findById(followedId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", followedId));
+
+        if (followedUser.getProfileVisibility() == com.otaku.community.feature.user.entity.ProfileVisibility.PRIVATE) {
+            throw new BadRequestException("This account is private and cannot be followed.");
         }
 
         if (userFollowRepository.existsByFollowerIdAndFollowedId(followerId, followedId)) {
@@ -61,6 +67,12 @@ public class UserFollowService {
 
         userFollowRepository.save(follow);
         log.debug("User {} followed {}", followerId, followedId);
+
+        // Log Activity
+        User follower = userRepository.findById(followerId).orElse(null);
+        if (follower != null) {
+            activityService.logActivity(follower, ActivityType.FOLLOW_USER, "Followed User ID: " + followedId);
+        }
 
         // Trigger Feed Backfill
         feedService.backfillFeed(followerId, followedId);
@@ -84,6 +96,10 @@ public class UserFollowService {
 
         userFollowRepository.deleteByFollowerIdAndFollowedId(followerId, followedId);
         log.debug("User {} unfollowed {}", followerId, followedId);
+
+        // Log Activity
+        userRepository.findById(followerId).ifPresent(follower -> activityService.logActivity(
+                follower, ActivityType.UNFOLLOW_USER, "Unfollowed User ID: " + followedId));
 
         // Trigger Feed Cleanup
         feedService.removeFeedEntries(followerId, followedId);
@@ -186,6 +202,7 @@ public class UserFollowService {
                             .avatarUrl(user.getAvatarUrl())
                             .bio(user.getBio())
                             .isFollowing(currentlyFollowingIds.contains(user.getId()))
+                            .profileVisibility(user.getProfileVisibility())
                             .build();
                 })
                 .filter(Objects::nonNull)

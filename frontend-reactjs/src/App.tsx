@@ -4,6 +4,7 @@ import { ROUTES } from './constants/routes'
 
 // Page components
 import HomePage from './pages/HomePage'
+import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
 import FeedPage from './pages/FeedPage'
@@ -18,6 +19,7 @@ import { CallbackPage } from './pages/CallbackPage'
 // Auth components
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { PublicRoute } from './components/auth/PublicRoute'
+import { ConditionalRoute } from './components/auth/ConditionalRoute'
 import { Auth0ProviderWrapper } from './components/auth/Auth0ProviderWrapper'
 import { AuthProvider } from './lib/contexts/AuthContext'
 import { AuthGuard } from './components/auth/AuthGuard'
@@ -35,6 +37,16 @@ function App() {
             <div className="min-h-screen bg-gray-50">
               <ToastProvider />
               <Routes>
+                {/* Landing page - public route, redirects authenticated users */}
+                <Route
+                  path={ROUTES.LANDING_PAGE}
+                  element={
+                    <ConditionalRoute>
+                      <LandingPage />
+                    </ConditionalRoute>
+                  }
+                />
+
                 {/* Public routes */}
                 <Route element={<MainLayout />}>
                   <Route path={ROUTES.HOME} element={<HomePage />} />
