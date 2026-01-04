@@ -1,3 +1,5 @@
 # IDE / Editor folders
 .vscode/
 .kiro/
+.cursor/
+.gemini/

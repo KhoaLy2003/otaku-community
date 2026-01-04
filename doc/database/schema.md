@@ -1,3 +1,43 @@
+-- public.chats definition
+
+-- Drop table
+
+-- DROP TABLE public.chats;
+
+CREATE TABLE public.chats (
+id uuid NOT NULL,
+created_at timestamptz(6) NOT NULL,
+deleted_at timestamptz(6) NULL,
+updated_at timestamptz(6) NOT NULL,
+user_a_id uuid NOT NULL,
+user_b_id uuid NOT NULL,
+CONSTRAINT chats_pkey PRIMARY KEY (id),
+CONSTRAINT uk_chats_user_pair UNIQUE (user_a_id, user_b_id)
+);
+CREATE INDEX idx_chats_user_pair ON public.chats USING btree (user_a_id, user_b_id);
+
+-- public.messages definition
+
+-- Drop table
+
+-- DROP TABLE public.messages;
+
+CREATE TABLE public.messages (
+id uuid NOT NULL,
+created_at timestamptz(6) NOT NULL,
+deleted_at timestamptz(6) NULL,
+updated_at timestamptz(6) NOT NULL,
+chat_id uuid NOT NULL,
+"content" text NOT NULL,
+is_deleted bool NOT NULL,
+sender_id uuid NOT NULL,
+status varchar(255) NOT NULL,
+CONSTRAINT messages_pkey PRIMARY KEY (id),
+CONSTRAINT messages_status_check CHECK (((status)::text = ANY ((ARRAY['SENT'::character varying, 'DELIVERED'::character varying, 'READ'::character varying])::text[])))
+);
+CREATE INDEX idx_messages_chat_id_created_at ON public.messages USING btree (chat_id, created_at DESC);
+CREATE INDEX idx_messages_chat_id_cursor ON public.messages USING btree (chat_id, created_at, id);
+
 -- public.notifications definition
 
 -- Drop table
@@ -16,9 +56,9 @@ recipient_id uuid NOT NULL,
 sender_id uuid NULL,
 target_id uuid NULL,
 target_type varchar(255) NULL,
-CONSTRAINT notifications_notification_type_check CHECK (((notification_type)::text = ANY ((ARRAY['LIKE'::character varying, 'COMMENT'::character varying, 'REPLY'::character varying, 'FOLLOW'::character varying, 'UNFOLLOW'::character varying, 'MENTION'::character varying, 'SYSTEM'::character varying])::text[]))),
+CONSTRAINT notifications_notification_type_check CHECK (((notification_type)::text = ANY ((ARRAY['LIKE'::character varying, 'COMMENT'::character varying, 'REPLY'::character varying, 'FOLLOW'::character varying, 'UNFOLLOW'::character varying, 'MENTION'::character varying, 'SYSTEM'::character varying, 'MESSAGE'::character varying])::text[]))),
 CONSTRAINT notifications_pkey PRIMARY KEY (id),
-CONSTRAINT notifications_target_type_check CHECK (((target_type)::text = ANY ((ARRAY['POST'::character varying, 'COMMENT'::character varying, 'USER'::character varying])::text[])))
+CONSTRAINT notifications_target_type_check CHECK (((target_type)::text = ANY ((ARRAY['POST'::character varying, 'COMMENT'::character varying, 'USER'::character varying, 'CHAT'::character varying])::text[])))
 );
 CREATE INDEX idx_notifications_recipient_created ON public.notifications USING btree (recipient_id, created_at DESC);
 CREATE INDEX idx_notifications_unread ON public.notifications USING btree (recipient_id);
@@ -103,15 +143,62 @@ interests \_text NULL,
 "location" varchar(100) NULL,
 "role" varchar(20) NOT NULL,
 username varchar(50) NOT NULL,
+cover_image_url text NULL,
+profile_visibility varchar(20) NULL,
 CONSTRAINT uk_6dotkott2kjsp8vw4d0m25fb7 UNIQUE (email),
 CONSTRAINT uk_6muhtnbpqcydo2lsv78rginj8 UNIQUE (auth0_id),
 CONSTRAINT uk_r43af9ap4edm43mmtq01oddj6 UNIQUE (username),
 CONSTRAINT users_pkey PRIMARY KEY (id),
+CONSTRAINT users_profile_visibility_check CHECK (((profile_visibility)::text = ANY ((ARRAY['PUBLIC'::character varying, 'FOLLOWERS_ONLY'::character varying, 'PRIVATE'::character varying])::text[]))),
 CONSTRAINT users_role_check CHECK (((role)::text = ANY ((ARRAY['USER'::character varying, 'ADMIN'::character varying])::text[])))
 );
 CREATE INDEX idx_users_deleted_at ON public.users USING btree (deleted_at);
 CREATE INDEX idx_users_email ON public.users USING btree (email);
 CREATE INDEX idx_users_username ON public.users USING btree (username);
+
+-- public.activity_logs definition
+
+-- Drop table
+
+-- DROP TABLE public.activity_logs;
+
+CREATE TABLE public.activity_logs (
+id uuid NOT NULL,
+created_at timestamptz(6) NOT NULL,
+deleted_at timestamptz(6) NULL,
+updated_at timestamptz(6) NOT NULL,
+action_type varchar(50) NOT NULL,
+metadata text NULL,
+user_id uuid NOT NULL,
+target_id varchar(255) NULL,
+target_type varchar(255) NULL,
+CONSTRAINT activity_logs_pkey PRIMARY KEY (id),
+CONSTRAINT activity_logs_target_type_check CHECK (((target_type)::text = ANY ((ARRAY['USER'::character varying, 'POST'::character varying, 'COMMENT'::character varying, 'IP_ADDRESS'::character varying])::text[]))),
+CONSTRAINT fk5bm1lt4f4eevt8lv2517soakd FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE INDEX idx_activity_logs_created_at ON public.activity_logs USING btree (created_at);
+CREATE INDEX idx_activity_logs_user_id ON public.activity_logs USING btree (user_id);
+
+-- public.login_histories definition
+
+-- Drop table
+
+-- DROP TABLE public.login_histories;
+
+CREATE TABLE public.login_histories (
+id uuid NOT NULL,
+created_at timestamptz(6) NOT NULL,
+deleted_at timestamptz(6) NULL,
+updated_at timestamptz(6) NOT NULL,
+ip_address varchar(45) NULL,
+user_agent text NULL,
+user_id uuid NOT NULL,
+CONSTRAINT login_history_pkey PRIMARY KEY (id),
+CONSTRAINT fk20v0mimmdegh2afs39uixlxpm FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE INDEX idx_login_histories_created_at ON public.login_histories USING btree (created_at);
+CREATE INDEX idx_login_histories_user_id ON public.login_histories USING btree (user_id);
+CREATE INDEX idx_login_history_user_id ON public.login_histories USING btree (user_id);
 
 -- public.posts definition
 

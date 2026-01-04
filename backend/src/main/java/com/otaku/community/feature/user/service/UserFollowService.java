@@ -3,8 +3,9 @@ package com.otaku.community.feature.user.service;
 import com.otaku.community.common.dto.PageResponse;
 import com.otaku.community.common.exception.BadRequestException;
 import com.otaku.community.common.exception.ResourceNotFoundException;
+import com.otaku.community.feature.activity.entity.ActivityTargetType;
 import com.otaku.community.feature.activity.entity.ActivityType;
-import com.otaku.community.feature.activity.service.ActivityService;
+import com.otaku.community.feature.activity.event.ActivityEvent;
 import com.otaku.community.feature.feed.service.FeedService;
 import com.otaku.community.feature.notification.entity.Notification;
 import com.otaku.community.feature.notification.listener.NotificationEventListener;
@@ -41,7 +42,6 @@ public class UserFollowService {
     private final UserRepository userRepository;
     private final FeedService feedService;
     private final ApplicationEventPublisher eventPublisher;
-    private final ActivityService activityService;
 
     public void followUser(UUID followerId, UUID followedId) {
         if (followerId.equals(followedId)) {
@@ -69,10 +69,8 @@ public class UserFollowService {
         log.debug("User {} followed {}", followerId, followedId);
 
         // Log Activity
-        User follower = userRepository.findById(followerId).orElse(null);
-        if (follower != null) {
-            activityService.logActivity(follower, ActivityType.FOLLOW_USER, "Followed User ID: " + followedId);
-        }
+        eventPublisher.publishEvent(new ActivityEvent(followerId, ActivityType.FOLLOW_USER, ActivityTargetType.USER,
+                followedId.toString(), "Followed User ID: " + followedId));
 
         // Trigger Feed Backfill
         feedService.backfillFeed(followerId, followedId);
@@ -98,8 +96,8 @@ public class UserFollowService {
         log.debug("User {} unfollowed {}", followerId, followedId);
 
         // Log Activity
-        userRepository.findById(followerId).ifPresent(follower -> activityService.logActivity(
-                follower, ActivityType.UNFOLLOW_USER, "Unfollowed User ID: " + followedId));
+        eventPublisher.publishEvent(new ActivityEvent(followerId, ActivityType.UNFOLLOW_USER, ActivityTargetType.USER,
+                followedId.toString(), "Unfollowed User ID: " + followedId));
 
         // Trigger Feed Cleanup
         feedService.removeFeedEntries(followerId, followedId);

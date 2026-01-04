@@ -5,9 +5,11 @@ import com.otaku.community.common.dto.post.PostAuthorRecord;
 import com.otaku.community.common.dto.post.PostResponseRecord;
 import com.otaku.community.common.exception.BadRequestException;
 import com.otaku.community.common.exception.ResourceNotFoundException;
+import com.otaku.community.common.logging.LogExecutionTime;
 import com.otaku.community.common.util.PaginationUtils;
+import com.otaku.community.feature.activity.entity.ActivityTargetType;
 import com.otaku.community.feature.activity.entity.ActivityType;
-import com.otaku.community.feature.activity.service.ActivityService;
+import com.otaku.community.feature.activity.event.ActivityEvent;
 import com.otaku.community.feature.interaction.dto.CommentResponse;
 import com.otaku.community.feature.interaction.entity.Reaction;
 import com.otaku.community.feature.interaction.repository.ReactionRepository;
@@ -32,6 +34,7 @@ import com.otaku.community.feature.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -62,7 +65,7 @@ public class PostServiceImpl implements PostService {
     private final UserService userService;
     private final com.otaku.community.feature.feed.service.FeedService feedService;
     private final ReactionRepository reactionRepository;
-    private final ActivityService activityService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Value("${app.frontend.url:http://localhost:3000}")
     private String frontendUrl;
@@ -72,6 +75,7 @@ public class PostServiceImpl implements PostService {
      */
     @Override
     @Transactional
+    @LogExecutionTime
     public PostResponse createPost(CreatePostRequest request) {
         log.debug("Creating new post with title: {}", request.getTitle());
 
@@ -104,7 +108,8 @@ public class PostServiceImpl implements PostService {
         savedPost = postRepository.save(savedPost);
 
         log.debug("Created post with ID: {} for user: {}", savedPost.getId(), userId);
-        activityService.logActivity(user, ActivityType.CREATE_POST, "Post title: " + savedPost.getTitle());
+        eventPublisher.publishEvent(new ActivityEvent(userId, ActivityType.CREATE_POST, ActivityTargetType.POST,
+                savedPost.getId().toString(), "Post title: " + savedPost.getTitle()));
 
         // Trigger Fan-out on Write
         feedService.fanOutToFollowers(savedPost);
@@ -147,7 +152,8 @@ public class PostServiceImpl implements PostService {
         // Save updated post
         Post updatedPost = postRepository.save(post);
         log.debug("Updated post with ID: {}", postId);
-        activityService.logActivity(post.getUser(), ActivityType.UPDATE_POST, "Post ID: " + postId);
+        eventPublisher.publishEvent(new ActivityEvent(post.getUserId(), ActivityType.UPDATE_POST,
+                ActivityTargetType.POST, postId.toString(), "Post ID: " + postId));
 
         return postMapper.toResponse(updatedPost);
     }
@@ -171,34 +177,8 @@ public class PostServiceImpl implements PostService {
         postRepository.save(post);
 
         log.debug("Deleted post with ID: {}", postId);
-        activityService.logActivity(post.getUser(), ActivityType.DELETE_POST, "Post ID: " + postId);
-    }
-
-    // TODO: review
-
-    /**
-     * Retrieves a post by ID
-     */
-    @Transactional(readOnly = true)
-    public PostResponse getPost(UUID postId) {
-        log.debug("Retrieving post with ID: {}", postId);
-
-        Post post = postRepository.findByIdAndNotDeleted(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
-
-        // Get media
-        List<PostMediaResponse> mediaResponses = postMediaServiceImpl.getPostMedia(postId);
-
-        // Build response
-        PostResponse response = postMapper.toResponse(post);
-        response.setMedia(mediaResponses);
-
-        // Set stats
-        PostStats stats = postStatsService.getPostStats(postId);
-        response.setLikesCount(stats.getLikeCount());
-        response.setCommentCount(stats.getCommentCount());
-
-        return response;
+        eventPublisher.publishEvent(new ActivityEvent(post.getUserId(), ActivityType.DELETE_POST,
+                ActivityTargetType.POST, postId.toString(), "Post ID: " + postId));
     }
 
     /**
@@ -207,6 +187,7 @@ public class PostServiceImpl implements PostService {
      */
     @Override
     @Transactional(readOnly = true)
+    @LogExecutionTime
     public PostDetailResponse getPostDetail(UUID postId) {
         log.debug("Retrieving detailed post information for ID: {}", postId);
 

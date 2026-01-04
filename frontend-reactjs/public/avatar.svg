@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg
+  viewBox="0 0 100 100"
+  xmlns="http://www.w3.org/2000/svg"
+>
+    <!-- Face background -->
+    <circle cx="50" cy="50" r="45" fill="#1F2937" />
+
+    <!-- Ears / side shapes -->
+    <path d="M20,30 L40,45 L25,50 Z" fill="#FF6B35" />
+    <path d="M80,30 L60,45 L75,50 Z" fill="#FF6B35" />
+
+    <!-- Eyes -->
+    <circle cx="35" cy="60" r="4" fill="#FFFFFF" />
+    <circle cx="65" cy="60" r="4" fill="#FFFFFF" />
+
+    <!-- Mouth -->
+    <path
+        d="M45,70 Q50,75 55,70"
+        stroke="#FFFFFF"
+        stroke-width="3"
+        fill="none"
+        stroke-linecap="round"
+    />
+</svg>

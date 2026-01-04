@@ -21,6 +21,8 @@ public interface UserFollowRepository extends JpaRepository<UserFollow, UUID> {
 
     Page<UserFollow> findAllByFollowerId(UUID followerId, Pageable pageable);
 
+    List<UserFollow> findAllByFollowerId(UUID followerId);
+
     Page<UserFollow> findAllByFollowedId(UUID followedId, Pageable pageable);
 
     // For fan-out (batch processing might be needed for large scale, but Slice/List

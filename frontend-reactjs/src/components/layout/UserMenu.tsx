@@ -5,7 +5,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { Colors } from "../../constants/colors";
 
 export function UserMenu() {
-  const { auth0User, logout } = useAuth();
+  const { user, auth0User, logout } = useAuth();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -32,7 +32,7 @@ export function UserMenu() {
   };
 
   const handleProfile = () => {
-    navigate(`/profile/${auth0User?.nickname}`);
+    navigate(`/profile/${user?.username || auth0User?.nickname}`);
     setIsOpen(false);
   };
 
@@ -42,6 +42,10 @@ export function UserMenu() {
   };
 
   if (!auth0User) return null;
+
+  const displayName = user?.displayName || user?.username || auth0User.name || auth0User.nickname;
+  const username = user?.username || auth0User.nickname;
+  const avatarUrl = user?.avatarUrl || auth0User.picture;
 
   return (
     <div className="relative" ref={menuRef}>
@@ -54,27 +58,26 @@ export function UserMenu() {
         }}
       >
         <span className="flex h-9 w-9 items-center justify-center text-white rounded-full overflow-hidden bg-orange-500">
-          {auth0User.picture ? (
+          {avatarUrl ? (
             <img
-              src={auth0User.picture}
-              alt={auth0User.username}
+              src={avatarUrl}
+              alt={username}
               width={36}
               height={36}
               className="object-cover"
             />
           ) : (
             <span className="text-sm font-semibold">
-              {auth0User.nickname?.charAt(0).toUpperCase() || 'U'}
+              {username?.charAt(0).toUpperCase() || 'U'}
             </span>
           )}
         </span>
         <div className="hidden text-xs md:block">
-          <p className="font-semibold text-[#1a1a1b]">{auth0User.nickname}</p>
+          <p className="font-semibold text-[#1a1a1b]">{displayName}</p>
         </div>
         <ChevronDown
-          className={`h-4 w-4 transition-transform ${
-            isOpen ? "rotate-180" : ""
-          }`}
+          className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""
+            }`}
         />
       </button>
 
@@ -88,9 +91,9 @@ export function UserMenu() {
             style={{ borderColor: Colors.Grey[20] }}
           >
             <p className="font-semibold text-sm text-[#1a1a1b]">
-              {auth0User.username}
+              {displayName}
             </p>
-            <p className="text-xs text-[#7c7c7c]">{auth0User.nickname}</p>
+            <p className="text-xs text-[#7c7c7c]">{username}</p>
           </div>
 
           <div className="py-2">

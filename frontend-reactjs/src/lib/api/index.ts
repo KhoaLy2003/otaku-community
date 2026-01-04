@@ -18,6 +18,7 @@ export {
   type UpdateCommentData,
 } from "./comments";
 export { interactionsApi, type LikeResponse } from "./interactions";
+export { chatApi } from "./chat";
 
 // Re-export common types
 export type { ApiResponse, PaginatedResponse } from "../../types/api";

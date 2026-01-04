@@ -27,26 +27,19 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-        if (accessor != null) {
-            log.debug("[WS][STOMP] Frame received: {}", accessor.getCommand());
-        }
-
         if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
             String authHeader = accessor.getFirstNativeHeader("Authorization");
-            log.debug("[WS][STOMP] CONNECT frame received, authHeader={}", authHeader != null ? "present" : "missing");
 
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 String token = authHeader.substring(7);
                 try {
                     Jwt jwt = jwtDecoder.decode(token);
                     String auth0Id = jwt.getSubject();
-                    log.debug("[WS][STOMP] ✅ JWT decoded, auth0Id={}", auth0Id);
 
                     // Map Auth0 ID to our internal User ID
                     return userRepository.findByAuth0Id(auth0Id)
                             .map(user -> {
                                 String userId = user.getId().toString();
-                                log.debug("[WS][STOMP] ✅ Internal User found, userId={}", userId);
                                 Principal principal = () -> userId;
                                 accessor.setUser(principal);
                                 return message;

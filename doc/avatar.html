@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Default Avatars - Otaku Community</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .avatar-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 2rem;
+      }
+      .avatar-card {
+        transition: all 0.3s ease;
+      }
+      .avatar-card:hover {
+        transform: translateY(-5px);
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 py-12 px-4">
+    <div class="max-w-5xl mx-auto">
+      <header class="mb-12 text-center">
+        <h1 class="text-4xl font-black text-slate-900 mb-4">
+          Hệ thống Avatar Mặc định
+        </h1>
+        <p class="text-gray-600 max-w-2xl mx-auto">
+          Thiết kế tối giản, đậm chất "Otaku" dành cho người dùng mới chưa cập
+          nhật ảnh đại diện. Sử dụng các biến thể màu Cam và Xanh của thương
+          hiệu.
+        </p>
+      </header>
+
+      <!-- Avatar Set 1: Emoticons (Biểu cảm Anime) -->
+      <section class="mb-16">
+        <h2
+          class="text-xl font-bold mb-8 border-l-4 border-orange-500 pl-4 uppercase tracking-wider"
+        >
+          Bộ 1: Biểu cảm Emoticons (^_^/ -_-)
+        </h2>
+        <div class="avatar-grid">
+          <!-- Happy -->
+          <div class="avatar-card text-center">
+            <div
+              class="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-lg mb-4"
+            >
+              <svg viewBox="0 0 100 100" class="w-20 h-20 fill-white">
+                <path
+                  d="M30,45 Q35,35 40,45 M60,45 Q65,35 70,45"
+                  stroke="white"
+                  stroke-width="6"
+                  fill="none"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M35,65 Q50,80 65,65"
+                  stroke="white"
+                  stroke-width="6"
+                  fill="none"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </div>
+            <span class="text-sm font-medium text-gray-500"
+              >Nhiệt huyết (Joy)</span
+            >
+          </div>
+
+          <!-- Cool/Glasses -->
+          <div class="avatar-card text-center">
+            <div
+              class="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-lg mb-4"
+            >
+              <svg viewBox="0 0 100 100" class="w-20 h-20 fill-white">
+                <rect
+                  x="25"
+                  y="45"
+                  width="20"
+                  height="12"
+                  rx="2"
+                  fill="white"
+                />
+                <rect
+                  x="55"
+                  y="45"
+                  width="20"
+                  height="12"
+                  rx="2"
+                  fill="white"
+                />
+                <path d="M45,51 L55,51" stroke="white" stroke-width="4" />
+                <path
+                  d="M45,70 L55,70"
+                  stroke="white"
+                  stroke-width="4"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </div>
+            <span class="text-sm font-medium text-gray-500"
+              >Tri thức (Cool)</span
+            >
+          </div>
+
+          <!-- Star Eyes -->
+          <div class="avatar-card text-center">
+            <div
+              class="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-orange-500 to-blue-600 flex items-center justify-center shadow-lg mb-4"
+            >
+              <svg viewBox="0 0 100 100" class="w-20 h-20 fill-white">
+                <path
+                  d="M35,35 L40,45 L50,45 L42,52 L45,62 L35,55 L25,62 L28,52 L20,45 L30,45 Z"
+                />
+                <path
+                  d="M65,35 L70,45 L80,45 L72,52 L75,62 L65,55 L55,62 L58,52 L50,45 L60,45 Z"
+                />
+                <path
+                  d="M40,75 Q50,85 60,75"
+                  stroke="white"
+                  stroke-width="4"
+                  fill="none"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </div>
+            <span class="text-sm font-medium text-gray-500"
+              >Hào hứng (Excited)</span
+            >
+          </div>
+
+          <!-- Cat Ears / Neko -->
+          <div class="avatar-card text-center">
+            <div
+              class="w-32 h-32 mx-auto rounded-full bg-slate-800 flex items-center justify-center shadow-lg mb-4 relative overflow-hidden"
+            >
+              <path d="M0,0 L100,0 L100,100 L0,100 Z" fill="#1e293b" />
+              <svg viewBox="0 0 100 100" class="w-20 h-20 fill-white">
+                <path d="M20,30 L40,45 L25,50 Z" fill="#FF6B35" />
+                <path d="M80,30 L60,45 L75,50 Z" fill="#FF6B35" />
+                <circle cx="35" cy="60" r="4" />
+                <circle cx="65" cy="60" r="4" />
+                <path
+                  d="M45,70 Q50,75 55,70"
+                  stroke="white"
+                  stroke-width="3"
+                  fill="none"
+                />
+              </svg>
+            </div>
+            <span class="text-sm font-medium text-gray-500">Neko Mode</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Avatar Set 2: Letter Based (Chữ cái đầu tên) -->
+      <section>
+        <h2
+          class="text-xl font-bold mb-8 border-l-4 border-blue-600 pl-4 uppercase tracking-wider"
+        >
+          Bộ 2: Chữ cái phong cách Manga
+        </h2>
+        <div class="avatar-grid">
+          <!-- Letter O - Orange -->
+          <div class="avatar-card text-center">
+            <div
+              class="w-32 h-32 mx-auto rounded-full bg-white border-4 border-orange-500 flex items-center justify-center shadow-md mb-4"
+            >
+              <span
+                class="text-5xl font-black text-orange-500 italic"
+                style="font-family: 'Arial Black', sans-serif"
+                >O</span
+              >
+            </div>
+            <span class="text-sm font-medium text-gray-400 italic">User O</span>
+          </div>
+
+          <!-- Letter T - Blue -->
+          <div class="avatar-card text-center">
+            <div
+              class="w-32 h-32 mx-auto rounded-full bg-white border-4 border-blue-600 flex items-center justify-center shadow-md mb-4"
+            >
+              <span
+                class="text-5xl font-black text-blue-600 italic"
+                style="font-family: 'Arial Black', sans-serif"
+                >T</span
+              >
+            </div>
+            <span class="text-sm font-medium text-gray-400 italic">User T</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Integration Note -->
+      <div class="mt-16 p-6 bg-blue-50 rounded-2xl border border-blue-100">
+        <h3 class="font-bold text-blue-800 mb-2">
+          Gợi ý kỹ thuật cho Lập trình viên:
+        </h3>
+        <ul class="text-sm text-blue-700 list-disc ml-5 space-y-1">
+          <li>
+            Khi người dùng đăng ký, hệ thống sẽ gán ngẫu nhiên 1 trong 4 màu
+            nền.
+          </li>
+          <li>
+            Tên người dùng (Username) có thể dùng để render bộ avatar "Chữ cái
+            đầu" nếu họ không chọn hình đại diện.
+          </li>
+          <li>
+            Sử dụng định dạng SVG để tiết kiệm dung lượng server và hiển thị sắc
+            nét trên màn hình Retina.
+          </li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>

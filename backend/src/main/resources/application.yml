@@ -1,3 +1,7 @@
+application:
+  title: Otaku Community
+  version: 1.0.0
+
 spring:
   application:
     name: otaku-community-backend
@@ -8,20 +12,34 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: false
+    show-sql: ${SHOW_SQL:false}
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${JWT_ISSUER_URI}
-          audiences: ${JWT_AUDIENCES}
+        use_sql_comments: false
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
 
 server:
   port: ${PORT:8080}
+  servlet:
+    context-path:
+
+# Auth0 Configuration
+auth0:
+  audience: ${AUTH0_AUDIENCE}
+  domain: ${AUTH0_DOMAIN}
+
+okta:
+  oauth2:
+    issuer: ${OKTA_OATH2_ISSUER}
+    client-id: ${OKTA_OATH2_CLIENT_ID}
+    client-secret: ${OKTA_OATH2_CLIENT_SECRET}
 
 # Cloudinary Configuration
 cloudinary:
@@ -39,9 +57,17 @@ cors:
 
 # Application Configuration
 app:
+  frontend:
+    url: ${FRONTEND_URL:http://localhost:3000}
   pagination:
-    default-page-size: 10
-    max-page-size: 50
+    default-page-size: 20
+    max-page-size: 100
+  upload:
+    max-images-per-post: 4
+    max-image-size: 5242880 # 5MB in bytes
+  rate-limit:
+    enabled: true
+    requests-per-minute: 100
 
 # Logging
 logging:
@@ -49,8 +75,12 @@ logging:
     root: INFO
     com.otaku.community: DEBUG
     org.springframework.web: INFO
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+#    org.springframework.web.socket: TRACE
+#    org.springframework.web.socket.server.support: TRACE
+#    org.springframework.web.socket.sockjs: TRACE
+#    org.springframework.messaging: TRACE
+#    org.hibernate.SQL: DEBUG
+#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 # Springdoc OpenAPI
 springdoc:

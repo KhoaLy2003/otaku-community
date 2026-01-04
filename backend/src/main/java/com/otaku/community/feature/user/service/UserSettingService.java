@@ -2,8 +2,9 @@ package com.otaku.community.feature.user.service;
 
 import com.otaku.community.common.exception.ResourceNotFoundException;
 import com.otaku.community.common.util.SecurityUtils;
+import com.otaku.community.feature.activity.entity.ActivityTargetType;
 import com.otaku.community.feature.activity.entity.ActivityType;
-import com.otaku.community.feature.activity.service.ActivityService;
+import com.otaku.community.feature.activity.event.ActivityEvent;
 import com.otaku.community.feature.media.dto.MediaUploadResponse;
 import com.otaku.community.feature.media.service.MediaService;
 import com.otaku.community.feature.user.dto.UpdatePrivacyRequest;
@@ -13,6 +14,7 @@ import com.otaku.community.feature.user.mapper.UserMapper;
 import com.otaku.community.feature.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,7 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserSettingService {
 
     private final UserRepository userRepository;
-    private final ActivityService activityService;
+    private final ApplicationEventPublisher eventPublisher;
     private final UserMapper userMapper;
     private final MediaService mediaService;
 
@@ -36,13 +38,15 @@ public class UserSettingService {
         if (avatarFile != null && !avatarFile.isEmpty()) {
             MediaUploadResponse response = mediaService.uploadMedia(avatarFile);
             user.setAvatarUrl(response.getUrl());
-            activityService.logActivity(user, ActivityType.UPDATE_PROFILE, "Avatar updated");
+            eventPublisher.publishEvent(new ActivityEvent(user.getId(), ActivityType.UPDATE_PROFILE,
+                    ActivityTargetType.USER, user.getId().toString(), "Avatar updated"));
         }
 
         if (coverFile != null && !coverFile.isEmpty()) {
             MediaUploadResponse response = mediaService.uploadMedia(coverFile);
             user.setCoverImageUrl(response.getUrl());
-            activityService.logActivity(user, ActivityType.UPDATE_PROFILE, "Cover image updated");
+            eventPublisher.publishEvent(new ActivityEvent(user.getId(), ActivityType.UPDATE_PROFILE,
+                    ActivityTargetType.USER, user.getId().toString(), "Cover image updated"));
         }
 
         User savedUser = userRepository.save(user);
@@ -56,8 +60,9 @@ public class UserSettingService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "auth0Id", auth0Id));
 
         user.setProfileVisibility(request.getProfileVisibility());
-        activityService.logActivity(user, ActivityType.UPDATE_PROFILE,
-                "Profile visibility changed to " + request.getProfileVisibility());
+        eventPublisher
+                .publishEvent(new ActivityEvent(user.getId(), ActivityType.UPDATE_PROFILE, ActivityTargetType.USER,
+                        user.getId().toString(), "Profile visibility changed to " + request.getProfileVisibility()));
 
         User savedUser = userRepository.save(user);
         return userMapper.toResponse(savedUser);

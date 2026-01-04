@@ -79,6 +79,7 @@ public class SecurityConfig {
                         .requestMatchers("/feed/home", "/feed/following").authenticated()
                         .requestMatchers("/notifications/**").authenticated()
                         .requestMatchers("/users/me/**").authenticated()
+                        .requestMatchers("/api/v1/chats/**").authenticated()
 
                         // Admin endpoints
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")

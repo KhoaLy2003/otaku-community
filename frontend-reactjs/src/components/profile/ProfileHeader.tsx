@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { MapPin, Link as LinkIcon, Calendar, Shield } from 'lucide-react';
+import { MapPin, Link as LinkIcon, Calendar, Shield, MessageCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { EditProfileModal } from './EditProfileModal';
 import type { UserProfile } from '../../types/user';
 import { usersApi } from '../../lib/api/users';
+import { chatApi } from '../../lib/api/chat';
 import { useAuth } from '@/hooks/useAuth';
 import { UserListModal } from '../users/UserListModal';
 
@@ -19,7 +21,9 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, isOwnProfile
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [currentUser, setCurrentUser] = useState(user);
     const [isUpdatingFollow, setIsUpdatingFollow] = useState(false);
+    const [isStartingChat, setIsStartingChat] = useState(false);
     const { isAuthenticated, login, user: authUser } = useAuth();
+    const navigate = useNavigate();
 
     const [userListModal, setUserListModal] = useState<{ isOpen: boolean; listType: 'followers' | 'following' | null }>({
         isOpen: false,
@@ -96,6 +100,10 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, isOwnProfile
         setUserListModal({ isOpen: false, listType: null });
     };
 
+    const handleMessage = () => {
+        navigate(`/chat?userId=${currentUser.id}`);
+    };
+
 
     return (
         <>
@@ -143,16 +151,31 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, isOwnProfile
                                     Private
                                 </div>
                             ) : (
-                                <Button
-                                    variant={currentUser.isFollowing ? "outline" : "filled"}
-                                    color={currentUser.isFollowing ? "grey" : "blue"}
-                                    size="md"
-                                    className="px-6"
-                                    onClick={handleFollowToggle}
-                                    disabled={isUpdatingFollow || !authUser}
-                                >
-                                    {currentUser.isFollowing ? 'Following' : 'Follow'}
-                                </Button>
+                                <div className="flex gap-2">
+                                    {currentUser.isFollowing && (
+                                        <Button
+                                            variant="outline"
+                                            color="blue"
+                                            size="md"
+                                            className="px-4"
+                                            onClick={handleMessage}
+                                            disabled={isStartingChat}
+                                        >
+                                            <MessageCircle size={18} className="mr-2" />
+                                            Message
+                                        </Button>
+                                    )}
+                                    <Button
+                                        variant={currentUser.isFollowing ? "outline" : "filled"}
+                                        color={currentUser.isFollowing ? "grey" : "blue"}
+                                        size="md"
+                                        className="px-6"
+                                        onClick={handleFollowToggle}
+                                        disabled={isUpdatingFollow || !authUser}
+                                    >
+                                        {currentUser.isFollowing ? 'Following' : 'Follow'}
+                                    </Button>
+                                </div>
                             )}
                         </div>
                     </div>
@@ -232,7 +255,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, isOwnProfile
                         </div>
                     )}
                 </div>
-            </div>
+            </div >
 
             <EditProfileModal
                 isOpen={isEditModalOpen}
@@ -243,15 +266,17 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, isOwnProfile
                 }}
             />
 
-            {userListModal.isOpen && userListModal.listType && (
-                <UserListModal
-                    isOpen={userListModal.isOpen}
-                    onClose={closeUserListModal}
-                    targetId={currentUser.id}
-                    listType={userListModal.listType}
-                    onUpdateSuccess={refreshProfileData}
-                />
-            )}
+            {
+                userListModal.isOpen && userListModal.listType && (
+                    <UserListModal
+                        isOpen={userListModal.isOpen}
+                        onClose={closeUserListModal}
+                        targetId={currentUser.id}
+                        listType={userListModal.listType}
+                        onUpdateSuccess={refreshProfileData}
+                    />
+                )
+            }
         </>
     );
 };

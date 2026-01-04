@@ -3,8 +3,9 @@ package com.otaku.community.feature.interaction.service;
 import com.otaku.community.common.dto.PageResponse;
 import com.otaku.community.common.exception.BadRequestException;
 import com.otaku.community.common.exception.ResourceNotFoundException;
+import com.otaku.community.feature.activity.entity.ActivityTargetType;
 import com.otaku.community.feature.activity.entity.ActivityType;
-import com.otaku.community.feature.activity.service.ActivityService;
+import com.otaku.community.feature.activity.event.ActivityEvent;
 import com.otaku.community.feature.interaction.dto.CommentResponse;
 import com.otaku.community.feature.interaction.dto.CreateCommentRequest;
 import com.otaku.community.feature.interaction.dto.LikeResponse;
@@ -50,7 +51,6 @@ public class InteractionService {
     private final UserService userService;
     private final UserFollowService userFollowService;
     private final ApplicationEventPublisher eventPublisher;
-    private final ActivityService activityService;
 
     // ===== LIKE OPERATIONS =====
 
@@ -82,8 +82,8 @@ public class InteractionService {
         PostStats stats = postStatsService.getPostStats(postId);
 
         log.debug("User {} liked post {}", interactionUserId, postId);
-        activityService.logActivity(userService.findById(interactionUserId), ActivityType.LIKE_POST,
-                "Post title: " + postId);
+        eventPublisher.publishEvent(new ActivityEvent(interactionUserId, ActivityType.LIKE_POST,
+                ActivityTargetType.POST, postId.toString(), "Post ID: " + postId));
 
         // Publish Notification Event
         postRepository.findById(postId).ifPresent(post -> {
@@ -123,8 +123,8 @@ public class InteractionService {
         PostStats stats = postStatsService.getPostStats(postId);
 
         log.debug("User {} unliked post {}", interactionUserId, postId);
-        activityService.logActivity(userService.findById(interactionUserId), ActivityType.UNLIKE_POST,
-                "Post ID: " + postId);
+        eventPublisher.publishEvent(new ActivityEvent(interactionUserId, ActivityType.UNLIKE_POST,
+                ActivityTargetType.POST, postId.toString(), "Post ID: " + postId));
         return interactionMapper.toLikeResponse(postId, false, stats.getLikeCount().longValue());
     }
 
@@ -210,8 +210,10 @@ public class InteractionService {
         postStatsService.incrementCommentCount(request.getPostId());
 
         log.debug("User created comment {} on post {}", comment.getId(), request.getPostId());
-        activityService.logActivity(user, ActivityType.CREATE_COMMENT,
-                "Post title: " + post.getTitle() + ", Comment content: " + comment.getContent());
+        eventPublisher.publishEvent(
+                new ActivityEvent(user.getId(), ActivityType.CREATE_COMMENT, ActivityTargetType.COMMENT,
+                        comment.getId().toString(),
+                        "Post title: " + post.getTitle() + ", Comment content: " + comment.getContent()));
 
         // Publish Notification Event
         if (!post.getUserId().equals(user.getId())) {
@@ -244,8 +246,8 @@ public class InteractionService {
         comment = commentRepository.save(comment);
 
         log.debug("User {} updated comment {}", interactionUserId, commentId);
-        activityService.logActivity(comment.getUser(), ActivityType.UPDATE_COMMENT,
-                "Post title: " + comment.getPost().getTitle());
+        eventPublisher.publishEvent(new ActivityEvent(interactionUserId, ActivityType.UPDATE_COMMENT,
+                ActivityTargetType.COMMENT, commentId.toString(), "Post title: " + comment.getPost().getTitle()));
         return interactionMapper.toCommentResponse(comment);
     }
 
@@ -268,8 +270,8 @@ public class InteractionService {
         postStatsService.decrementCommentCount(comment.getPost().getId());
 
         log.debug("User {} deleted comment {}", interactionUserId, commentId);
-        activityService.logActivity(comment.getUser(), ActivityType.DELETE_COMMENT,
-                "Post title: " + comment.getPost().getTitle());
+        eventPublisher.publishEvent(new ActivityEvent(interactionUserId, ActivityType.DELETE_COMMENT,
+                ActivityTargetType.COMMENT, commentId.toString(), "Post title: " + comment.getPost().getTitle()));
     }
 
     /**

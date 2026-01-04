@@ -19,7 +19,6 @@ public class WebSocketLoggingInterceptor implements HandshakeInterceptor {
             ServerHttpResponse response,
             WebSocketHandler wsHandler,
             Map<String, Object> attributes) {
-        log.debug("[WS][Handshake] Incoming handshake request to: {}", request.getURI());
         return true;
     }
 

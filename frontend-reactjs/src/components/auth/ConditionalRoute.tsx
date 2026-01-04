@@ -12,7 +12,7 @@ interface ConditionalRouteProps {
  * ConditionalRoute component that shows children for unauthenticated users
  * and redirects authenticated users to a specified route
  */
-export function ConditionalRoute({ children, redirectTo = ROUTES.FEED }: ConditionalRouteProps) {
+export function ConditionalRoute({ children, redirectTo = ROUTES.HOME }: ConditionalRouteProps) {
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 

@@ -27,6 +27,7 @@ export interface BasePost {
   author: string;
   authorId: string;
   authorName: string;
+  authorAvatarUrl?: string;
   time: string;
   likesCount: number;
   isLiked: boolean;
@@ -283,6 +284,7 @@ function PostContent({
         community={post.community}
         author={post.author}
         authorUsername={post.authorName}
+        authorAvatarUrl={post.authorAvatarUrl}
         time={post.time}
       />
       <h2 className="mt-2 text-lg font-semibold text-[#1a1a1b]">
@@ -308,20 +310,30 @@ function PostMeta({
   community,
   author,
   authorUsername,
+  authorAvatarUrl,
   time,
 }: {
   community: string;
   author: string;
   authorUsername: string;
+  authorAvatarUrl?: string;
   time: string;
 }) {
   return (
     <div className="flex flex-wrap items-center gap-1 text-xs text-[#7c7c7c]">
       <div className="flex items-center gap-1 text-[#1a1a1b]">
-        <span
-          className="h-5 w-5 rounded-full"
-          style={{ backgroundColor: Colors.Grey[20] }}
-        />
+        {authorAvatarUrl ? (
+          <img
+            src={authorAvatarUrl}
+            alt={author}
+            className="h-5 w-5 rounded-full object-cover"
+          />
+        ) : (
+          <span
+            className="h-5 w-5 rounded-full"
+            style={{ backgroundColor: Colors.Grey[20] }}
+          />
+        )}
         <span className="font-semibold">{community}</span>
       </div>
       <span>•</span>

@@ -6,12 +6,16 @@ import { IconButton } from "../ui/IconButton";
 import { TextInput } from "../ui/TextInput";
 import { UserMenu } from "./UserMenu";
 import { useAuth } from "../../hooks/useAuth";
+import { useChatStore } from "../../store/useChatStore";
 
 import { NotificationBadge } from '../notification/NotificationBadge';
 
 export function Header() {
   const { auth0User, isLoading } = useAuth();
   const navigate = useNavigate();
+  const { unreadCounts } = useChatStore();
+
+  const totalUnreadChat = Object.entries(unreadCounts).reduce((acc, [_, count]) => acc + count, 0);
 
   return (
     <header
@@ -54,8 +58,15 @@ export function Header() {
         />
 
         <div className="hidden items-center gap-5 md:flex">
-          <IconButton aria-label="Messages">
-            <MessageCircle className="h-5 w-5" />
+          <IconButton aria-label="Messages" onClick={() => navigate('/chat')}>
+            <div className="relative">
+              <MessageCircle className="h-5 w-5" />
+              {totalUnreadChat > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                  {totalUnreadChat > 9 ? "9+" : totalUnreadChat}
+                </span>
+              )}
+            </div>
           </IconButton>
           <IconButton aria-label="Chat">
             <Send className="h-5 w-5" />

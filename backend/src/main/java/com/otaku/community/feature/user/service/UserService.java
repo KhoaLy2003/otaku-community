@@ -3,9 +3,11 @@ package com.otaku.community.feature.user.service;
 import com.otaku.community.common.dto.PageResponse;
 import com.otaku.community.common.exception.ConflictException;
 import com.otaku.community.common.exception.ResourceNotFoundException;
+import com.otaku.community.common.logging.LogExecutionTime;
 import com.otaku.community.common.util.SecurityUtils;
+import com.otaku.community.feature.activity.entity.ActivityTargetType;
 import com.otaku.community.feature.activity.entity.ActivityType;
-import com.otaku.community.feature.activity.service.ActivityService;
+import com.otaku.community.feature.activity.event.ActivityEvent;
 import com.otaku.community.feature.post.repository.PostRepository;
 import com.otaku.community.feature.user.dto.UpdateUserRequest;
 import com.otaku.community.feature.user.dto.UserProfileResponse;
@@ -17,6 +19,8 @@ import com.otaku.community.feature.user.mapper.UserMapper;
 import com.otaku.community.feature.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,7 +39,10 @@ public class UserService {
     private final UserMapper userMapper;
     private final UserFollowService userFollowService;
     private final PostRepository postRepository;
-    private final ActivityService activityService;
+    private final ApplicationEventPublisher eventPublisher;
+
+    @Value("${default.avatar.url}")
+    private String defaultAvatarUrl;
 
     @Transactional(readOnly = true)
     public UserProfileResponse getUserProfileByUsername(String username) {
@@ -137,8 +144,8 @@ public class UserService {
         User savedUser = userRepository.save(user);
         log.debug("User updated: {}", savedUser.getId());
 
-        activityService.logActivity(savedUser, ActivityType.UPDATE_PROFILE,
-                "Profile updated via generic update endpoint");
+        eventPublisher.publishEvent(new ActivityEvent(savedUser.getId(), ActivityType.UPDATE_PROFILE,
+                ActivityTargetType.USER, savedUser.getId().toString(), "Profile updated via generic update endpoint"));
 
         return userMapper.toResponse(savedUser);
     }
@@ -158,6 +165,7 @@ public class UserService {
     }
 
     @Transactional
+    @LogExecutionTime
     public UserSyncResponse syncUserFromAuth0(String auth0Id, String email, String username) {
         User syncedUser = userRepository.findByAuth0Id(auth0Id)
                 .map(existingUser -> {
@@ -199,6 +207,7 @@ public class UserService {
                             .email(email)
                             .username(uniqueUsername)
                             .role(User.UserRole.USER)
+                            .avatarUrl(defaultAvatarUrl)
                             .build();
 
                     User savedUser = userRepository.save(newUser);
@@ -223,6 +232,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    @LogExecutionTime
     public UserResponse getCurrentUserResponse() {
         String auth0Id = SecurityUtils.getCurrentAuth0Id();
         User user = userRepository.findByAuth0Id(auth0Id)

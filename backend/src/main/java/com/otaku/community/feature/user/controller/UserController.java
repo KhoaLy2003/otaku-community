@@ -74,6 +74,7 @@ public class UserController {
         return ResponseEntity.ok(userService.searchUsers(q, page, limit));
     }
 
+    //TODO: enhancement
     @PostMapping("/sync")
     @PreAuthorize("isAuthenticated()")
     @SecurityRequirement(name = "bearer-jwt")

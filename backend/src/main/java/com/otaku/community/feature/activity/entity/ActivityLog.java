@@ -39,4 +39,11 @@ public class ActivityLog extends BaseEntity {
 
     @Column(name = "metadata", columnDefinition = "TEXT")
     private String metadata;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "target_type")
+    private ActivityTargetType targetType;
+
+    @Column(name = "target_id")
+    private String targetId;
 }
