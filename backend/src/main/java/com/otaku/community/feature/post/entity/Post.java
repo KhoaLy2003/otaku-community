@@ -38,7 +38,6 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-//@Builder
 public class Post extends BaseEntity {
 
     @Column(name = "title", nullable = false, length = 255)
@@ -61,11 +60,7 @@ public class Post extends BaseEntity {
     @OneToOne(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private PostStats stats;
 
-    @OneToMany(
-            mappedBy = "post",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("orderIndex ASC")
     private List<PostMedia> medias = new ArrayList<>();
 
@@ -97,15 +92,19 @@ public class Post extends BaseEntity {
         this.status = PostStatus.DRAFT;
     }
 
-    @OneToMany(
-            mappedBy = "post",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostTopic> postTopics = new ArrayList<>();
 
     public void addTopic(Topic topic) {
         PostTopic pt = PostTopic.create(this, topic);
         postTopics.add(pt);
+    }
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostReference> references = new ArrayList<>();
+
+    public void addReference(PostReference reference) {
+        reference.setPost(this);
+        references.add(reference);
     }
 }

@@ -1,6 +1,7 @@
 package com.otaku.community.feature.post.service.impl;
 
 import com.otaku.community.common.dto.CursorInfo;
+import com.otaku.community.common.dto.PageResponse;
 import com.otaku.community.common.dto.post.PostAuthorRecord;
 import com.otaku.community.common.dto.post.PostResponseRecord;
 import com.otaku.community.common.exception.BadRequestException;
@@ -10,6 +11,7 @@ import com.otaku.community.common.util.PaginationUtils;
 import com.otaku.community.feature.activity.entity.ActivityTargetType;
 import com.otaku.community.feature.activity.entity.ActivityType;
 import com.otaku.community.feature.activity.event.ActivityEvent;
+import com.otaku.community.feature.feed.service.FeedService;
 import com.otaku.community.feature.interaction.dto.CommentResponse;
 import com.otaku.community.feature.interaction.entity.Reaction;
 import com.otaku.community.feature.interaction.repository.ReactionRepository;
@@ -17,13 +19,17 @@ import com.otaku.community.feature.interaction.service.InteractionService;
 import com.otaku.community.feature.post.dto.CreatePostRequest;
 import com.otaku.community.feature.post.dto.PostDetailResponse;
 import com.otaku.community.feature.post.dto.PostMediaResponse;
+import com.otaku.community.feature.post.dto.PostReferenceRequest;
 import com.otaku.community.feature.post.dto.PostResponse;
 import com.otaku.community.feature.post.dto.UpdatePostRequest;
 import com.otaku.community.feature.post.dto.UserPostResponse;
 import com.otaku.community.feature.post.entity.Post;
+import com.otaku.community.feature.post.entity.PostReference;
+import com.otaku.community.feature.post.entity.PostReferenceType;
 import com.otaku.community.feature.post.entity.PostStats;
 import com.otaku.community.feature.post.entity.PostStatus;
 import com.otaku.community.feature.post.mapper.PostMapper;
+import com.otaku.community.feature.post.mapper.PostReferenceMapper;
 import com.otaku.community.feature.post.repository.PostRepository;
 import com.otaku.community.feature.post.service.PostService;
 import com.otaku.community.feature.post.service.PostStatsService;
@@ -63,9 +69,10 @@ public class PostServiceImpl implements PostService {
     private final TopicService topicService;
     private final InteractionService interactionService;
     private final UserService userService;
-    private final com.otaku.community.feature.feed.service.FeedService feedService;
+    private final FeedService feedService;
     private final ReactionRepository reactionRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final PostReferenceMapper postReferenceMapper;
 
     @Value("${app.frontend.url:http://localhost:3000}")
     private String frontendUrl;
@@ -105,6 +112,9 @@ public class PostServiceImpl implements PostService {
         Set<UUID> newTopicIds = new HashSet<>(request.getTopicIds());
         topicService.associatePostWithTopics(savedPost, newTopicIds);
 
+        // Handle references
+        handleReferences(savedPost, request.getReferences());
+
         savedPost = postRepository.save(savedPost);
 
         log.debug("Created post with ID: {} for user: {}", savedPost.getId(), userId);
@@ -120,6 +130,9 @@ public class PostServiceImpl implements PostService {
         // Set stats
         response.setLikesCount(stats.getLikeCount());
         response.setCommentCount(stats.getCommentCount());
+        response.setReferences(savedPost.getReferences().stream()
+                .map(postReferenceMapper::toResponse)
+                .toList());
 
         return response;
     }
@@ -151,11 +164,20 @@ public class PostServiceImpl implements PostService {
 
         // Save updated post
         Post updatedPost = postRepository.save(post);
+
+        // Handle references
+        handleReferences(updatedPost, request.getReferences());
+        updatedPost = postRepository.save(updatedPost);
+
         log.debug("Updated post with ID: {}", postId);
         eventPublisher.publishEvent(new ActivityEvent(post.getUserId(), ActivityType.UPDATE_POST,
                 ActivityTargetType.POST, postId.toString(), "Post ID: " + postId));
 
-        return postMapper.toResponse(updatedPost);
+        PostResponse response = postMapper.toResponse(updatedPost);
+        response.setReferences(updatedPost.getReferences().stream()
+                .map(postReferenceMapper::toResponse)
+                .toList());
+        return response;
     }
 
     /**
@@ -168,9 +190,6 @@ public class PostServiceImpl implements PostService {
 
         // Find post and verify ownership
         Post post = findPostAndVerifyOwnership(postId);
-
-        // Delete all associated media
-        // postMediaService.deleteAllPostMedia(postId);
 
         // Soft delete the post
         post.softDelete();
@@ -202,20 +221,19 @@ public class PostServiceImpl implements PostService {
         // Get topics associated with this post
         List<TopicResponse> topics = topicService.getTopicsByPostId(postId);
 
-        // Get comments for this post (sorted by creation time ascending as per
-        // requirement 4.2)
+        // Get comments for this post
         List<CommentResponse> comments = interactionService.getCommentsByPost(postId);
 
-        // Get like status for current user (requirement 4.3)
+        // Get like status for current user
         Boolean isLikedByCurrentUser = null;
         if (userId != null) {
             isLikedByCurrentUser = interactionService.getLikeStatusForAnyPost(postId, userId).isLiked();
         }
 
-        // Generate shareable URL (requirement 4.4)
+        // Generate shareable URL
         String shareableUrl = generateShareableUrl(postId);
 
-        // Get the basic post response to reuse user mapping
+        // Get the basic post author response
         PostDetailResponse.PostAuthorResponse postAuthor = new PostDetailResponse.PostAuthorResponse(
                 post.getUser().getId(),
                 post.getUser().getUsername(),
@@ -250,6 +268,9 @@ public class PostServiceImpl implements PostService {
                 .commentCount(stats.getCommentCount())
                 .isLiked(isLikedByCurrentUser)
                 .comments(comments)
+                .references(post.getReferences().stream()
+                        .map(postReferenceMapper::toResponse)
+                        .toList())
                 .shareableUrl(shareableUrl)
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
@@ -257,13 +278,11 @@ public class PostServiceImpl implements PostService {
     }
 
     /**
-     * Generates a shareable URL for a post (requirement 4.4)
+     * Generates a shareable URL for a post
      */
     private String generateShareableUrl(UUID postId) {
         return frontendUrl + "/posts/" + postId;
     }
-
-    // TODO: review
 
     /**
      * Retrieves posts by user ID
@@ -404,6 +423,12 @@ public class PostServiceImpl implements PostService {
     private PostResponse mapToResponseWithStats(Post post) {
         PostResponse response = postMapper.toResponse(post);
 
+        PostAuthorRecord author = new PostAuthorRecord(
+                post.getUser().getId(),
+                post.getUser().getUsername(),
+                post.getUser().getAvatarUrl());
+        response.setAuthor(author);
+
         // Get media
         List<PostMediaResponse> mediaResponses = postMediaServiceImpl.getPostMedia(post.getId());
         response.setMedia(mediaResponses);
@@ -452,6 +477,38 @@ public class PostServiceImpl implements PostService {
             } else {
                 return postRepository.findPostsByUserAfterCursor(
                         userId, cursorInfo.createdAt(), cursorInfo.id(), pageable);
+            }
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<PostResponse> getPostsByReference(String type, Long externalId, int page, int limit) {
+        log.debug("Retrieving posts for reference: {}/{}", type, externalId);
+        PostReferenceType refType = PostReferenceType.valueOf(type.toUpperCase());
+        Pageable pageable = PageRequest.of(page - 1, limit);
+        Page<Post> postPage = postRepository.findByReference(refType, externalId, pageable);
+
+        return PageResponse.of(
+                postPage.getContent().stream()
+                        .map(this::mapToResponseWithStats)
+                        .toList(),
+                page,
+                limit,
+                postPage.getTotalElements());
+    }
+
+    private void handleReferences(Post post, List<PostReferenceRequest> manualRefs) {
+        // Clear existing references if it's an update
+        post.getReferences().clear();
+
+        // 1. Process manual references
+        if (manualRefs != null) {
+            for (var refReq : manualRefs) {
+                PostReference ref = postReferenceMapper.toEntity(refReq);
+                ref.setPost(post);
+                ref.setAutoLinked(false);
+                post.addReference(ref);
             }
         }
     }

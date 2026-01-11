@@ -28,6 +28,7 @@ public class PostDetailResponse {
     private Integer likesCount;
     private Integer commentCount;
     private Boolean isLiked;
+    private List<PostReferenceResponse> references;
     private List<CommentResponse> comments;
     private String shareableUrl;
     private Instant createdAt;

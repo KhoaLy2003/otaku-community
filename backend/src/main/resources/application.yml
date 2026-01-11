@@ -6,14 +6,17 @@ spring:
   application:
     name: otaku-community-backend
   datasource:
-    url: ${DATABASE_URL}
-    username: ${DATABASE_USERNAME}
-    password: ${DATABASE_PASSWORD}
+    url: ${DATABASE_URL:jdbc:postgresql://ep-twilight-art-a1bnx2bz-pooler.ap-southeast-1.aws.neon.tech/otaku_community?sslmode=require&channelBinding=require}
+    username: ${DATABASE_USERNAME:neondb_owner}
+    password: ${DATABASE_PASSWORD:npg_0aLuQspkJ7ny}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 30000
+      initialization-fail-timeout: 0
+
   jpa:
     hibernate:
-      ddl-auto: false
-    show-sql: ${SHOW_SQL:false}
+      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -32,25 +35,25 @@ server:
 
 # Auth0 Configuration
 auth0:
-  audience: ${AUTH0_AUDIENCE}
-  domain: ${AUTH0_DOMAIN}
+  audience: ${AUTH0_AUDIENCE:https://api.otaku-community.com}
+  domain: ${AUTH0_DOMAIN:dev-nog2rrygucv5xs34.us.auth0.com}
 
 okta:
   oauth2:
-    issuer: ${OKTA_OATH2_ISSUER}
-    client-id: ${OKTA_OATH2_CLIENT_ID}
-    client-secret: ${OKTA_OATH2_CLIENT_SECRET}
+    issuer: https://dev-nog2rrygucv5xs34.us.auth0.com
+    client-id: ENb4Nbfgnr3cHPdlXLIGzQkT86v026KS
+    client-secret: mbuNN4xmLpn6bqM8nXPDdKJQW4inX0N1P3qgl7nj83FtgxO_Y9BPOcMvz0YkFWqv
 
 # Cloudinary Configuration
 cloudinary:
-  cloud-name: ${CLOUDINARY_CLOUD_NAME}
-  api-key: ${CLOUDINARY_API_KEY}
-  api-secret: ${CLOUDINARY_API_SECRET}
-  folder: ${CLOUDINARY_FOLDER_NAME}
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:dfdwupiah}
+  api-key: ${CLOUDINARY_API_KEY:486752477978861}
+  api-secret: ${CLOUDINARY_API_SECRET:mfF4j39l7T-3Y68ZxtWwPsiZ4ME}
+  folder: ${CLOUDINARY_FOLDER_NAME:otaku-community}
 
 # CORS Configuration
 cors:
-  allowed-origins: ${CORS_ALLOWED_ORIGINS}
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
   allowed-methods: GET,POST,PUT,DELETE,OPTIONS
   allowed-headers: "*"
   allow-credentials: true
@@ -89,3 +92,7 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     enabled: true
+
+default:
+  avatar:
+    url: https://res.cloudinary.com/dfdwupiah/image/upload/v1767623060/otaku-community/avatar_qmmxgm.png
