@@ -27,6 +27,8 @@ public class CreatePostRequest {
 
     private List<UUID> topicIds;
 
+    private List<PostReferenceRequest> references;
+
     @Builder.Default
     private PostStatus status = PostStatus.DRAFT;
 }

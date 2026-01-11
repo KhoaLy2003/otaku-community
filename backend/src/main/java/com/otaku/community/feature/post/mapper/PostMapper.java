@@ -11,11 +11,8 @@ import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(
-        componentModel = MappingConstants.ComponentModel.SPRING,
-        uses = {UserMapper.class},
-        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
-)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {UserMapper.class,
+        PostReferenceMapper.class}, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface PostMapper {
 
     @Mapping(target = "id", ignore = true)
@@ -24,6 +21,7 @@ public interface PostMapper {
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "stats", ignore = true)
+    @Mapping(target = "references", ignore = true)
     Post toEntity(CreatePostRequest request);
 
     @Mapping(source = "user.id", target = "userId")
@@ -39,5 +37,6 @@ public interface PostMapper {
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "stats", ignore = true)
+    @Mapping(target = "references", ignore = true)
     void updateEntity(UpdatePostRequest request, @MappingTarget Post post);
 }

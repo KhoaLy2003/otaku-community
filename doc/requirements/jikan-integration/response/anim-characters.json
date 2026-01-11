@@ -1,0 +1,70 @@
+{
+  "data": [
+    {
+      "character": {
+        "mal_id": 162150,
+        "url": "https://myanimelist.net/character/162150/Oguri_Cap",
+        "images": {
+          "jpg": {
+            "image_url": "https://cdn.myanimelist.net/images/characters/13/613451.jpg?s=694de64508d9483a22afcd54376c9c67"
+          },
+          "webp": {
+            "image_url": "https://cdn.myanimelist.net/images/characters/13/613451.webp?s=694de64508d9483a22afcd54376c9c67",
+            "small_image_url": "https://cdn.myanimelist.net/images/characters/13/613451t.webp?s=694de64508d9483a22afcd54376c9c67"
+          }
+        },
+        "name": "Oguri Cap"
+      },
+      "role": "Main",
+      "favorites": 1557,
+      "voice_actors": [
+        {
+          "person": {
+            "mal_id": 45241,
+            "url": "https://myanimelist.net/people/45241/Tomoyo_Takayanagi",
+            "images": {
+              "jpg": {
+                "image_url": "https://cdn.myanimelist.net/images/voiceactors/1/63637.jpg?s=4fe1c770fe53c0408296d58c06e9f1a1"
+              }
+            },
+            "name": "Takayanagi, Tomoyo"
+          },
+          "language": "Japanese"
+        }
+      ]
+    },
+    {
+      "character": {
+        "mal_id": 287055,
+        "url": "https://myanimelist.net/character/287055/Ai-chan",
+        "images": {
+          "jpg": {
+            "image_url": "https://cdn.myanimelist.net/images/characters/7/617631.jpg?s=5a948090b1260fd50fab91f653a881ac"
+          },
+          "webp": {
+            "image_url": "https://cdn.myanimelist.net/images/characters/7/617631.webp?s=5a948090b1260fd50fab91f653a881ac",
+            "small_image_url": "https://cdn.myanimelist.net/images/characters/7/617631t.webp?s=5a948090b1260fd50fab91f653a881ac"
+          }
+        },
+        "name": "Ai-chan"
+      },
+      "role": "Supporting",
+      "favorites": 0,
+      "voice_actors": [
+        {
+          "person": {
+            "mal_id": 79403,
+            "url": "https://myanimelist.net/people/79403/Keina_Yamada",
+            "images": {
+              "jpg": {
+                "image_url": "https://cdn.myanimelist.net/images/voiceactors/3/82652.jpg?s=709c7ae93730da17e9234d18897522ce"
+              }
+            },
+            "name": "Yamada, Keina"
+          },
+          "language": "Japanese"
+        }
+      ]
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 package com.otaku.community.feature.post.service;
 
+import com.otaku.community.common.dto.PageResponse;
 import com.otaku.community.feature.post.dto.CreatePostRequest;
 import com.otaku.community.feature.post.dto.PostDetailResponse;
 import com.otaku.community.feature.post.dto.PostResponse;
@@ -31,4 +32,6 @@ public interface PostService {
     PostResponse makeDraft(UUID postId);
 
     boolean isPostOwner(UUID postId);
+
+    PageResponse<PostResponse> getPostsByReference(String type, Long externalId, int page, int limit);
 }

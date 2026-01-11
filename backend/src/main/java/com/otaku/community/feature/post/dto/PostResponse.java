@@ -1,7 +1,7 @@
 package com.otaku.community.feature.post.dto;
 
+import com.otaku.community.common.dto.post.PostAuthorRecord;
 import com.otaku.community.feature.post.entity.PostStatus;
-import com.otaku.community.feature.user.dto.UserResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,9 +22,10 @@ public class PostResponse {
     private List<PostMediaResponse> media;
     private PostStatus status;
     private UUID userId;
-    private UserResponse user;
+    private PostAuthorRecord author;
     private Integer likesCount;
     private Integer commentCount;
+    private List<PostReferenceResponse> references;
     private Instant createdAt;
     private Instant updatedAt;
 }

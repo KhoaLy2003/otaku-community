@@ -72,6 +72,8 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers(HttpMethod.GET, "/health", "/docs/**", "/swagger-ui/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/feed/explore/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/anime/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/manga/**").permitAll()
                         .requestMatchers("/api/ws-registry/**", "/ws-registry/**", "/ws-native/**").permitAll()
 
                         // Authenticated endpoints

@@ -1,5 +1,7 @@
 package com.otaku.community.feature.post.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.otaku.community.common.annotation.CurrentUserId;
 import com.otaku.community.common.dto.ApiResponse;
 import com.otaku.community.common.dto.PageResponse;
@@ -8,6 +10,7 @@ import com.otaku.community.feature.post.dto.CreatePostRequest;
 import com.otaku.community.feature.post.dto.PostDetailResponse;
 import com.otaku.community.feature.post.dto.PostMediaRequest;
 import com.otaku.community.feature.post.dto.PostMediaResponse;
+import com.otaku.community.feature.post.dto.PostReferenceRequest;
 import com.otaku.community.feature.post.dto.PostResponse;
 import com.otaku.community.feature.post.dto.UpdatePostRequest;
 import com.otaku.community.feature.post.dto.UserMediaResponse;
@@ -64,8 +67,20 @@ public class PostController {
             @Parameter(description = "Post content") @RequestParam(required = false) String content,
             @Parameter(description = "Post status") @RequestParam(defaultValue = "DRAFT") String status,
             @Parameter(description = "Media files") @RequestParam(value = "files", required = false) List<MultipartFile> files,
-            @Parameter(description = "Topic IDs") @RequestParam(value = "topicIds", required = false) List<UUID> topicIds) {
+            @Parameter(description = "Topic IDs") @RequestParam(value = "topicIds", required = false) List<UUID> topicIds,
+            @Parameter(description = "Post references as JSON string") @RequestParam(value = "referencesJson", required = false) String referencesJson) {
         log.debug("Creating new post with title: {} and {} files", title, files != null ? files.size() : 0);
+
+        List<PostReferenceRequest> references = null;
+        if (referencesJson != null && !referencesJson.isEmpty()) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                references = mapper.readValue(referencesJson, new TypeReference<>() {
+                });
+            } catch (Exception e) {
+                log.warn("Failed to parse referencesJson: {}", e.getMessage());
+            }
+        }
 
         // Create basic post first
         CreatePostRequest request = CreatePostRequest.builder()
@@ -73,6 +88,7 @@ public class PostController {
                 .content(content)
                 .status(PostStatus.valueOf(status.toUpperCase()))
                 .topicIds(topicIds)
+                .references(references)
                 .build();
 
         PostResponse response = postServiceImpl.createPost(request);

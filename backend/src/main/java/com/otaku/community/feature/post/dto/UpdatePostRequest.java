@@ -25,5 +25,7 @@ public class UpdatePostRequest {
 
     private List<UUID> topicIds;
 
+    private List<PostReferenceRequest> references;
+
     private PostStatus status;
 }
