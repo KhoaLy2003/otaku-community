@@ -11,14 +11,18 @@ import com.otaku.community.feature.interaction.repository.ReactionRepository;
 import com.otaku.community.feature.post.entity.Post;
 import com.otaku.community.feature.post.entity.PostStatus;
 import com.otaku.community.feature.post.repository.PostRepository;
+import com.otaku.community.feature.user.entity.ProfileVisibility;
+import com.otaku.community.feature.user.entity.User;
 import com.otaku.community.feature.user.entity.UserFollow;
 import com.otaku.community.feature.user.repository.UserFollowRepository;
+import com.otaku.community.feature.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +45,7 @@ public class FeedService {
     private final FeedMapper feedMapper;
     private final UserFollowRepository userFollowRepository;
     private final ReactionRepository reactionRepository;
+    private final UserRepository userRepository;
 
     /**
      * Get home feed for authenticated user (followed users and topics)
@@ -144,38 +149,54 @@ public class FeedService {
     }
 
     /**
-     * Fan-out on Write trigger: Distribute post to followers' feeds.
-     * Called asynchronously after post creation.
+     * Fan-out on Write trigger: Distribute post to followers and other eligible
+     * users.
+     * Made asynchronous to avoid blocking post creation flow.
      */
+    @Async
     @Transactional
     public void fanOutToFollowers(Post post) {
-        log.debug("Fan-out triggered for post: {}", post.getId());
+        log.debug("Fan-out triggered for post: {} (author: {})", post.getId(), post.getUserId());
 
-        // 1. Find all followers of the post's author
+        // 1. Get follower IDs
         List<UserFollow> follows = userFollowRepository.findAllByFollowedId(post.getUserId());
-        List<UUID> followerIds = follows.stream()
+        Set<UUID> followerIds = follows.stream()
                 .map(UserFollow::getFollowerId)
-                .toList();
+                .collect(Collectors.toSet());
 
-        if (followerIds.isEmpty()) {
-            log.debug("No followers to fan-out to for user: {}", post.getUserId());
+        // 2. Get global fanout target IDs (For MVP, exclude PUBLIC users with USER
+        // role)
+        List<UUID> broadUserIds = userRepository.findUserIdsForBroadFanout(
+                post.getUserId(), User.UserRole.USER, ProfileVisibility.PUBLIC);
+
+        // 3. Merge targets (Union of followers and broad targets)
+        Set<UUID> targetUserIds = new HashSet<>(followerIds);
+        targetUserIds.addAll(broadUserIds);
+
+        // Ensure author is never included in fan-out
+        targetUserIds.remove(post.getUserId());
+
+        if (targetUserIds.isEmpty()) {
+            log.debug("No users to fan-out to for post: {}", post.getId());
             return;
         }
 
-        log.debug("Fan-out to {} followers", followerIds.size());
-        // 2. Create feed entries for each follower
-        List<UserFeed> feedEntries = followerIds.stream()
-                .map(followerId -> UserFeed.builder()
-                        .userId(followerId)
+        log.debug("Fan-out to {} users (Followers: {}, Broad Eligible: {})",
+                targetUserIds.size(), followerIds.size(), broadUserIds.size());
+
+        // 4. Create feed entries
+        List<UserFeed> feedEntries = targetUserIds.stream()
+                .map(targetId -> UserFeed.builder()
+                        .userId(targetId)
                         .postId(post.getId())
                         .authorId(post.getUserId())
-                        .score((double) post.getCreatedAt().toEpochMilli()) // Use post creation time for score
-                        .reason("FOLLOW")
+                        .score((double) post.getCreatedAt().toEpochMilli())
+                        .reason(followerIds.contains(targetId) ? "FOLLOW" : "GLOBAL")
                         .createdAt(Instant.now())
                         .build())
                 .toList();
 
-        // 3. Save all new feed entries
+        // 5. Save all new feed entries
         userFeedRepository.saveAll(feedEntries);
     }
 

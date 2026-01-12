@@ -45,7 +45,7 @@ export function ChatPage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] border border-gray-200 rounded-lg overflow-hidden bg-white">
+    <div className="flex h-full max-h-[80vh] border border-gray-200 rounded-lg overflow-hidden bg-white">
       {/* Chat list sidebar */}
       <div className="w-80 border-r border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-200">

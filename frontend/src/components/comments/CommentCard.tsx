@@ -18,6 +18,7 @@ interface CommentCardProps {
   author: string;
   time: string;
   content: string;
+  imageUrl?: string;
   votes?: number;
   isOwner?: boolean;
   onEdit?: (id: string, newContent: string) => void;
@@ -33,6 +34,7 @@ export function CommentCard({
   author,
   time,
   content,
+  imageUrl,
   votes = 0,
   isOwner = false,
   onEdit,
@@ -161,6 +163,15 @@ export function CommentCard({
                   backgroundColor: Colors.Grey.White,
                 }}
               />
+              {imageUrl && (
+                <div className="rounded-lg overflow-hidden border max-w-sm opacity-60" style={{ borderColor: Colors.Grey[20] }}>
+                  <img
+                    src={imageUrl}
+                    alt="Comment attachment"
+                    className="max-h-[200px] w-full object-contain bg-[#F6F7F8]"
+                  />
+                </div>
+              )}
               <div className="flex gap-2 justify-end">
                 <Button
                   variant="outline"
@@ -180,7 +191,18 @@ export function CommentCard({
               </div>
             </div>
           ) : (
-            <p className="text-sm leading-relaxed text-[#1a1a1b]">{content}</p>
+            <div className="space-y-3">
+              {content && <p className="text-sm leading-relaxed text-[#1a1a1b]">{content}</p>}
+              {imageUrl && (
+                <div className="rounded-lg overflow-hidden border max-w-lg" style={{ borderColor: Colors.Grey[20] }}>
+                  <img
+                    src={imageUrl}
+                    alt="Comment attachment"
+                    className="max-h-[400px] w-full object-contain bg-[#F6F7F8]"
+                  />
+                </div>
+              )}
+            </div>
           )}
 
           {/* Actions */}

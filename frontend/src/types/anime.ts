@@ -125,3 +125,8 @@ export interface AnimeCharacter {
   role: string;
   voiceActors: VoiceActor[];
 }
+
+export interface SeasonArchive {
+  year: number;
+  seasons: string[];
+}

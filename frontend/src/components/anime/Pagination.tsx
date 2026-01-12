@@ -15,6 +15,12 @@ export const Pagination: React.FC<PaginationProps> = ({
 }) => {
     if (totalPages <= 1) return null;
 
+    const handleChangePage = (page: number) => {
+        document.getElementById("anime-list-top")
+            ?.scrollIntoView({ behavior: "smooth" });
+        onPageChange(page);
+    };
+
     const renderPageNumbers = () => {
         const pages = [];
         // Simple logic for now: show all or simple range. 
@@ -42,7 +48,7 @@ export const Pagination: React.FC<PaginationProps> = ({
             result.push(
                 <button
                     key={p}
-                    onClick={() => onPageChange(p)}
+                    onClick={() => handleChangePage(p)}
                     // className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium transition-colors ${currentPage === p
                     //         ? "bg-primary-600 text-white shadow-md"
                     //         : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
@@ -82,7 +88,7 @@ export const Pagination: React.FC<PaginationProps> = ({
     return (
         <div className="flex items-center justify-center space-x-2 mt-8">
             <button
-                onClick={() => onPageChange(currentPage - 1)}
+                onClick={() => handleChangePage(currentPage - 1)}
                 disabled={currentPage === 1}
                 // className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
                 className="p-2 rounded-full transition-colors disabled:cursor-not-allowed"
@@ -109,7 +115,7 @@ export const Pagination: React.FC<PaginationProps> = ({
             </div>
 
             <button
-                onClick={() => onPageChange(currentPage + 1)}
+                onClick={() => handleChangePage(currentPage + 1)}
                 disabled={currentPage === totalPages}
                 className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
             >

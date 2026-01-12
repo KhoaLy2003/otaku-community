@@ -16,7 +16,8 @@ import java.util.UUID;
 public interface MessageRepository extends JpaRepository<Message, UUID> {
 
     /**
-     * Find messages by chat ID, excluding deleted messages, ordered by creation date ascending
+     * Find messages by chat ID, excluding deleted messages, ordered by creation
+     * date ascending
      */
     @Query("""
             SELECT m FROM Message m
@@ -29,7 +30,8 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
             Pageable pageable);
 
     /**
-     * Find messages by chat ID, excluding deleted messages, ordered by creation date descending
+     * Find messages by chat ID, excluding deleted messages, ordered by creation
+     * date descending
      */
     @Query("""
             SELECT m FROM Message m
@@ -45,15 +47,17 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
      * Find messages by chat ID with cursor-based pagination
      */
     @Query("""
-            SELECT m FROM Message m
-            WHERE m.chatId = :chatId
-            AND m.isDeleted = false
-            AND (
-                :cursorCreatedAt IS NULL
-                OR m.createdAt < :cursorCreatedAt
-                OR (m.createdAt = :cursorCreatedAt AND m.id < :cursorMessageId)
-            )
-            ORDER BY m.createdAt DESC, m.id ASC
+                SELECT m FROM Message m
+                WHERE m.chatId = :chatId
+                  AND m.isDeleted = false
+                  AND (
+                    m.createdAt < :cursorCreatedAt
+                    OR (
+                      m.createdAt = :cursorCreatedAt
+                      AND m.id < :cursorMessageId
+                    )
+                  )
+                ORDER BY m.createdAt DESC, m.id DESC
             """)
     List<Message> findByChatIdAndCreatedAtBeforeAndIdBeforeOrderByCreatedAt(
             @Param("chatId") UUID chatId,
@@ -76,7 +80,8 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
             @Param("receiverId") UUID receiverId);
 
     /**
-     * Find undelivered messages for a user (messages where user is receiver and status is SENT)
+     * Find undelivered messages for a user (messages where user is receiver and
+     * status is SENT)
      */
     @Query("""
             SELECT m FROM Message m
@@ -88,5 +93,13 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
             ORDER BY m.createdAt ASC
             """)
     List<Message> findUndeliveredMessagesForUser(@Param("userId") UUID userId);
-}
 
+    @Query("""
+            SELECT m FROM Message m
+            WHERE m.chatId = :chatId
+            AND m.senderId != :receiverId
+            AND m.status != 'READ'
+            AND m.isDeleted = false
+            """)
+    List<Message> findUnreadMessages(@Param("chatId") UUID chatId, @Param("receiverId") UUID receiverId);
+}

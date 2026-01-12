@@ -191,12 +191,7 @@ public class MessageService {
                 .orElseThrow(() -> new ResourceNotFoundException("Chat", "id", chatId));
 
         // Get all unread messages where user is receiver
-        List<Message> unreadMessages = messageRepository.findAll().stream()
-                .filter(m -> m.getChatId().equals(chatId))
-                .filter(m -> !m.getSenderId().equals(userId))
-                .filter(m -> m.getStatus() != Message.MessageStatus.READ)
-                .filter(m -> !m.isDeleted())
-                .toList();
+        List<Message> unreadMessages = messageRepository.findUnreadMessages(chatId, userId);
 
         // Update status to READ
         for (Message message : unreadMessages) {

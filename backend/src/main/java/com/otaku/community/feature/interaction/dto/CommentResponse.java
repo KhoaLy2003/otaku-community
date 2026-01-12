@@ -17,6 +17,7 @@ public class CommentResponse {
     private UUID id;
     private UUID postId;
     private String content;
+    private String imageUrl;
     private UUID parentId;
     private CommentUserResponse author;
     private Instant createdAt;
@@ -33,7 +34,6 @@ public class CommentResponse {
     public record CommentUserResponse(
             UUID id,
             String name,
-            String avatar
-    ) {
+            String avatar) {
     }
 }

@@ -1,5 +1,6 @@
 package com.otaku.community.feature.user.repository;
 
+import com.otaku.community.feature.user.entity.ProfileVisibility;
 import com.otaku.community.feature.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,4 +40,11 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     long countActiveUsers();
 
     List<User> findAllByIdIn(Set<UUID> ids);
+
+    @Query("SELECT u.id FROM User u WHERE u.id != :authorId AND u.deletedAt IS NULL " +
+            "AND (u.role != :userRole OR u.profileVisibility != :publicVisibility)")
+    List<UUID> findUserIdsForBroadFanout(
+            @Param("authorId") UUID authorId,
+            @Param("userRole") User.UserRole userRole,
+            @Param("publicVisibility") ProfileVisibility publicVisibility);
 }

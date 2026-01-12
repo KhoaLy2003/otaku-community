@@ -10,7 +10,14 @@ interface FilterBarProps {
     onTypeChange: (type: string) => void;
     selectedStatus: string;
     onStatusChange: (status: string) => void;
+    selectedYear?: string;
+    onYearChange?: (year: string) => void;
+    selectedSeason?: string;
+    onSeasonChange?: (season: string) => void;
+    yearOptions?: { label: string; value: string }[];
+    seasonOptions?: { label: string; value: string }[];
 }
+
 
 const TYPE_OPTIONS = [
     { label: "All Types", value: "" },
@@ -34,6 +41,12 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     onTypeChange,
     selectedStatus,
     onStatusChange,
+    selectedYear,
+    onYearChange,
+    selectedSeason,
+    onSeasonChange,
+    yearOptions,
+    seasonOptions,
 }) => {
     return (
         <div className="flex flex-col md:flex-row gap-4 mb-8">
@@ -51,7 +64,27 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             </div>
 
             {/* Filters */}
-            <div className="flex gap-4 z-40">
+            <div className="flex flex-wrap gap-4 z-40">
+                {yearOptions && onYearChange && (
+                    <Dropdown
+                        items={yearOptions}
+                        value={selectedYear || ""}
+                        onChange={onYearChange}
+                        placeholder="All Years"
+                        className="w-32"
+                    />
+                )}
+
+                {seasonOptions && onSeasonChange && (
+                    <Dropdown
+                        items={seasonOptions}
+                        value={selectedSeason || ""}
+                        onChange={onSeasonChange}
+                        placeholder="All Seasons"
+                        className="w-40"
+                    />
+                )}
+
                 <Dropdown
                     items={TYPE_OPTIONS}
                     value={selectedType}
@@ -71,3 +104,4 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         </div>
     );
 };
+

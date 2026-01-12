@@ -1,7 +1,9 @@
 package com.otaku.community.feature.anime.integration;
 
+import com.otaku.community.common.exception.JikanIntegrationException;
 import com.otaku.community.feature.anime.integration.dto.JikanCharactersResponse;
 import com.otaku.community.feature.anime.integration.dto.JikanListResponse;
+import com.otaku.community.feature.anime.integration.dto.JikanSeasonArchiveResponse;
 import com.otaku.community.feature.anime.integration.dto.JikanSingleResponse;
 import com.otaku.community.feature.manga.integration.dto.JikanMangaListResponse;
 import com.otaku.community.feature.manga.integration.dto.JikanMangaSingleResponse;
@@ -16,8 +18,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Slf4j
 public class JikanIntegrationService {
 
-    private final RestTemplate restTemplate;
     private static final String BASE_URL = "https://api.jikan.moe/v4";
+    private final RestTemplate restTemplate;
 
     public JikanIntegrationService(RestTemplateBuilder builder) {
         this.restTemplate = builder.build();
@@ -44,7 +46,7 @@ public class JikanIntegrationService {
             return restTemplate.getForObject(url, JikanListResponse.class);
         } catch (RestClientException e) {
             log.error("Error calling Jikan Search API", e);
-            throw new RuntimeException("Failed to fetch anime from Jikan", e);
+            throw new JikanIntegrationException("Failed to fetch anime from Jikan", e);
         }
     }
 
@@ -55,7 +57,7 @@ public class JikanIntegrationService {
             return restTemplate.getForObject(url, JikanSingleResponse.class);
         } catch (RestClientException e) {
             log.error("Error calling Jikan Detail API for id {}", id, e);
-            throw new RuntimeException("Failed to fetch anime details from Jikan", e);
+            throw new JikanIntegrationException("Failed to fetch anime details from Jikan", e);
         }
     }
 
@@ -73,7 +75,7 @@ public class JikanIntegrationService {
             return restTemplate.getForObject(url, JikanListResponse.class);
         } catch (RestClientException e) {
             log.error("Error calling Jikan Top Anime API", e);
-            throw new RuntimeException("Failed to fetch top anime from Jikan", e);
+            throw new JikanIntegrationException("Failed to fetch top anime from Jikan", e);
         }
     }
 
@@ -87,7 +89,33 @@ public class JikanIntegrationService {
             return restTemplate.getForObject(url, JikanListResponse.class);
         } catch (RestClientException e) {
             log.error("Error calling Jikan Seasonal API", e);
-            throw new RuntimeException("Failed to fetch seasonal anime from Jikan", e);
+            throw new JikanIntegrationException("Failed to fetch seasonal anime from Jikan", e);
+        }
+    }
+
+    public JikanListResponse getSeasonalAnime(int year, String season, int page) {
+        try {
+            UriComponentsBuilder builder = UriComponentsBuilder
+                    .fromHttpUrl(BASE_URL + "/seasons/" + year + "/" + season)
+                    .queryParam("page", page);
+
+            String url = builder.build().toUriString();
+            log.debug("Calling Jikan Seasonal API for {} {}: {}", year, season, url);
+            return restTemplate.getForObject(url, JikanListResponse.class);
+        } catch (RestClientException e) {
+            log.error("Error calling Jikan Seasonal API for {} {}", year, season, e);
+            throw new JikanIntegrationException("Failed to fetch seasonal anime from Jikan", e);
+        }
+    }
+
+    public JikanSeasonArchiveResponse getSeasonArchive() {
+        try {
+            String url = BASE_URL + "/seasons";
+            log.debug("Calling Jikan Season Archive API: {}", url);
+            return restTemplate.getForObject(url, JikanSeasonArchiveResponse.class);
+        } catch (RestClientException e) {
+            log.error("Error calling Jikan Season Archive API", e);
+            throw new JikanIntegrationException("Failed to fetch season archive from Jikan", e);
         }
     }
 
@@ -112,7 +140,7 @@ public class JikanIntegrationService {
             return restTemplate.getForObject(url, JikanMangaListResponse.class);
         } catch (RestClientException e) {
             log.error("Error calling Jikan Manga Search API", e);
-            throw new RuntimeException("Failed to fetch manga from Jikan", e);
+            throw new JikanIntegrationException("Failed to fetch manga from Jikan", e);
         }
     }
 
@@ -123,7 +151,7 @@ public class JikanIntegrationService {
             return restTemplate.getForObject(url, JikanMangaSingleResponse.class);
         } catch (RestClientException e) {
             log.error("Error calling Jikan Manga Detail API for id {}", id, e);
-            throw new RuntimeException("Failed to fetch manga details from Jikan", e);
+            throw new JikanIntegrationException("Failed to fetch manga details from Jikan", e);
         }
     }
 
@@ -138,7 +166,7 @@ public class JikanIntegrationService {
             return restTemplate.getForObject(url, JikanMangaListResponse.class);
         } catch (RestClientException e) {
             log.error("Error calling Jikan Top Manga API", e);
-            throw new RuntimeException("Failed to fetch top manga from Jikan", e);
+            throw new JikanIntegrationException("Failed to fetch top manga from Jikan", e);
         }
     }
 
@@ -149,7 +177,7 @@ public class JikanIntegrationService {
             return restTemplate.getForObject(url, JikanCharactersResponse.class);
         } catch (RestClientException e) {
             log.error("Error calling Jikan Anime Characters API for id {}", id, e);
-            throw new RuntimeException("Failed to fetch anime characters from Jikan", e);
+            throw new JikanIntegrationException("Failed to fetch anime characters from Jikan", e);
         }
     }
 }

@@ -65,7 +65,7 @@ export function Dropdown({
 
             {isOpen && (
                 <div
-                    className="absolute right-0 z-50 mt-1 w-full min-w-[140px] rounded-lg border bg-white dark:bg-gray-800 shadow-lg py-1"
+                    className="absolute right-0 z-50 mt-1 w-full min-w-[140px] rounded-lg border bg-white dark:bg-gray-800 shadow-lg py-1 max-h-60 overflow-y-auto"
                     style={{ borderColor: Colors.Grey[20] }}
                 >
                     {items.map((item) => (

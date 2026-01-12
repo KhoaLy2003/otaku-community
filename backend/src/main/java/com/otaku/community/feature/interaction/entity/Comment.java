@@ -31,8 +31,11 @@ import lombok.Setter;
 @Builder
 public class Comment extends BaseEntity {
 
-    @Column(name = "content", nullable = false, length = 1000)
+    @Column(name = "content", length = 1000)
     private String content;
+
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "post_id", nullable = false)
@@ -49,7 +52,11 @@ public class Comment extends BaseEntity {
     /**
      * Updates the comment content while preserving creation timestamp
      */
-    public void updateContent(String newContent) {
+    /**
+     * Updates the comment content and image while preserving creation timestamp
+     */
+    public void updateComment(String newContent, String newImageUrl) {
         this.content = newContent;
+        this.imageUrl = newImageUrl;
     }
 }

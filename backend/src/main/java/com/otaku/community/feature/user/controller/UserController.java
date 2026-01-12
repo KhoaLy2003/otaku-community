@@ -14,7 +14,6 @@ import com.otaku.community.feature.user.dto.UserSyncResponse;
 import com.otaku.community.feature.user.entity.User;
 import com.otaku.community.feature.user.service.UserFollowService;
 import com.otaku.community.feature.user.service.UserService;
-import com.otaku.community.feature.user.service.UserSettingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -47,7 +46,6 @@ public class UserController {
     private final UserFollowService userFollowService;
     private final NotificationService notificationService;
     private final ActivityService activityService;
-    private final UserSettingService userSettingService;
 
     @GetMapping("/username/{username}")
     @Operation(summary = "Get user profile by username", description = "Retrieves a user's public profile by their username")

@@ -25,6 +25,7 @@ public class InteractionMapper {
                 .id(comment.getId())
                 .postId(comment.getPost().getId())
                 .content(comment.getContent())
+                .imageUrl(comment.getImageUrl())
                 .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
                 .author(comment.getUser() != null ? toResponse(comment.getUser()) : null)
                 .createdAt(comment.getCreatedAt())
@@ -41,8 +42,7 @@ public class InteractionMapper {
         return new CommentResponse.CommentUserResponse(
                 user.getId(),
                 user.getUsername(),
-                user.getAvatarUrl()
-        );
+                user.getAvatarUrl());
     }
 
     /**

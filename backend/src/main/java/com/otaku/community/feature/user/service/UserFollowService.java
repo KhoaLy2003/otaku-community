@@ -10,6 +10,7 @@ import com.otaku.community.feature.feed.service.FeedService;
 import com.otaku.community.feature.notification.entity.Notification;
 import com.otaku.community.feature.notification.listener.NotificationEventListener;
 import com.otaku.community.feature.user.dto.UserSummaryDto;
+import com.otaku.community.feature.user.entity.ProfileVisibility;
 import com.otaku.community.feature.user.entity.User;
 import com.otaku.community.feature.user.entity.UserFollow;
 import com.otaku.community.feature.user.repository.UserFollowRepository;
@@ -51,7 +52,7 @@ public class UserFollowService {
         User followedUser = userRepository.findById(followedId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", followedId));
 
-        if (followedUser.getProfileVisibility() == com.otaku.community.feature.user.entity.ProfileVisibility.PRIVATE) {
+        if (followedUser.getProfileVisibility() == ProfileVisibility.PRIVATE) {
             throw new BadRequestException("This account is private and cannot be followed.");
         }
 

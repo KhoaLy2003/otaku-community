@@ -15,6 +15,8 @@ import com.otaku.community.feature.interaction.entity.Reaction;
 import com.otaku.community.feature.interaction.mapper.InteractionMapper;
 import com.otaku.community.feature.interaction.repository.CommentRepository;
 import com.otaku.community.feature.interaction.repository.ReactionRepository;
+import com.otaku.community.feature.media.dto.MediaUploadResponse;
+import com.otaku.community.feature.media.service.MediaService;
 import com.otaku.community.feature.notification.entity.Notification;
 import com.otaku.community.feature.notification.listener.NotificationEventListener;
 import com.otaku.community.feature.post.entity.Post;
@@ -50,6 +52,7 @@ public class InteractionService {
     private final InteractionMapper interactionMapper;
     private final UserService userService;
     private final UserFollowService userFollowService;
+    private final MediaService mediaService;
     private final ApplicationEventPublisher eventPublisher;
 
     // ===== LIKE OPERATIONS =====
@@ -182,6 +185,19 @@ public class InteractionService {
     // ===== COMMENT OPERATIONS =====
 
     /**
+     * Create a comment on a post with an optional image
+     */
+    @Transactional
+    public CommentResponse createComment(CreateCommentRequest request,
+                                         org.springframework.web.multipart.MultipartFile file) {
+        if (file != null && !file.isEmpty()) {
+            MediaUploadResponse uploadResponse = mediaService.uploadMedia(file);
+            request.setImageUrl(uploadResponse.getUrl());
+        }
+        return createComment(request);
+    }
+
+    /**
      * Create a comment on a post
      */
     @Transactional
@@ -196,11 +212,18 @@ public class InteractionService {
         Comment parentComment = commentRepository.findByIdAndUserId(request.getParentId(), user.getId())
                 .orElse(null);
 
+        // Validate that either content or image is present
+        if ((request.getContent() == null || request.getContent().trim().isEmpty()) &&
+                (request.getImageUrl() == null || request.getImageUrl().trim().isEmpty())) {
+            throw new BadRequestException("Common content or image is required");
+        }
+
         // Create comment
         Comment comment = Comment.builder()
                 .post(post)
                 .user(user)
-                .content(request.getContent().trim())
+                .content(request.getContent() != null ? request.getContent().trim() : null)
+                .imageUrl(request.getImageUrl())
                 .parent(parentComment)
                 .build();
 
@@ -231,6 +254,19 @@ public class InteractionService {
     }
 
     /**
+     * Update a comment with an optional image
+     */
+    @Transactional
+    public CommentResponse updateComment(UUID commentId, UpdateCommentRequest request, UUID interactionUserId,
+                                         org.springframework.web.multipart.MultipartFile file) {
+        if (file != null && !file.isEmpty()) {
+            MediaUploadResponse uploadResponse = mediaService.uploadMedia(file);
+            request.setImageUrl(uploadResponse.getUrl());
+        }
+        return updateComment(commentId, request, interactionUserId);
+    }
+
+    /**
      * Update a comment (user can only update their own comments)
      */
     @Transactional
@@ -241,8 +277,16 @@ public class InteractionService {
         Comment comment = commentRepository.findByIdAndUserId(commentId, interactionUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment not found or access denied"));
 
+        // Validate that either content or image is present
+        if ((request.getContent() == null || request.getContent().trim().isEmpty()) &&
+                (request.getImageUrl() == null || request.getImageUrl().trim().isEmpty())) {
+            throw new BadRequestException("Common content or image is required");
+        }
+
         // Update content
-        comment.updateContent(request.getContent().trim());
+        comment.updateComment(
+                request.getContent() != null ? request.getContent().trim() : null,
+                request.getImageUrl());
         comment = commentRepository.save(comment);
 
         log.debug("User {} updated comment {}", interactionUserId, commentId);
@@ -286,36 +330,6 @@ public class InteractionService {
 
         List<Comment> comments = commentRepository.findByPostIdOrderByCreatedAtDesc(postId);
         return interactionMapper.toCommentResponseList(comments);
-    }
-
-    // TODO: review
-
-    /**
-     * Get comments for a post with pagination
-     */
-    @Transactional(readOnly = true)
-    public Page<CommentResponse> getCommentsByPost(UUID postId, Pageable pageable) {
-        // Verify post exists and is not soft deleted
-        if (!postRepository.findByIdAndNotDeleted(postId).isPresent()) {
-            throw new ResourceNotFoundException("Post not found");
-        }
-
-        Page<Comment> comments = commentRepository.findByPostIdOrderByCreatedAtDesc(postId, pageable);
-        return comments.map(interactionMapper::toCommentResponse);
-    }
-
-    // TODO: review
-
-    /**
-     * Get a specific comment by ID
-     */
-    @Transactional(readOnly = true)
-    public CommentResponse getComment(UUID commentId) {
-        Comment comment = commentRepository.findById(commentId)
-                .filter(c -> c.getDeletedAt() == null) // Exclude soft deleted
-                .orElseThrow(() -> new ResourceNotFoundException("Comment not found"));
-
-        return interactionMapper.toCommentResponse(comment);
     }
 
     // ===== HELPER METHODS =====

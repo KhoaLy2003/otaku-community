@@ -250,26 +250,6 @@ CREATE INDEX idx_reactions_target ON public.reactions USING btree (target_type, 
 CREATE INDEX idx_reactions_type ON public.reactions USING btree (reaction_type);
 CREATE INDEX idx_reactions_user_id ON public.reactions USING btree (user_id);
 
--- public.user_feed definition
-
--- Drop table
-
--- DROP TABLE public.user_feed;
-
-CREATE TABLE public.user_feed (
-post_id uuid NOT NULL,
-user_id uuid NOT NULL,
-created_at timestamp(6) NOT NULL,
-reason varchar(20) NOT NULL,
-score float4 NOT NULL,
-CONSTRAINT user_feed_pkey PRIMARY KEY (post_id, user_id),
-CONSTRAINT user_feed_reason_check CHECK (((reason)::text = ANY ((ARRAY['FRIEND'::character varying, 'FOLLOW'::character varying, 'GROUP'::character varying, 'PAGE'::character varying])::text[]))),
-CONSTRAINT fk30k3slom60bw4qa6mfje04f0m FOREIGN KEY (user_id) REFERENCES public.users(id),
-CONSTRAINT fkplqljgt097k2oym0nl26m7a8k FOREIGN KEY (post_id) REFERENCES public.posts(id)
-);
-CREATE INDEX idx_user_feed_created_at ON public.user_feed USING btree (created_at);
-CREATE INDEX idx_user_feed_user_score ON public.user_feed USING btree (user_id, score DESC);
-
 -- public."comments" definition
 
 -- Drop table
@@ -321,6 +301,31 @@ CONSTRAINT fk1urcum9dtf0vgul7k405f4r2d FOREIGN KEY (post_id) REFERENCES public.p
 );
 CREATE INDEX idx_post_media_order ON public.post_media USING btree (post_id, order_index);
 CREATE INDEX idx_post_media_post_id ON public.post_media USING btree (post_id);
+
+-- public.post_references definition
+
+-- Drop table
+
+-- DROP TABLE public.post_references;
+
+CREATE TABLE public.post_references (
+id uuid NOT NULL,
+created_at timestamptz(6) NOT NULL,
+deleted_at timestamptz(6) NULL,
+updated_at timestamptz(6) NOT NULL,
+external_id int8 NOT NULL,
+image_url varchar(255) NULL,
+is_auto_linked bool NOT NULL,
+reference_type varchar(20) NOT NULL,
+title varchar(512) NULL,
+post_id uuid NOT NULL,
+CONSTRAINT post_references_pkey PRIMARY KEY (id),
+CONSTRAINT post_references_reference_type_check CHECK (((reference_type)::text = ANY ((ARRAY['ANIME'::character varying, 'MANGA'::character varying])::text[]))),
+CONSTRAINT fkf7cwrjcxl7wcp1vhpjklcq35d FOREIGN KEY (post_id) REFERENCES public.posts(id)
+);
+CREATE INDEX idx_post_ref_external_id ON public.post_references USING btree (external_id);
+CREATE INDEX idx_post_ref_post_id ON public.post_references USING btree (post_id);
+CREATE INDEX idx_post_ref_type_ext_id ON public.post_references USING btree (reference_type, external_id);
 
 -- public.post_stats definition
 

@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -109,6 +110,22 @@ public class InteractionController {
                 .body(ApiResponse.success("Comment created successfully", response));
     }
 
+    @PostMapping(value = "/comments", consumes = "multipart/form-data")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Create a comment with image", description = "Add a comment (text and/or image) to a post")
+    public ResponseEntity<ApiResponse<CommentResponse>> createCommentMultipart(
+            @RequestParam("postId") UUID postId,
+            @RequestParam(value = "content", required = false) String content,
+            @RequestParam(value = "parentId", required = false) UUID parentId,
+            @RequestParam(value = "file", required = false) org.springframework.web.multipart.MultipartFile file) {
+
+        CreateCommentRequest request = new CreateCommentRequest(postId, content, null, parentId);
+        CommentResponse response = interactionService.createComment(request, file);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Comment created successfully", response));
+    }
+
     @PutMapping("/comments/{commentId}")
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Update a comment", description = "Update user's own comment")
@@ -124,6 +141,22 @@ public class InteractionController {
             @CurrentUserId UUID interactionUserId) {
 
         CommentResponse response = interactionService.updateComment(commentId, request, interactionUserId);
+
+        return ResponseEntity.ok(ApiResponse.success("Comment updated successfully", response));
+    }
+
+    @PutMapping(value = "/comments/{commentId}", consumes = "multipart/form-data")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Update a comment with image", description = "Update user's own comment (text and/or image)")
+    public ResponseEntity<ApiResponse<CommentResponse>> updateCommentMultipart(
+            @PathVariable UUID commentId,
+            @RequestParam(value = "content", required = false) String content,
+            @RequestParam(value = "file", required = false) org.springframework.web.multipart.MultipartFile file,
+            @CurrentUserId UUID interactionUserId) {
+
+        UpdateCommentRequest request = new UpdateCommentRequest(content, null);
+        CommentResponse response = interactionService.updateComment(commentId, request, interactionUserId,
+                file);
 
         return ResponseEntity.ok(ApiResponse.success("Comment updated successfully", response));
     }

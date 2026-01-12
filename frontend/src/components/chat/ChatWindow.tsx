@@ -93,12 +93,14 @@ export function ChatWindow({ chat }: ChatWindowProps) {
   // WebSocket integration
   const { sendMessage, markAsRead } = useChatWebSocket({
     onMessage: (message) => {
-      if (message.chatId === chatId) {
-        addMessage(chatId, message);
+      // Always add message to store if it belongs to a known chat
+      // The store handles deduplication and organization by chatId
+      addMessage(message.chatId, message);
+
+      // Handle active chat specific logic
+      if (message.chatId === activeChatId) {
         // Mark as read if this is the active chat
-        if (chatId === activeChatId) {
-          markAsRead({ chatId });
-        }
+        markAsRead({ chatId: message.chatId });
       }
     },
     onReadReceipt: (event) => {

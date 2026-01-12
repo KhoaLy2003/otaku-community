@@ -124,7 +124,7 @@ public class ChatService {
                 .map(userMap::get)
                 .filter(Objects::nonNull)
                 .map(user -> ChatResponse.builder()
-                        .id(null) // ❗️Quan trọng: null = virtual chat
+                        .id(null)
                         .participant(ChatResponse.ParticipantDTO.builder()
                                 .id(user.getId())
                                 .username(user.getUsername())
@@ -132,8 +132,8 @@ public class ChatService {
                                 .build())
                         .lastMessage(null)
                         .unreadCount(0)
-                        .createdAt(null)
-                        .updatedAt(null)
+                        .createdAt(Instant.now())
+                        .updatedAt(Instant.now())
                         .build())
                 .toList();
     }

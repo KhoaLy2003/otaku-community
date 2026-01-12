@@ -3,11 +3,14 @@ package com.otaku.community.feature.anime.service;
 import com.otaku.community.common.dto.PageResponse;
 import com.otaku.community.feature.anime.dto.AnimeCharacterDto;
 import com.otaku.community.feature.anime.dto.AnimeDto;
+import com.otaku.community.feature.anime.dto.SeasonArchiveDto;
 import com.otaku.community.feature.anime.integration.JikanIntegrationService;
 import com.otaku.community.feature.anime.integration.dto.JikanCharactersResponse;
 import com.otaku.community.feature.anime.integration.dto.JikanListResponse;
+import com.otaku.community.feature.anime.integration.dto.JikanSeasonArchiveResponse;
 import com.otaku.community.feature.anime.integration.dto.JikanSingleResponse;
 import com.otaku.community.feature.anime.mapper.AnimeMapper;
+import com.otaku.community.feature.post.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,7 +24,7 @@ public class AnimeService {
 
     private final JikanIntegrationService jikanIntegrationService;
     private final AnimeMapper animeMapper;
-    private final com.otaku.community.feature.post.service.PostService postService;
+    private final PostService postService;
 
     public PageResponse<AnimeDto> searchAnime(String query, String type, String status, int page) {
         log.debug("Searching anime with query: {}, type: {}, status: {}, page: {}", query, type, status, page);
@@ -70,6 +73,23 @@ public class AnimeService {
         return mapToPageResponse(response);
     }
 
+    public PageResponse<AnimeDto> getSeasonalAnime(int year, String season, int page) {
+        log.debug("Fetching seasonal anime for year: {}, season: {}, page: {}", year, season, page);
+        JikanListResponse response = jikanIntegrationService.getSeasonalAnime(year, season, page);
+        return mapToPageResponse(response);
+    }
+
+    public List<SeasonArchiveDto> getSeasonArchive() {
+        log.debug("Fetching season archive");
+        JikanSeasonArchiveResponse response = jikanIntegrationService.getSeasonArchive();
+        List<JikanSeasonArchiveResponse.SeasonArchiveData> filteredData = response.getData().stream()
+                .filter(s -> s.getYear() != null && s.getYear() >= 2000)
+                .sorted((a, b) -> b.getYear().compareTo(a.getYear()))
+                .toList();
+
+        return animeMapper.toSeasonArchiveDtoList(filteredData);
+    }
+
     public List<AnimeCharacterDto> getAnimeCharacters(int id) {
         log.debug("Fetching characters for anime id: {}", id);
         JikanCharactersResponse response = jikanIntegrationService.getAnimeCharacters(id);
@@ -77,6 +97,7 @@ public class AnimeService {
     }
 
     private PageResponse<AnimeDto> mapToPageResponse(JikanListResponse response) {
+
         List<AnimeDto> dtos = response.getData().stream()
                 .map(animeMapper::toDto)
                 .toList();

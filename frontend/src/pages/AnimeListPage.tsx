@@ -6,7 +6,7 @@ import { FilterBar } from "../components/anime/FilterBar";
 import { AnimeCard } from "../components/anime/AnimeCard";
 import { Pagination } from "../components/anime/Pagination";
 import { animeApi } from "../lib/api";
-import type { Anime } from "../types/anime";
+import type { Anime, SeasonArchive } from "../types/anime";
 
 const TAB_ITEMS = [
     { id: "seasonal", label: "Seasonal Anime" },
@@ -21,17 +21,33 @@ const AnimeListPage = () => {
     const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
     const [selectedType, setSelectedType] = useState(searchParams.get("type") || "");
     const [selectedStatus, setSelectedStatus] = useState(searchParams.get("status") || "");
+    const [selectedYear, setSelectedYear] = useState(searchParams.get("year") || "");
+    const [selectedSeason, setSelectedSeason] = useState(searchParams.get("season") || "");
     const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get("page") || "1", 10));
 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [animeData, setAnimeData] = useState<Anime[]>([]);
     const [totalPages, setTotalPages] = useState(1);
+    const [seasonsArchive, setSeasonsArchive] = useState<SeasonArchive[]>([]);
 
     const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
     // Flag to skip one-time resets on mount
     const [isInitialMount, setIsInitialMount] = useState(true);
+
+    // Fetch seasons archive on mount
+    useEffect(() => {
+        const fetchSeasons = async () => {
+            try {
+                const archive = await animeApi.getSeasonsArchive();
+                setSeasonsArchive(archive);
+            } catch (err) {
+                console.error("Failed to fetch seasons archive:", err);
+            }
+        };
+        fetchSeasons();
+    }, []);
 
     // Update URL params when internal state changes
     useEffect(() => {
@@ -40,10 +56,16 @@ const AnimeListPage = () => {
         if (debouncedSearchQuery) params.q = debouncedSearchQuery;
         if (selectedType) params.type = selectedType;
         if (selectedStatus) params.status = selectedStatus;
+        if (activeTab === "seasonal") {
+            if (selectedYear) params.year = selectedYear;
+            if (selectedSeason) params.season = selectedSeason;
+        }
         if (currentPage > 1) params.page = currentPage.toString();
 
+
         setSearchParams(params, { replace: true });
-    }, [activeTab, debouncedSearchQuery, selectedType, selectedStatus, currentPage, setSearchParams]);
+    }, [activeTab, debouncedSearchQuery, selectedType, selectedStatus, selectedYear, selectedSeason, currentPage, setSearchParams]);
+
 
     // Fetch data when tab, page, or filters change
     useEffect(() => {
@@ -74,7 +96,11 @@ const AnimeListPage = () => {
                             page: currentPage,
                         });
                     } else {
-                        response = await animeApi.getSeasonalAnime(currentPage);
+                        response = await animeApi.getSeasonalAnime(
+                            currentPage,
+                            selectedYear ? parseInt(selectedYear, 10) : undefined,
+                            selectedSeason || undefined
+                        );
                     }
                 }
 
@@ -90,7 +116,7 @@ const AnimeListPage = () => {
         };
 
         fetchAnime();
-    }, [activeTab, debouncedSearchQuery, selectedType, selectedStatus, currentPage]);
+    }, [activeTab, debouncedSearchQuery, selectedType, selectedStatus, selectedYear, selectedSeason, currentPage]);
 
     // Reset page when filters or tab change (skip initial mount to preserve URL page)
     useEffect(() => {
@@ -99,10 +125,15 @@ const AnimeListPage = () => {
             return;
         }
         setCurrentPage(1);
-    }, [debouncedSearchQuery, selectedType, selectedStatus, activeTab]);
+    }, [debouncedSearchQuery, selectedType, selectedStatus, activeTab, selectedYear, selectedSeason]);
 
     return (
         <div className="container mx-auto px-4 py-8">
+            <div
+                id="anime-list-top"
+                className="scroll-mt-[80px]"
+            />
+
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
@@ -130,7 +161,24 @@ const AnimeListPage = () => {
                 onTypeChange={setSelectedType}
                 selectedStatus={selectedStatus}
                 onStatusChange={setSelectedStatus}
+                // New seasonal filters
+                selectedYear={activeTab === "seasonal" ? selectedYear : undefined}
+                onYearChange={setSelectedYear}
+                selectedSeason={activeTab === "seasonal" ? selectedSeason : undefined}
+                onSeasonChange={setSelectedSeason}
+                yearOptions={activeTab === "seasonal" ? [
+                    { label: "Season", value: "" },
+                    ...seasonsArchive.map(s => ({ label: s.year.toString(), value: s.year.toString() }))
+                ] : undefined}
+                seasonOptions={activeTab === "seasonal" && selectedYear ? [
+                    { label: "All Seasons", value: "" },
+                    ...(seasonsArchive.find(s => s.year.toString() === selectedYear)?.seasons.map(season => ({
+                        label: season.charAt(0).toUpperCase() + season.slice(1),
+                        value: season
+                    })) || [])
+                ] : undefined}
             />
+
 
             {error && (
                 <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">

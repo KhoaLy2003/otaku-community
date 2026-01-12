@@ -2,6 +2,7 @@ package com.otaku.community.feature.anime.controller;
 
 import com.otaku.community.common.dto.PageResponse;
 import com.otaku.community.feature.anime.dto.AnimeDto;
+import com.otaku.community.feature.anime.dto.SeasonArchiveDto;
 import com.otaku.community.feature.anime.service.AnimeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/anime")
@@ -46,5 +49,20 @@ public class AnimeController {
     @Operation(summary = "Get seasonal anime", description = "Get current seasonal anime")
     public PageResponse<AnimeDto> getSeasonalAnime(@RequestParam(defaultValue = "1") int page) {
         return animeService.getSeasonalAnime(page);
+    }
+
+    @GetMapping("/seasons")
+    @Operation(summary = "Get season archive", description = "Get list of available years and seasons")
+    public List<SeasonArchiveDto> getSeasonArchive() {
+        return animeService.getSeasonArchive();
+    }
+
+    @GetMapping("/seasons/{year}/{season}")
+    @Operation(summary = "Get seasonal anime by year and season", description = "Get anime list for a specific year and season")
+    public PageResponse<AnimeDto> getSeasonalAnimeByYearAndSeason(
+            @PathVariable int year,
+            @PathVariable String season,
+            @RequestParam(defaultValue = "1") int page) {
+        return animeService.getSeasonalAnime(year, season, page);
     }
 }

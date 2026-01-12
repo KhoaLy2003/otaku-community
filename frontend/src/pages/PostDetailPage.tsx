@@ -20,6 +20,7 @@ interface CommentCardData {
   author: string;
   time: string;
   content: string;
+  imageUrl?: string;
   votes: number;
   isOwner?: boolean;
   replies: CommentCardData[];
@@ -38,6 +39,7 @@ const buildCommentTree = (
       author: comment.author?.name || "Unknown",
       time: timeAgo(comment.createdAt),
       content: comment.content,
+      imageUrl: comment.imageUrl,
       votes: comment.likesCount,
       isOwner: currentUserId ? comment.author?.id === currentUserId : false,
       replies: buildCommentTree(comments, currentUserId, comment.id),
@@ -101,13 +103,20 @@ export default function PostDetailPage() {
     }
   };
 
-  const handleAddComment = async (value: string) => {
+  const handleAddComment = async (value: string, image?: File) => {
     if (!id || !user) return;
+
+    let optimisticImageUrl = undefined;
+    if (image) {
+      optimisticImageUrl = URL.createObjectURL(image);
+    }
+
     const optimisticComment: CommentCardData = {
       id: Date.now().toString(),
       author: user.username,
       time: "Just now",
       content: value,
+      imageUrl: optimisticImageUrl,
       votes: 0,
       isOwner: true,
       replies: [],
@@ -115,10 +124,10 @@ export default function PostDetailPage() {
     setCommentsData((prev) => [optimisticComment, ...prev]);
 
     try {
-      const response = await commentsApi.createComment({ postId: id, content: value });
+      const response = await commentsApi.createComment({ postId: id, content: value }, image);
       if (response.success && response.data) {
         setCommentsData((prev) =>
-          prev.map((c) => (c.id === optimisticComment.id ? buildCommentTree([response.data], user.id)[0] : c))
+          prev.map((c) => (c.id === optimisticComment.id ? buildCommentTree([response.data as any], user.id)[0] : c))
         );
       }
     } catch (error) {
@@ -127,13 +136,20 @@ export default function PostDetailPage() {
     }
   };
 
-  const handleReply = async (parentId: string, content: string) => {
+  const handleReply = async (parentId: string, content: string, image?: File) => {
     if (!id || !user) return;
+
+    let optimisticImageUrl = undefined;
+    if (image) {
+      optimisticImageUrl = URL.createObjectURL(image);
+    }
+
     const optimisticReply: CommentCardData = {
       id: Date.now().toString(),
       author: user.username,
       time: "Just now",
       content: content,
+      imageUrl: optimisticImageUrl,
       votes: 0,
       isOwner: true,
       replies: [],
@@ -153,13 +169,14 @@ export default function PostDetailPage() {
     setCommentsData(addOptimisticReply);
 
     try {
-      const response = await commentsApi.createComment({ postId: id, content, parentId });
+      const response = await commentsApi.createComment({ postId: id, content, parentId }, image);
       if (response.success && response.data) {
         const newReply: CommentCardData = {
           id: response.data.id,
           author: response.data.author.name,
           time: timeAgo(response.data.createdAt),
           content: response.data.content,
+          imageUrl: response.data.imageUrl,
           votes: response.data.likesCount,
           isOwner: response.data.author.id === user.id,
           replies: [],
@@ -380,6 +397,7 @@ export default function PostDetailPage() {
             author={comment.author}
             time={comment.time}
             content={comment.content}
+            imageUrl={comment.imageUrl}
             votes={comment.votes}
             isOwner={comment.isOwner}
             replies={comment.replies}

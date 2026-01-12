@@ -2,8 +2,10 @@ package com.otaku.community.feature.anime.mapper;
 
 import com.otaku.community.feature.anime.dto.AnimeCharacterDto;
 import com.otaku.community.feature.anime.dto.AnimeDto;
+import com.otaku.community.feature.anime.dto.SeasonArchiveDto;
 import com.otaku.community.feature.anime.integration.dto.JikanAnimeData;
 import com.otaku.community.feature.anime.integration.dto.JikanCharactersResponse;
+import com.otaku.community.feature.anime.integration.dto.JikanSeasonArchiveResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -21,6 +23,10 @@ public interface AnimeMapper {
     @Mapping(target = "status", qualifiedByName = "normalizeStatus")
     @Mapping(target = "type", qualifiedByName = "normalizeType")
     AnimeDto toDto(JikanAnimeData source);
+
+    List<SeasonArchiveDto> toSeasonArchiveDtoList(List<JikanSeasonArchiveResponse.SeasonArchiveData> source);
+
+    SeasonArchiveDto toSeasonArchiveDto(JikanSeasonArchiveResponse.SeasonArchiveData source);
 
     @Named("mapGenres")
     default List<String> mapGenres(List<JikanAnimeData.JikanGenre> genres) {

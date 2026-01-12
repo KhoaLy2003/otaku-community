@@ -74,6 +74,7 @@ export function CommentForm({
           }}
           autoFocus={autoFocus}
         />
+        {/* TODO: Add image upload */}
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}

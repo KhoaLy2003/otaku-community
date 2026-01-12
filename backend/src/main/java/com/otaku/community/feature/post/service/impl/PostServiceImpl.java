@@ -11,7 +11,6 @@ import com.otaku.community.common.util.PaginationUtils;
 import com.otaku.community.feature.activity.entity.ActivityTargetType;
 import com.otaku.community.feature.activity.entity.ActivityType;
 import com.otaku.community.feature.activity.event.ActivityEvent;
-import com.otaku.community.feature.feed.service.FeedService;
 import com.otaku.community.feature.interaction.dto.CommentResponse;
 import com.otaku.community.feature.interaction.entity.Reaction;
 import com.otaku.community.feature.interaction.repository.ReactionRepository;
@@ -28,6 +27,7 @@ import com.otaku.community.feature.post.entity.PostReference;
 import com.otaku.community.feature.post.entity.PostReferenceType;
 import com.otaku.community.feature.post.entity.PostStats;
 import com.otaku.community.feature.post.entity.PostStatus;
+import com.otaku.community.feature.post.event.PostCreatedEvent;
 import com.otaku.community.feature.post.mapper.PostMapper;
 import com.otaku.community.feature.post.mapper.PostReferenceMapper;
 import com.otaku.community.feature.post.repository.PostRepository;
@@ -69,7 +69,6 @@ public class PostServiceImpl implements PostService {
     private final TopicService topicService;
     private final InteractionService interactionService;
     private final UserService userService;
-    private final FeedService feedService;
     private final ReactionRepository reactionRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final PostReferenceMapper postReferenceMapper;
@@ -121,8 +120,8 @@ public class PostServiceImpl implements PostService {
         eventPublisher.publishEvent(new ActivityEvent(userId, ActivityType.CREATE_POST, ActivityTargetType.POST,
                 savedPost.getId().toString(), "Post title: " + savedPost.getTitle()));
 
-        // Trigger Fan-out on Write
-        feedService.fanOutToFollowers(savedPost);
+        // Trigger Fan-out on Write via event (Decoupled and potentially Async)
+        eventPublisher.publishEvent(new PostCreatedEvent(savedPost));
 
         // Build response with media
         PostResponse response = postMapper.toResponse(savedPost);
