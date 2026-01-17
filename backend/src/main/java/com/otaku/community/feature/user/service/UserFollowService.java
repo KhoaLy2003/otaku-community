@@ -9,7 +9,7 @@ import com.otaku.community.feature.activity.event.ActivityEvent;
 import com.otaku.community.feature.feed.service.FeedService;
 import com.otaku.community.feature.notification.entity.Notification;
 import com.otaku.community.feature.notification.listener.NotificationEventListener;
-import com.otaku.community.feature.user.dto.UserSummaryDto;
+import com.otaku.community.feature.user.dto.UserSummaryResponse;
 import com.otaku.community.feature.user.entity.ProfileVisibility;
 import com.otaku.community.feature.user.entity.User;
 import com.otaku.community.feature.user.entity.UserFollow;
@@ -130,8 +130,8 @@ public class UserFollowService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<UserSummaryDto> getFollowersWithStatus(UUID targetUserId, UUID currentUserId,
-                                                               int page, int limit) {
+    public PageResponse<UserSummaryResponse> getFollowersWithStatus(UUID targetUserId, UUID currentUserId,
+                                                                    int page, int limit) {
         // 1. Get the page of followers
         Pageable pageable = PageRequest.of(page - 1, limit);
         Page<UserFollow> followsPage = userFollowRepository.findAllByFollowedId(targetUserId, pageable);
@@ -149,7 +149,7 @@ public class UserFollowService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<UserSummaryDto> getFollowingWithStatus(
+    public PageResponse<UserSummaryResponse> getFollowingWithStatus(
             UUID targetUserId, UUID currentUserId,
             int page, int limit) {
         // 1. Get the page of followed users
@@ -169,8 +169,8 @@ public class UserFollowService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<UserSummaryDto> getUsersWithStatus(List<UUID> userIds, UUID currentUserId,
-                                                           int page, int limit, long totalElements) {
+    public PageResponse<UserSummaryResponse> getUsersWithStatus(List<UUID> userIds, UUID currentUserId,
+                                                                int page, int limit, long totalElements) {
         if (userIds.isEmpty()) {
             return PageResponse.of(Collections.emptyList(), page, limit, totalElements);
         }
@@ -189,13 +189,13 @@ public class UserFollowService {
         }
 
         // 5. Map to DTO, preserving order of the original list
-        List<UserSummaryDto> content = userIds.stream()
+        List<UserSummaryResponse> content = userIds.stream()
                 .map(id -> {
                     User user = userMap.get(id);
                     if (user == null)
                         return null; // Should not happen if data is consistent
 
-                    return UserSummaryDto.builder()
+                    return UserSummaryResponse.builder()
                             .id(user.getId())
                             .username(user.getUsername())
                             .avatarUrl(user.getAvatarUrl())

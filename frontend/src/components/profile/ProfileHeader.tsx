@@ -3,12 +3,12 @@ import { MapPin, Link as LinkIcon, Calendar, Shield, MessageCircle } from 'lucid
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
-import { EditProfileModal } from './EditProfileModal';
+import { MainFavoriteDisplay } from './MainFavoriteDisplay';
 import type { UserProfile } from '../../types/user';
 import { usersApi } from '../../lib/api/users';
-import { chatApi } from '../../lib/api/chat';
 import { useAuth } from '@/hooks/useAuth';
 import { UserListModal } from '../users/UserListModal';
+import { EditProfileModal } from './EditProfileModal';
 
 interface ProfileHeaderProps {
     user: UserProfile;
@@ -195,6 +195,12 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, isOwnProfile
                         </p>
                     )}
 
+                    {currentUser.mainFavorite && (
+                        <div className="mt-6 max-w-3xl">
+                            <MainFavoriteDisplay favorite={currentUser.mainFavorite} />
+                        </div>
+                    )}
+
                     {currentUser.interests && currentUser.interests.length > 0 && !user.isRestricted && (
                         <div className="mt-3">
                             <div className="flex flex-wrap gap-2">
@@ -206,7 +212,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, isOwnProfile
                                 {currentUser.interests.length > 8 && (
                                     <button
                                         onClick={() => setShowAllInterests(!showAllInterests)}
-                                        className="text-xs font-medium text-orange-600 hover:text-orange-700 transition"
+                                        className="text-sm font-medium text-orange-600 hover:text-orange-700 transition"
                                     >
                                         {showAllInterests ? 'Show less' : `+${currentUser.interests.length - 8} more`}
                                     </button>

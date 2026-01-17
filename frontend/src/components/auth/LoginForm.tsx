@@ -53,8 +53,8 @@ export function LoginForm({ onSuccess, redirectTo }: LoginFormProps) {
       </Button>
 
       <div className="mt-4 p-3 bg-blue-50 rounded-md border border-blue-200">
-        <p className="text-xs text-blue-800 font-medium mb-1">Auth0 Authentication:</p>
-        <p className="text-xs text-blue-700">
+        <p className="text-sm text-blue-800 font-medium mb-1">Auth0 Authentication:</p>
+        <p className="text-sm text-blue-700">
           You'll be redirected to Auth0 to securely log in or create an account.
         </p>
       </div>

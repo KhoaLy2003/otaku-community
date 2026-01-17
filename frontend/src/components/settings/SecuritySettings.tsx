@@ -82,15 +82,15 @@ export const SecuritySettings: React.FC = () => {
                                                 <span className="font-semibold text-gray-900">
                                                     {getBrowserName(item.userAgent)}
                                                 </span>
-                                                <span className="text-xs text-gray-400">•</span>
+                                                <span className="text-sm text-gray-400">•</span>
                                                 <span className="text-sm text-gray-500">{item.ipAddress}</span>
                                             </div>
-                                            <p className="text-xs text-gray-400 mt-0.5">
+                                            <p className="text-sm text-gray-400 mt-0.5">
                                                 {parseDate(item.createdAt)?.toLocaleString()}
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="text-xs font-medium px-2 py-1 bg-green-100 text-green-700 rounded-full">
+                                    <div className="text-sm font-medium px-2 py-1 bg-green-100 text-green-700 rounded-full">
                                         Completed
                                     </div>
                                 </div>
@@ -101,7 +101,7 @@ export const SecuritySettings: React.FC = () => {
             </div>
 
             <div className="pt-6 border-t">
-                <p className="text-xs text-center text-gray-400">
+                <p className="text-sm text-center text-gray-400">
                     Showing last 10 login sessions. If you see suspicious activity, we recommend changing your password through Auth0.
                 </p>
             </div>

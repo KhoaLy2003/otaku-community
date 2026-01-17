@@ -118,7 +118,7 @@ export const ProfileSettings: React.FC = () => {
                             className="hidden"
                         />
                     </div>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-sm text-gray-500">
                         Recommended size: 1200x400 pixels. Max file size: 5MB.
                     </p>
                 </div>
@@ -133,7 +133,6 @@ export const ProfileSettings: React.FC = () => {
                             <Avatar
                                 src={avatarPreview || user?.avatarUrl}
                                 alt={user?.username}
-                                size="xl"
                                 className="w-24 h-24 border-4 border-white shadow-md"
                             />
                             <button
@@ -158,7 +157,7 @@ export const ProfileSettings: React.FC = () => {
                             >
                                 Change Avatar
                             </Button>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-sm text-gray-500">
                                 JPG, PNG or WebP. Max 5MB.
                             </p>
                         </div>

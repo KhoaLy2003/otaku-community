@@ -32,6 +32,8 @@ const AnimeListPage = () => {
     const [seasonsArchive, setSeasonsArchive] = useState<SeasonArchive[]>([]);
 
     const debouncedSearchQuery = useDebounce(searchQuery, 500);
+    // Use raw search query when it's empty to flush filters immediately (e.g. on tab change)
+    const effectiveSearchQuery = searchQuery === "" ? "" : debouncedSearchQuery;
 
     // Flag to skip one-time resets on mount
     const [isInitialMount, setIsInitialMount] = useState(true);
@@ -53,7 +55,7 @@ const AnimeListPage = () => {
     useEffect(() => {
         const params: Record<string, string> = {};
         if (activeTab !== "top") params.tab = activeTab;
-        if (debouncedSearchQuery) params.q = debouncedSearchQuery;
+        if (effectiveSearchQuery) params.q = effectiveSearchQuery;
         if (selectedType) params.type = selectedType;
         if (selectedStatus) params.status = selectedStatus;
         if (activeTab === "seasonal") {
@@ -64,7 +66,7 @@ const AnimeListPage = () => {
 
 
         setSearchParams(params, { replace: true });
-    }, [activeTab, debouncedSearchQuery, selectedType, selectedStatus, selectedYear, selectedSeason, currentPage, setSearchParams]);
+    }, [activeTab, effectiveSearchQuery, selectedType, selectedStatus, selectedYear, selectedSeason, currentPage, setSearchParams]);
 
 
     // Fetch data when tab, page, or filters change
@@ -77,9 +79,9 @@ const AnimeListPage = () => {
                 let response;
 
                 if (activeTab === "top") {
-                    if (debouncedSearchQuery || selectedType || selectedStatus) {
+                    if (effectiveSearchQuery || selectedType || selectedStatus) {
                         response = await animeApi.searchAnime({
-                            q: debouncedSearchQuery || undefined,
+                            q: effectiveSearchQuery || undefined,
                             type: selectedType || undefined,
                             status: selectedStatus || undefined,
                             page: currentPage,
@@ -88,9 +90,9 @@ const AnimeListPage = () => {
                         response = await animeApi.getTrendingAnime(currentPage);
                     }
                 } else {
-                    if (debouncedSearchQuery || selectedType || selectedStatus) {
+                    if (effectiveSearchQuery || selectedType || selectedStatus) {
                         response = await animeApi.searchAnime({
-                            q: debouncedSearchQuery || undefined,
+                            q: effectiveSearchQuery || undefined,
                             type: selectedType || undefined,
                             status: selectedStatus || undefined,
                             page: currentPage,
@@ -116,7 +118,7 @@ const AnimeListPage = () => {
         };
 
         fetchAnime();
-    }, [activeTab, debouncedSearchQuery, selectedType, selectedStatus, selectedYear, selectedSeason, currentPage]);
+    }, [activeTab, effectiveSearchQuery, selectedType, selectedStatus, selectedYear, selectedSeason, currentPage]);
 
     // Reset page when filters or tab change (skip initial mount to preserve URL page)
     useEffect(() => {
@@ -125,7 +127,7 @@ const AnimeListPage = () => {
             return;
         }
         setCurrentPage(1);
-    }, [debouncedSearchQuery, selectedType, selectedStatus, activeTab, selectedYear, selectedSeason]);
+    }, [effectiveSearchQuery, selectedType, selectedStatus, activeTab, selectedYear, selectedSeason]);
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -149,7 +151,17 @@ const AnimeListPage = () => {
                 <Tabs
                     tabs={TAB_ITEMS}
                     activeTab={activeTab}
-                    onChange={(id) => setActiveTab(id as "top" | "seasonal")}
+                    onChange={(id) => {
+                        const newTab = id as "top" | "seasonal";
+                        if (newTab !== activeTab) {
+                            setActiveTab(newTab);
+                            setSearchQuery("");
+                            setSelectedType("");
+                            setSelectedStatus("");
+                            setSelectedYear("");
+                            setSelectedSeason("");
+                        }
+                    }}
                     variant="underline"
                 />
             </div>

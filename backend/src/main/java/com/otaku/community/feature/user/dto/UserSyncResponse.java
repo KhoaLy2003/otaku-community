@@ -29,4 +29,5 @@ public class UserSyncResponse {
     private long unreadNotificationCount;
     private Instant createdAt;
     private Instant updatedAt;
+    private UserMainFavoriteResponse mainFavorite;
 }

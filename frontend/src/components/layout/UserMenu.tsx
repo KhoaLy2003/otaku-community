@@ -72,7 +72,7 @@ export function UserMenu() {
             </span>
           )}
         </span>
-        <div className="hidden text-xs md:block">
+        <div className="hidden text-sm md:block">
           <p className="font-semibold text-[#1a1a1b]">{displayName}</p>
         </div>
         <ChevronDown
@@ -93,7 +93,7 @@ export function UserMenu() {
             <p className="font-semibold text-sm text-[#1a1a1b]">
               {displayName}
             </p>
-            <p className="text-xs text-[#7c7c7c]">{username}</p>
+            <p className="text-sm text-[#7c7c7c]">{username}</p>
           </div>
 
           <div className="py-2">

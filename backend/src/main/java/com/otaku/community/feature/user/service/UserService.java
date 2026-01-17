@@ -8,18 +8,25 @@ import com.otaku.community.common.util.SecurityUtils;
 import com.otaku.community.feature.activity.entity.ActivityTargetType;
 import com.otaku.community.feature.activity.entity.ActivityType;
 import com.otaku.community.feature.activity.event.ActivityEvent;
+import com.otaku.community.feature.notification.service.NotificationService;
 import com.otaku.community.feature.post.repository.PostRepository;
+import com.otaku.community.feature.user.dto.UserMainFavoriteResponse;
+import com.otaku.community.feature.user.dto.UpdateMainFavoriteRequest;
 import com.otaku.community.feature.user.dto.UpdateUserRequest;
 import com.otaku.community.feature.user.dto.UserProfileResponse;
 import com.otaku.community.feature.user.dto.UserResponse;
 import com.otaku.community.feature.user.dto.UserSyncResponse;
 import com.otaku.community.feature.user.entity.ProfileVisibility;
 import com.otaku.community.feature.user.entity.User;
+import com.otaku.community.feature.user.entity.UserMainFavorite;
 import com.otaku.community.feature.user.mapper.UserMapper;
+import com.otaku.community.feature.user.repository.UserMainFavoriteRepository;
 import com.otaku.community.feature.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,13 +46,17 @@ public class UserService {
     private final UserMapper userMapper;
     private final UserFollowService userFollowService;
     private final PostRepository postRepository;
+    private final UserMainFavoriteRepository userMainFavoriteRepository;
+    private final NotificationService notificationService;
     private final ApplicationEventPublisher eventPublisher;
 
     @Value("${default.avatar.url}")
     private String defaultAvatarUrl;
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "userProfile", key = "#username")
     public UserProfileResponse getUserProfileByUsername(String username) {
+        log.debug("Fetching user profile from database for username: {}", username);
         User user = userRepository.findByUsernameAndNotDeleted(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
 
@@ -79,10 +90,12 @@ public class UserService {
         }
 
         String auth0Id = SecurityUtils.getCurrentAuth0Id();
-        if (auth0Id != null) {
-            userRepository.findByAuth0Id(auth0Id).ifPresent(currentUser -> response
-                    .setIsFollowing(userFollowService.isFollowing(currentUser.getId(), user.getId())));
-        }
+        userRepository.findByAuth0Id(auth0Id).ifPresent(currentUser -> response
+                .setIsFollowing(userFollowService.isFollowing(currentUser.getId(), user.getId())));
+
+        // Set Main Favorite
+        userMainFavoriteRepository.findByUserId(user.getId())
+                .ifPresent(mf -> response.setMainFavorite(mapToMainFavoriteDto(mf)));
 
         return response;
     }
@@ -116,6 +129,7 @@ public class UserService {
     }
 
     @Transactional
+    @CacheEvict(value = "userProfile", key = "#result.username")
     public UserResponse updateUser(UpdateUserRequest request) {
         String auth0Id = SecurityUtils.getCurrentAuth0Id();
         User user = userRepository.findByAuth0Id(auth0Id)
@@ -148,6 +162,29 @@ public class UserService {
                 ActivityTargetType.USER, savedUser.getId().toString(), "Profile updated via generic update endpoint"));
 
         return userMapper.toResponse(savedUser);
+    }
+
+    @Transactional
+    public UserResponse updateMainFavorite(UpdateMainFavoriteRequest request) {
+        String auth0Id = SecurityUtils.getCurrentAuth0Id();
+        User user = userRepository.findByAuth0Id(auth0Id)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "auth0Id", auth0Id));
+
+        UserMainFavorite mainFavorite = userMainFavoriteRepository.findByUserId(user.getId())
+                .orElse(UserMainFavorite.builder().user(user).build());
+
+        mainFavorite.setFavoriteType(request.getFavoriteType());
+        mainFavorite.setFavoriteId(request.getFavoriteId());
+        mainFavorite.setFavoriteName(request.getFavoriteName());
+        mainFavorite.setFavoriteImageUrl(request.getFavoriteImageUrl());
+        mainFavorite.setFavoriteReason(request.getFavoriteReason());
+
+        userMainFavoriteRepository.save(mainFavorite);
+        log.debug("User main favorite updated for user: {}", user.getId());
+
+        UserResponse response = userMapper.toResponse(user);
+        response.setMainFavorite(mapToMainFavoriteDto(mainFavorite));
+        return response;
     }
 
     @Transactional(readOnly = true)
@@ -238,7 +275,24 @@ public class UserService {
         User user = userRepository.findByAuth0Id(auth0Id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "auth0Id", auth0Id));
 
-        return userMapper.toResponse(user);
+        UserResponse response = userMapper.toResponse(user);
+        userMainFavoriteRepository.findByUserId(user.getId())
+                .ifPresent(mf -> response.setMainFavorite(mapToMainFavoriteDto(mf)));
+        return response;
+    }
+
+    @Transactional(readOnly = true)
+    @LogExecutionTime
+    public UserSyncResponse getCurrentUserSyncResponse() {
+        String auth0Id = SecurityUtils.getCurrentAuth0Id();
+        User user = userRepository.findByAuth0Id(auth0Id)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "auth0Id", auth0Id));
+
+        UserSyncResponse response = userMapper.toSyncResponse(user);
+        response.setUnreadNotificationCount(notificationService.getUnreadCount(user.getId()).getCount());
+        userMainFavoriteRepository.findByUserId(user.getId())
+                .ifPresent(mf -> response.setMainFavorite(mapToMainFavoriteDto(mf)));
+        return response;
     }
 
     @Transactional(readOnly = true)
@@ -268,5 +322,15 @@ public class UserService {
         return userRepository.findByUsername(username)
                 .map(user -> !user.getId().equals(excludeUserId))
                 .orElse(false);
+    }
+
+    private UserMainFavoriteResponse mapToMainFavoriteDto(UserMainFavorite mf) {
+        return UserMainFavoriteResponse.builder()
+                .favoriteType(mf.getFavoriteType())
+                .favoriteId(mf.getFavoriteId())
+                .favoriteName(mf.getFavoriteName())
+                .favoriteImageUrl(mf.getFavoriteImageUrl())
+                .favoriteReason(mf.getFavoriteReason())
+                .build();
     }
 }

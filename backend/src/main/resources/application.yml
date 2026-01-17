@@ -23,6 +23,13 @@ spring:
         format_sql: true
         use_sql_comments: false
 
+  data:
+    redis:
+      host: ${REDIS_HOST:redis-17342.c54.ap-northeast-1-2.ec2.cloud.redislabs.com}
+      port: ${REDIS_PORT:17342}
+      username: ${REDIS_USERNAME:default}
+      password: ${REDIS_PASSWORD:ng9szhywoeyXnjCxCw20XUUmYRcMgfJP}
+
   servlet:
     multipart:
       max-file-size: 5MB

@@ -130,3 +130,11 @@ export interface SeasonArchive {
   year: number;
   seasons: string[];
 }
+
+export interface Character {
+  malId: number;
+  name: string;
+  imageUrl: string;
+  about: string;
+  favorites: number;
+}

@@ -5,6 +5,7 @@ import {
   type User,
   type UserListItem,
   type UserProfile,
+  type MainFavorite,
 } from "../../types/user";
 
 export interface UpdateProfileData {
@@ -44,6 +45,7 @@ export interface UserSyncResponse {
   unreadNotificationCount: number;
   createdAt: string;
   updatedAt: string;
+  mainFavorite?: MainFavorite;
 }
 
 export const usersApi = {
@@ -51,7 +53,7 @@ export const usersApi = {
    * Sync user data with backend (replaces Next.js API route)
    */
   syncUser: async (
-    data: UserSyncRequest
+    data: UserSyncRequest,
   ): Promise<ApiResponse<UserSyncResponse>> => {
     return apiClient.post<ApiResponse<UserSyncResponse>>("/users/sync", data);
   },
@@ -66,18 +68,18 @@ export const usersApi = {
   /**
    * Get current user profile
    */
-  getCurrentUser: async (): Promise<ApiResponse<UserProfile>> => {
-    return apiClient.get<ApiResponse<UserProfile>>(`/users/me`);
+  getCurrentUser: async (): Promise<ApiResponse<UserSyncResponse>> => {
+    return apiClient.get<ApiResponse<UserSyncResponse>>("/users/me");
   },
 
   /**
    * Get user profile by username
    */
   getUserProfile: async (
-    username: string
+    username: string,
   ): Promise<ApiResponse<UserProfile>> => {
     return apiClient.get<ApiResponse<UserProfile>>(
-      `/users/username/${username}`
+      `/users/username/${username}`,
     );
   },
 
@@ -85,7 +87,7 @@ export const usersApi = {
    * Update user profile
    */
   updateProfile: async (
-    data: UpdateProfileData
+    data: UpdateProfileData,
   ): Promise<ApiResponse<User>> => {
     return apiClient.put<ApiResponse<User>>("/users/me", data);
   },
@@ -109,7 +111,7 @@ export const usersApi = {
    */
   getFollowers: async (
     userId: string,
-    params?: { page?: number; limit?: number }
+    params?: { page?: number; limit?: number },
   ): Promise<ApiResponse<PaginatedResponse<UserListItem>>> => {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append("page", params.page.toString());
@@ -117,7 +119,7 @@ export const usersApi = {
 
     const query = queryParams.toString();
     return apiClient.get<ApiResponse<PaginatedResponse<UserListItem>>>(
-      `/users/${userId}/followers${query ? `?${query}` : ""}`
+      `/users/${userId}/followers${query ? `?${query}` : ""}`,
     );
   },
 
@@ -126,7 +128,7 @@ export const usersApi = {
    */
   getFollowing: async (
     userId: string,
-    params?: { page?: number; limit?: number }
+    params?: { page?: number; limit?: number },
   ): Promise<ApiResponse<PaginatedResponse<UserListItem>>> => {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append("page", params.page.toString());
@@ -134,7 +136,7 @@ export const usersApi = {
 
     const query = queryParams.toString();
     return apiClient.get<ApiResponse<PaginatedResponse<UserListItem>>>(
-      `/users/${userId}/following${query ? `?${query}` : ""}`
+      `/users/${userId}/following${query ? `?${query}` : ""}`,
     );
   },
 
@@ -143,7 +145,7 @@ export const usersApi = {
    */
   updateProfileImages: async (
     avatar?: File,
-    cover?: File
+    cover?: File,
   ): Promise<ApiResponse<User>> => {
     const formData = new FormData();
     if (avatar) formData.append("avatar", avatar);
@@ -156,8 +158,17 @@ export const usersApi = {
    * Update profile visibility
    */
   updatePrivacy: async (
-    data: UpdatePrivacyRequest
+    data: UpdatePrivacyRequest,
   ): Promise<ApiResponse<User>> => {
     return apiClient.put<ApiResponse<User>>("/v1/users/me/privacy", data);
+  },
+
+  /**
+   * Update main favorite
+   */
+  updateMainFavorite: async (
+    data: MainFavorite,
+  ): Promise<ApiResponse<User>> => {
+    return apiClient.put<ApiResponse<User>>("/users/me/main-favorite", data);
   },
 };

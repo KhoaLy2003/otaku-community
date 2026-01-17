@@ -1,5 +1,3 @@
-import React from 'react'
-
 const values = [
   {
     title: 'Built for Otaku',

@@ -117,7 +117,7 @@ export function ResetPasswordForm({ token, onSuccess }: ResetPasswordFormProps) 
           className="w-full"
         />
         {errors.password && (
-          <p className="mt-1 text-xs text-red-600">{errors.password}</p>
+          <p className="mt-1 text-sm text-red-600">{errors.password}</p>
         )}
       </div>
 
@@ -132,7 +132,7 @@ export function ResetPasswordForm({ token, onSuccess }: ResetPasswordFormProps) 
           className="w-full"
         />
         {errors.confirmPassword && (
-          <p className="mt-1 text-xs text-red-600">{errors.confirmPassword}</p>
+          <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
         )}
       </div>
 

@@ -1,7 +1,26 @@
-export enum ProfileVisibility {
-  PUBLIC = "PUBLIC",
-  FOLLOWERS_ONLY = "FOLLOWERS_ONLY",
-  PRIVATE = "PRIVATE",
+export const ProfileVisibility = {
+  PUBLIC: "PUBLIC",
+  FOLLOWERS_ONLY: "FOLLOWERS_ONLY",
+  PRIVATE: "PRIVATE",
+} as const;
+
+export type ProfileVisibility =
+  (typeof ProfileVisibility)[keyof typeof ProfileVisibility];
+
+export const FavoriteType = {
+  ANIME: "ANIME",
+  MANGA: "MANGA",
+  CHARACTER: "CHARACTER",
+} as const;
+
+export type FavoriteType = (typeof FavoriteType)[keyof typeof FavoriteType];
+
+export interface MainFavorite {
+  favoriteType: FavoriteType;
+  favoriteId: number;
+  favoriteName: string;
+  favoriteImageUrl: string;
+  favoriteReason: string;
 }
 
 export interface User {
@@ -20,6 +39,7 @@ export interface User {
   joinedAt?: string;
   createdAt: string;
   updatedAt: string;
+  mainFavorite?: MainFavorite;
 }
 
 export interface UserProfile extends User {

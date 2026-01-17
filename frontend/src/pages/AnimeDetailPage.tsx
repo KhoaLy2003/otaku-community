@@ -119,19 +119,19 @@ const AnimeDetailPage = () => {
 
                                 {/* Meta Tags */}
                                 <div className="flex flex-wrap justify-center md:justify-start gap-3 mb-6">
-                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-500 rounded-full text-xs font-bold border border-yellow-100 dark:border-yellow-900/30">
+                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-500 rounded-full text-sm font-bold border border-yellow-100 dark:border-yellow-900/30">
                                         <Star className="w-3.5 h-3.5 fill-current" />
                                         {anime.score}
                                     </div>
-                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-500 rounded-full text-xs font-medium border border-blue-100 dark:border-blue-900/30">
+                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-500 rounded-full text-sm font-medium border border-blue-100 dark:border-blue-900/30">
                                         <Tv className="w-3.5 h-3.5" />
                                         {anime.type}
                                     </div>
-                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-500 rounded-full text-xs font-medium border border-green-100 dark:border-green-900/30">
+                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-500 rounded-full text-sm font-medium border border-green-100 dark:border-green-900/30">
                                         <Calendar className="w-3.5 h-3.5" />
                                         {anime.year || "N/A"}
                                     </div>
-                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-500 rounded-full text-xs font-medium border border-purple-100 dark:border-purple-900/30">
+                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-500 rounded-full text-sm font-medium border border-purple-100 dark:border-purple-900/30">
                                         <Clock className="w-3.5 h-3.5" />
                                         {anime.episodes ? `${anime.episodes} eps` : "Unknown"}
                                     </div>

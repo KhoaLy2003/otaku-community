@@ -1,4 +1,4 @@
-package com.otaku.community.feature.anime.integration.dto;
+package com.otaku.community.feature.integration.jikan.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -8,8 +8,8 @@ import java.util.List;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class JikanListResponse {
-    private List<JikanAnimeData> data;
+public class JikanListResponse<T> {
+    private List<T> data;
     private JikanPagination pagination;
 
     @Data

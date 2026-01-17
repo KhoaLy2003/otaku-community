@@ -1,23 +1,22 @@
-import { User } from '@auth0/auth0-react';
-import { usersApi, type UserSyncRequest, type UserSyncResponse } from './api';
-import type { ApiResponse } from '../types/api';
+import { User } from "@auth0/auth0-react";
+import { usersApi, type UserSyncRequest, type UserSyncResponse } from "./api";
 
 /**
  * Synchronizes user data between Auth0 and the backend database
  * This replaces the Next.js API route functionality
  */
 export async function syncUserWithBackend(
-  user: User
+  user: User,
 ): Promise<UserSyncResponse> {
   try {
     if (!user.sub || !user.email) {
-      throw new Error('Invalid user data: missing sub or email');
+      throw new Error("Invalid user data: missing sub or email");
     }
 
     const syncRequest: UserSyncRequest = {
       auth0Id: user.sub,
       email: user.email,
-      username: user.nickname || user.name || user.email.split('@')[0],
+      username: user.nickname || user.name || user.email.split("@")[0],
       avatarUrl: user.picture,
       name: user.name,
       nickname: user.nickname,
@@ -27,12 +26,12 @@ export async function syncUserWithBackend(
     const response = await usersApi.syncUser(syncRequest);
 
     if (!response.success || !response.data) {
-      throw new Error(response.message || 'Sync response invalid');
+      throw new Error(response.message || "Sync response invalid");
     }
 
     return response.data;
   } catch (error) {
-    console.error('User sync failed:', error);
+    console.error("User sync failed:", error);
     throw error;
   }
 }
@@ -46,12 +45,12 @@ export async function getCurrentUser(): Promise<UserSyncResponse> {
     const response = await usersApi.getCurrentUser();
 
     if (!response.success || !response.data) {
-      throw new Error(response.message || 'User response invalid');
+      throw new Error(response.message || "User response invalid");
     }
 
     return response.data;
   } catch (error) {
-    console.error('Get current user failed:', error);
+    console.error("Get current user failed:", error);
     throw error;
   }
 }
@@ -63,26 +62,32 @@ export async function getCurrentUser(): Promise<UserSyncResponse> {
 export function handleUserSyncError(error: unknown): string {
   if (error instanceof Error) {
     // Handle specific API errors
-    if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-      return 'Authentication failed. Please log in again.';
+    if (
+      error.message.includes("401") ||
+      error.message.includes("Unauthorized")
+    ) {
+      return "Authentication failed. Please log in again.";
     }
-    
-    if (error.message.includes('403') || error.message.includes('Forbidden')) {
-      return 'You do not have permission to perform this action.';
+
+    if (error.message.includes("403") || error.message.includes("Forbidden")) {
+      return "You do not have permission to perform this action.";
     }
-    
-    if (error.message.includes('404') || error.message.includes('Not Found')) {
-      return 'User not found. Please try again.';
+
+    if (error.message.includes("404") || error.message.includes("Not Found")) {
+      return "User not found. Please try again.";
     }
-    
-    if (error.message.includes('500') || error.message.includes('Internal Server Error')) {
-      return 'Server error. Please try again later.';
+
+    if (
+      error.message.includes("500") ||
+      error.message.includes("Internal Server Error")
+    ) {
+      return "Server error. Please try again later.";
     }
-    
+
     return error.message;
   }
-  
-  return 'An unexpected error occurred during user synchronization.';
+
+  return "An unexpected error occurred during user synchronization.";
 }
 
 /**
@@ -90,15 +95,15 @@ export function handleUserSyncError(error: unknown): string {
  */
 export function validateUserSyncRequest(user: User): boolean {
   if (!user.sub) {
-    console.error('User sync validation failed: missing sub');
+    console.error("User sync validation failed: missing sub");
     return false;
   }
-  
+
   if (!user.email) {
-    console.error('User sync validation failed: missing email');
+    console.error("User sync validation failed: missing email");
     return false;
   }
-  
+
   return true;
 }
 
@@ -107,13 +112,13 @@ export function validateUserSyncRequest(user: User): boolean {
  */
 export function createUserSyncRequest(user: User): UserSyncRequest {
   if (!validateUserSyncRequest(user)) {
-    throw new Error('Invalid user data for sync request');
+    throw new Error("Invalid user data for sync request");
   }
-  
+
   return {
     auth0Id: user.sub!,
     email: user.email!,
-    username: user.nickname || user.name || user.email!.split('@')[0],
+    username: user.nickname || user.name || user.email!.split("@")[0],
     avatarUrl: user.picture,
     name: user.name,
     nickname: user.nickname,

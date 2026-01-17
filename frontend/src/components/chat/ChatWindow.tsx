@@ -104,8 +104,9 @@ export function ChatWindow({ chat }: ChatWindowProps) {
       }
     },
     onReadReceipt: (event) => {
+      if (!chatId) return;
+
       if (event.chatId === chatId) {
-        // Update message statuses to READ
         currentMessages.forEach((msg) => {
           if (msg.status !== "READ") {
             updateMessage(chatId, msg.id, { status: "READ" });
@@ -114,6 +115,8 @@ export function ChatWindow({ chat }: ChatWindowProps) {
       }
     },
     onMessageDeleted: (event) => {
+      if (!chatId) return;
+
       if (event.chatId === chatId && event.messageId) {
         deleteMessage(chatId, event.messageId);
       }
@@ -242,10 +245,10 @@ export function ChatWindow({ chat }: ChatWindowProps) {
         isOpen={deleteData.isOpen}
         title="Delete Message"
         message="Are you sure you want to delete this message? This action cannot be undone."
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
+        confirmText="Delete"
+        cancelText="Cancel"
         onConfirm={confirmDelete}
-        onCancel={() => setDeleteData({ messageId: null, isOpen: false })}
+        onClose={() => setDeleteData({ messageId: null, isOpen: false })}
         variant="danger"
       />
     </div>

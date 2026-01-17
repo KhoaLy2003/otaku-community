@@ -67,14 +67,14 @@ const AnimeMangaSearch: React.FC<AnimeMangaSearchProps> = ({ onSelect, selectedR
             <div className="flex gap-2">
                 <button
                     onClick={() => setType('ANIME')}
-                    className={`px-3 py-1 text-xs font-medium rounded-full border transition ${type === 'ANIME' ? 'bg-[#ff4500] text-white border-[#ff4500]' : 'bg-white text-[#7c7c7c] border-[#edeff1]'
+                    className={`px-3 py-1 text-sm font-medium rounded-full border transition ${type === 'ANIME' ? 'bg-[#ff4500] text-white border-[#ff4500]' : 'bg-white text-[#7c7c7c] border-[#edeff1]'
                         }`}
                 >
                     Anime
                 </button>
                 <button
                     onClick={() => setType('MANGA')}
-                    className={`px-3 py-1 text-xs font-medium rounded-full border transition ${type === 'MANGA' ? 'bg-[#ff4500] text-white border-[#ff4500]' : 'bg-white text-[#7c7c7c] border-[#edeff1]'
+                    className={`px-3 py-1 text-sm font-medium rounded-full border transition ${type === 'MANGA' ? 'bg-[#ff4500] text-white border-[#ff4500]' : 'bg-white text-[#7c7c7c] border-[#edeff1]'
                         }`}
                 >
                     Manga
@@ -108,9 +108,9 @@ const AnimeMangaSearch: React.FC<AnimeMangaSearchProps> = ({ onSelect, selectedR
                                 <img src={item.imageUrl} alt={item.title} className="w-10 h-14 object-cover rounded" />
                                 <div className="text-left">
                                     <p className="text-sm font-medium text-[#1a1a1b] line-clamp-1">{item.title}</p>
-                                    <p className="text-xs text-[#7c7c7c]">{type}</p>
+                                    <p className="text-sm text-[#7c7c7c]">{type}</p>
                                 </div>
-                                {isSelected && <span className="ml-auto text-xs text-[#ff4500] font-medium">Linked</span>}
+                                {isSelected && <span className="ml-auto text-sm text-[#ff4500] font-medium">Linked</span>}
                             </button>
                         );
                     })}
@@ -124,7 +124,7 @@ const AnimeMangaSearch: React.FC<AnimeMangaSearchProps> = ({ onSelect, selectedR
                             <div className="flex items-center gap-2 p-2 rounded-lg border border-[#edeff1] bg-[#f6f7f8]">
                                 <img src={ref.imageUrl} alt={ref.title} className="w-8 h-10 object-cover rounded" />
                                 <div className="max-w-[150px]">
-                                    <p className="text-xs font-medium text-[#1a1a1b] truncate">{ref.title}</p>
+                                    <p className="text-sm font-medium text-[#1a1a1b] truncate">{ref.title}</p>
                                     <p className="text-[10px] text-[#7c7c7c]">{ref.referenceType}</p>
                                 </div>
                                 <button

@@ -29,4 +29,5 @@ public class UserProfileResponse {
     private Boolean isFollowing;
     private Boolean isRestricted;
     private Instant createdAt;
+    private UserMainFavoriteResponse mainFavorite;
 }

@@ -18,7 +18,7 @@ import com.otaku.community.feature.post.dto.UserPostResponse;
 import com.otaku.community.feature.post.entity.PostStatus;
 import com.otaku.community.feature.post.service.impl.PostMediaServiceImpl;
 import com.otaku.community.feature.post.service.impl.PostServiceImpl;
-import com.otaku.community.feature.user.dto.UserSummaryDto;
+import com.otaku.community.feature.user.dto.UserSummaryResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -245,14 +245,14 @@ public class PostController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Likes retrieved successfully"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Post not found")
     })
-    public ResponseEntity<ApiResponse<PageResponse<UserSummaryDto>>> getPostLikes(
+    public ResponseEntity<ApiResponse<PageResponse<UserSummaryResponse>>> getPostLikes(
             @Parameter(description = "Post ID") @PathVariable UUID postId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int limit,
             @CurrentUserId UUID currentUserId) {
         log.debug("Retrieving likes for post: {} (page: {}, limit: {})", postId, page, limit);
 
-        PageResponse<UserSummaryDto> response = interactionService.getPostLikes(postId, currentUserId, page,
+        PageResponse<UserSummaryResponse> response = interactionService.getPostLikes(postId, currentUserId, page,
                 limit);
         return ResponseEntity.ok(ApiResponse.success(response));
     }

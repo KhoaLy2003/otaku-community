@@ -11,6 +11,7 @@ import com.otaku.community.common.util.PaginationUtils;
 import com.otaku.community.feature.activity.entity.ActivityTargetType;
 import com.otaku.community.feature.activity.entity.ActivityType;
 import com.otaku.community.feature.activity.event.ActivityEvent;
+import com.otaku.community.feature.feed.service.FeedUpdateService;
 import com.otaku.community.feature.interaction.dto.CommentResponse;
 import com.otaku.community.feature.interaction.entity.Reaction;
 import com.otaku.community.feature.interaction.repository.ReactionRepository;
@@ -72,6 +73,7 @@ public class PostServiceImpl implements PostService {
     private final ReactionRepository reactionRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final PostReferenceMapper postReferenceMapper;
+    private final FeedUpdateService feedUpdateService;
 
     @Value("${app.frontend.url:http://localhost:3000}")
     private String frontendUrl;
@@ -122,6 +124,9 @@ public class PostServiceImpl implements PostService {
 
         // Trigger Fan-out on Write via event (Decoupled and potentially Async)
         eventPublisher.publishEvent(new PostCreatedEvent(savedPost));
+
+        // Notify feed update service for real-time updates (exclude the creator)
+        feedUpdateService.notifyNewPost(user.getAuth0Id());
 
         // Build response with media
         PostResponse response = postMapper.toResponse(savedPost);

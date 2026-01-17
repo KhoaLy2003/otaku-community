@@ -38,13 +38,12 @@ export function MessageBubble({ message, isOwn, onDelete }: MessageBubbleProps) 
         <Avatar
           src={message.sender.avatarUrl || undefined}
           alt={message.sender.username}
-          size="sm"
         />
       )}
       <div className={cn("flex items-center gap-2", isOwn ? "flex-row-reverse" : "flex-row")}>
         <div className={cn("flex flex-col max-w-[70%]", isOwn ? "items-end" : "items-start")}>
           {!isOwn && (
-            <span className="text-xs text-gray-500 mb-1 px-1">
+            <span className="text-sm text-gray-500 mb-1 px-1">
               {message.sender.username}
             </span>
           )}
@@ -58,7 +57,7 @@ export function MessageBubble({ message, isOwn, onDelete }: MessageBubbleProps) 
           >
             {message.content}
           </div>
-          <span className="text-xs text-gray-400 mt-1 px-1">
+          <span className="text-sm text-gray-400 mt-1 px-1">
             {formatTimeAgo(message.createdAt)}
           </span>
         </div>
@@ -77,7 +76,6 @@ export function MessageBubble({ message, isOwn, onDelete }: MessageBubbleProps) 
         <Avatar
           src={message.sender.avatarUrl || undefined}
           alt={message.sender.username}
-          size="sm"
         />
       )}
     </div>

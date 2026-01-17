@@ -29,9 +29,9 @@ const TYPE_OPTIONS = [
 
 const STATUS_OPTIONS = [
     { label: "All Status", value: "" },
-    { label: "Airing", value: "Currently Airing" },
-    { label: "Finished", value: "Finished Airing" },
-    { label: "Upcoming", value: "Not yet aired" },
+    { label: "Airing", value: "airing" },
+    { label: "Completed", value: "complete" },
+    { label: "Upcoming", value: "upcoming" },
 ];
 
 export const FilterBar: React.FC<FilterBarProps> = ({

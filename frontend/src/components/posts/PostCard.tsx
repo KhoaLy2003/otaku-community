@@ -190,7 +190,7 @@ function PostActions({
   };
 
   return (
-    <div className="mt-4 flex flex-wrap items-center gap-3 text-xs font-semibold text-[#7c7c7c]">
+    <div className="mt-4 flex flex-wrap items-center gap-3 text-sm font-semibold text-[#7c7c7c]">
       <Action
         icon={Heart}
         label={`${likesCount}`}
@@ -358,7 +358,7 @@ function PostMeta({
   time: string;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-1 text-xs text-[#7c7c7c]">
+    <div className="flex flex-wrap items-center gap-1 text- text-[#7c7c7c]">
       <div className="flex items-center gap-1 text-[#1a1a1b]">
         {authorAvatarUrl ? (
           <img

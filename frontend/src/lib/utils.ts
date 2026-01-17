@@ -37,3 +37,15 @@ export function parseDate(value?: string | number | Date | null): Date | null {
   if (!value) return null;
   return value instanceof Date ? value : new Date(value);
 }
+
+/**
+ * Scrolls to the top of the main scroll container or window
+ */
+export function scrollToTop(behavior: ScrollBehavior = "smooth") {
+  const mainScroll = document.getElementById("main-scroll");
+  if (mainScroll) {
+    mainScroll.scrollTo({ top: 0, behavior });
+  } else {
+    window.scrollTo({ top: 0, behavior });
+  }
+}

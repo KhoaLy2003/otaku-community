@@ -197,37 +197,37 @@ curl http://localhost:8080/api/users/me \
 ### React/Next.js Example
 
 ```javascript
-import { useAuth0 } from '@auth0/auth0-react';
+import {useAuth0} from '@auth0/auth0-react';
 
 const syncUser = async () => {
-  const { user, getAccessTokenSilently } = useAuth0();
-  
-  try {
-    const token = await getAccessTokenSilently({
-      authorizationParams: {
-        audience: 'https://api.otaku-community.com'
-      }
-    });
+    const {user, getAccessTokenSilently} = useAuth0();
 
-    const response = await fetch('/api/users/sync', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        auth0Id: user.sub,
-        email: user.email,
-        username: user.nickname || user.name,
-        avatarUrl: user.picture
-      })
-    });
+    try {
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+                audience: 'https://api.otaku-community.com'
+            }
+        });
 
-    const result = await response.json();
-    console.log('User synced:', result.data);
-  } catch (error) {
-    console.error('Sync failed:', error);
-  }
+        const response = await fetch('/api/users/sync', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                auth0Id: user.sub,
+                email: user.email,
+                username: user.nickname || user.name,
+                avatarUrl: user.picture
+            })
+        });
+
+        const result = await response.json();
+        console.log('User synced:', result.data);
+    } catch (error) {
+        console.error('Sync failed:', error);
+    }
 };
 ```
 

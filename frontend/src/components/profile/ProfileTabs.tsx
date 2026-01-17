@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
 
-type TabType = 'posts' | 'replies' | 'media' | 'likes';
+type TabType = 'posts' | 'replies' | 'media' | 'likes' | 'favorites';
 
 interface ProfileTabsProps {
     activeTab: TabType;
@@ -14,8 +14,9 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, onTabChange
         ? [{ id: 'posts', label: 'Posts' }]
         : [
             { id: 'posts', label: 'Posts' },
-            { id: 'replies', label: 'Replies' },
+            { id: 'favorites', label: 'Favorites' },
             { id: 'media', label: 'Media' },
+            { id: 'replies', label: 'Replies' },
             { id: 'likes', label: 'Likes' },
         ];
 

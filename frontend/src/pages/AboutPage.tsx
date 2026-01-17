@@ -62,7 +62,7 @@ const AboutPage: React.FC = () => {
                         <Card key={idx} className="p-6 flex flex-col justify-center items-center text-center hover:border-orange-200 transition-colors">
                             <principle.icon className="w-8 h-8 text-orange-600 mb-3" />
                             <h3 className="font-bold text-gray-900 dark:text-white mb-1">{principle.title}</h3>
-                            <p className="text-xs text-gray-500">{principle.desc}</p>
+                            <p className="text-sm text-gray-500">{principle.desc}</p>
                         </Card>
                     ))}
                 </div>

@@ -49,7 +49,7 @@ export const UserCard: React.FC<UserCardProps> = ({
             {!isOwnCard && onFollowToggle && (
                 <div className="ml-4 flex-shrink-0">
                     {user.profileVisibility === 'PRIVATE' && !isFollowing ? (
-                        <div className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-md border border-gray-100 flex items-center gap-1">
+                        <div className="text-sm text-gray-400 bg-gray-50 px-2 py-1 rounded-md border border-gray-100 flex items-center gap-1">
                             <Shield size={12} />
                             Private
                         </div>

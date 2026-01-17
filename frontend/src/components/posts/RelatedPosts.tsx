@@ -38,7 +38,7 @@ const RelatedPosts: React.FC<RelatedPostsProps> = ({ type, initialPosts }) => {
             <div className="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
                 <MessageSquare className="h-10 w-10 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
                 <p className="text-gray-500 dark:text-gray-400 text-sm">No discussions yet about this {type.toLowerCase()}.</p>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Be the first to start a conversation!</p>
+                <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Be the first to start a conversation!</p>
             </div>
         );
     }

@@ -4,12 +4,13 @@ import { ProfileHeader } from '@/components/profile/ProfileHeader'
 import { ProfileTabs } from '@/components/profile/ProfileTabs'
 import { ProfileFeed } from '@/components/profile/ProfileFeed'
 import { ProfileMedia } from '@/components/profile/ProfileMedia'
+import { ProfileFavorites } from '@/components/profile/ProfileFavorites'
 import { useAuth } from '@/hooks/useAuth'
 import { Shield } from 'lucide-react'
 import { usersApi } from '@/lib/api/users'
 import type { UserProfile } from '@/types/user'
 
-type TabType = 'posts' | 'replies' | 'media' | 'likes';
+type TabType = 'posts' | 'replies' | 'media' | 'likes' | 'favorites';
 
 const ProfilePage: React.FC = () => {
   const { user: authUser, isLoading: authLoading } = useAuth()
@@ -26,9 +27,10 @@ const ProfilePage: React.FC = () => {
 
     setLoading(true);
     try {
-      const response = username
-        ? await usersApi.getUserProfile(username)
-        : await usersApi.getCurrentUser();
+      const effectiveUsername = username || authUser?.username;
+      if (!effectiveUsername) return;
+
+      const response = await usersApi.getUserProfile(effectiveUsername);
 
       if (response.success && response.data) {
         setUser(response.data);
@@ -75,6 +77,10 @@ const ProfilePage: React.FC = () => {
                 </div>
               ) : activeTab === 'media' ? (
                 <ProfileMedia username={user.username} />
+              ) : activeTab === 'favorites' ? (
+                <div className="p-4">
+                  <ProfileFavorites isOwner={username === authUser?.username} />
+                </div>
               ) : (
                 <ProfileFeed
                   username={user.username}

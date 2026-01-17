@@ -250,6 +250,54 @@ CREATE INDEX idx_reactions_target ON public.reactions USING btree (target_type, 
 CREATE INDEX idx_reactions_type ON public.reactions USING btree (reaction_type);
 CREATE INDEX idx_reactions_user_id ON public.reactions USING btree (user_id);
 
+-- public.user_favorites definition
+
+-- Drop table
+
+-- DROP TABLE public.user_favorites;
+
+CREATE TABLE public.user_favorites (
+id uuid NOT NULL,
+created_at timestamptz(6) NOT NULL,
+deleted_at timestamptz(6) NULL,
+updated_at timestamptz(6) NOT NULL,
+external_id int8 NOT NULL,
+image_url varchar(255) NULL,
+note varchar(500) NULL,
+title varchar(512) NOT NULL,
+"type" varchar(20) NOT NULL,
+user_id uuid NOT NULL,
+CONSTRAINT uk_user_favorites_user_type_external_id UNIQUE (user_id, type, external_id),
+CONSTRAINT user_favorites_pkey PRIMARY KEY (id),
+CONSTRAINT user_favorites_type_check CHECK (((type)::text = ANY ((ARRAY['ANIME'::character varying, 'MANGA'::character varying])::text[]))),
+CONSTRAINT fk4sv7b9w9adr0fjnc4u10exlwm FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE INDEX idx_user_favorites_user_id ON public.user_favorites USING btree (user_id);
+CREATE INDEX idx_user_favorites_user_type ON public.user_favorites USING btree (user_id, type);
+
+-- public.user_main_favorites definition
+
+-- Drop table
+
+-- DROP TABLE public.user_main_favorites;
+
+CREATE TABLE public.user_main_favorites (
+id uuid NOT NULL,
+created_at timestamptz(6) NOT NULL,
+deleted_at timestamptz(6) NULL,
+updated_at timestamptz(6) NOT NULL,
+favorite_id int4 NOT NULL,
+favorite_image_url varchar(255) NULL,
+favorite_name varchar(255) NOT NULL,
+favorite_reason varchar(200) NULL,
+favorite_type varchar(255) NOT NULL,
+user_id uuid NOT NULL,
+CONSTRAINT uk_eekwa97at7428hnn1hxov45js UNIQUE (user_id),
+CONSTRAINT user_main_favorites_favorite_type_check CHECK (((favorite_type)::text = ANY ((ARRAY['ANIME'::character varying, 'MANGA'::character varying, 'CHARACTER'::character varying])::text[]))),
+CONSTRAINT user_main_favorites_pkey PRIMARY KEY (id),
+CONSTRAINT fkp8q0r2efcqfq9kj8l159cb905 FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+
 -- public."comments" definition
 
 -- Drop table
@@ -265,6 +313,7 @@ updated_at timestamptz(6) NOT NULL,
 parent_id uuid NULL,
 post_id uuid NOT NULL,
 user_id uuid NOT NULL,
+image_url varchar(500) NULL,
 CONSTRAINT comments_pkey PRIMARY KEY (id),
 CONSTRAINT fk8omq0tc18jd43bu5tjh6jvraq FOREIGN KEY (user_id) REFERENCES public.users(id),
 CONSTRAINT fkh4c7lvsc298whoyd4w9ta25cr FOREIGN KEY (post_id) REFERENCES public.posts(id),

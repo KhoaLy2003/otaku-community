@@ -5,10 +5,11 @@ import com.otaku.community.common.dto.ApiResponse;
 import com.otaku.community.common.dto.PageResponse;
 import com.otaku.community.feature.activity.service.ActivityService;
 import com.otaku.community.feature.notification.service.NotificationService;
+import com.otaku.community.feature.user.dto.UpdateMainFavoriteRequest;
 import com.otaku.community.feature.user.dto.UpdateUserRequest;
 import com.otaku.community.feature.user.dto.UserProfileResponse;
 import com.otaku.community.feature.user.dto.UserResponse;
-import com.otaku.community.feature.user.dto.UserSummaryDto;
+import com.otaku.community.feature.user.dto.UserSummaryResponse;
 import com.otaku.community.feature.user.dto.UserSyncRequest;
 import com.otaku.community.feature.user.dto.UserSyncResponse;
 import com.otaku.community.feature.user.entity.User;
@@ -62,6 +63,15 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success("Profile updated successfully", response));
     }
 
+    @PutMapping("/me/main-favorite")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Update main favorite", description = "Updates the authenticated user's main favorite")
+    public ResponseEntity<ApiResponse<UserResponse>> updateMainFavorite(
+            @Valid @RequestBody UpdateMainFavoriteRequest request) {
+        UserResponse response = userService.updateMainFavorite(request);
+        return ResponseEntity.ok(ApiResponse.success("Main favorite updated successfully", response));
+    }
+
     @GetMapping("/search")
     @Operation(summary = "Search users", description = "Searches for users by username")
     public ResponseEntity<PageResponse<UserResponse>> searchUsers(
@@ -72,7 +82,7 @@ public class UserController {
         return ResponseEntity.ok(userService.searchUsers(q, page, limit));
     }
 
-    //TODO: enhancement
+    // TODO: enhancement
     @PostMapping("/sync")
     @PreAuthorize("isAuthenticated()")
     @SecurityRequirement(name = "bearer-jwt")
@@ -112,9 +122,9 @@ public class UserController {
 
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    @Operation(summary = "Get current user", description = "Gets the currently authenticated user's profile")
-    public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser() {
-        UserResponse response = userService.getCurrentUserResponse();
+    @Operation(summary = "Get current user", description = "Gets the currently authenticated user's profile and session data")
+    public ResponseEntity<ApiResponse<UserSyncResponse>> getCurrentUser() {
+        UserSyncResponse response = userService.getCurrentUserSyncResponse();
         return ResponseEntity.ok(ApiResponse.success("User retrieved successfully", response));
     }
 
@@ -138,20 +148,13 @@ public class UserController {
 
     @GetMapping("/{id}/followers")
     @Operation(summary = "Get followers list", description = "Retrieves a paginated list of followers for a user")
-    public ResponseEntity<ApiResponse<PageResponse<UserSummaryDto>>> getFollowers(
+    public ResponseEntity<ApiResponse<PageResponse<UserSummaryResponse>>> getFollowers(
             @PathVariable UUID id,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int limit,
-            @AuthenticationPrincipal Jwt jwt) {
+            @CurrentUserId UUID currentUserId) {
 
-        UUID currentUserId = null;
-        if (jwt != null) {
-            currentUserId = userService.findByAuth0IdOptional(jwt.getSubject())
-                    .map(User::getId)
-                    .orElse(null);
-        }
-
-        PageResponse<UserSummaryDto> response = userFollowService.getFollowersWithStatus(
+        PageResponse<UserSummaryResponse> response = userFollowService.getFollowersWithStatus(
                 id, currentUserId, page, limit);
 
         return ResponseEntity.ok(ApiResponse.success(response));
@@ -159,20 +162,13 @@ public class UserController {
 
     @GetMapping("/{id}/following")
     @Operation(summary = "Get following list", description = "Retrieves a paginated list of users that the specified user is following")
-    public ResponseEntity<ApiResponse<PageResponse<UserSummaryDto>>> getFollowing(
+    public ResponseEntity<ApiResponse<PageResponse<UserSummaryResponse>>> getFollowing(
             @PathVariable UUID id,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int limit,
-            @AuthenticationPrincipal Jwt jwt) {
+            @CurrentUserId UUID currentUserId) {
 
-        UUID currentUserId = null;
-        if (jwt != null) {
-            currentUserId = userService.findByAuth0IdOptional(jwt.getSubject())
-                    .map(User::getId)
-                    .orElse(null);
-        }
-
-        PageResponse<UserSummaryDto> response = userFollowService.getFollowingWithStatus(
+        PageResponse<UserSummaryResponse> response = userFollowService.getFollowingWithStatus(
                 id, currentUserId, page, limit);
         return ResponseEntity.ok(ApiResponse.success(response));
     }

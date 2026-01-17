@@ -1,11 +1,15 @@
 package com.otaku.community.feature.anime.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class AnimeCharacterDto {
     private Integer malId;
@@ -15,6 +19,8 @@ public class AnimeCharacterDto {
     private List<VoiceActorDto> voiceActors;
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Builder
     public static class VoiceActorDto {
         private String name;

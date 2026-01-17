@@ -3,7 +3,7 @@ import type { Notification } from '@/types/notification';
 import { cn } from '@/lib/utils';
 import { useNotificationStore } from '@/store/useNotificationStore';
 import { notificationApi } from '@/lib/api/notification';
-import { Avatar, AvatarImage, AvatarFallback } from '../ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 
 interface NotificationItemProps {
   notification: Notification;
@@ -101,14 +101,10 @@ export const NotificationItem = ({ notification }: NotificationItemProps) => {
         !notification.isRead && 'bg-blue-50'
       )}
     >
-      <Avatar>
-        <AvatarImage src={notification.sender?.avatarUrl} />
-        <AvatarFallback>
-          {notification.sender?.username
-            ? getInitials(notification.sender.username)
-            : '?'}
-        </AvatarFallback>
-      </Avatar>
+      <Avatar
+        src={notification.sender?.avatarUrl || undefined}
+        alt={notification.sender?.username}
+      />
       <div className="flex-1 min-w-0">
         <p className="text-sm text-gray-900">
           {message}
@@ -116,7 +112,7 @@ export const NotificationItem = ({ notification }: NotificationItemProps) => {
         {notification.preview && (
           <p className="text-sm text-gray-500 mt-1 truncate">{notification.preview}</p>
         )}
-        <p className="text-xs text-gray-400 mt-1">
+        <p className="text-sm text-gray-400 mt-1">
           {new Date(notification.createdAt).toLocaleString()}
         </p>
       </div>

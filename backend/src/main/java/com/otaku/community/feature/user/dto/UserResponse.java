@@ -24,4 +24,5 @@ public class UserResponse {
     private String location;
     private ProfileVisibility profileVisibility;
     private Instant createdAt;
+    private UserMainFavoriteResponse mainFavorite;
 }

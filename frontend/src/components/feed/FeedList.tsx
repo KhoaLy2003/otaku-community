@@ -3,7 +3,7 @@ import { PostCard, type BasePost } from '../posts/PostCard'
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { feedApi } from '@/lib/api/feed'
 import type { FeedPost } from '@/types/post'
-import { timeAgo } from '@/lib/utils'
+import { timeAgo, scrollToTop } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { postsApi } from '@/lib/api/posts'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
@@ -53,7 +53,7 @@ export function FeedList() {
 
   useEffect(() => {
     const handleRefresh = () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      scrollToTop('smooth')
       fetchFeed()
     }
     window.addEventListener('REFRESH_FEED', handleRefresh)

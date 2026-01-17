@@ -19,12 +19,12 @@ export const AnimeHoverModal: React.FC<AnimeHoverModalProps> = ({ anime }) => {
                         <Star className="w-4 h-4 fill-current" />
                         <span className="font-bold">{anime.score ?? "N/A"}</span>
                     </div>
-                    <span className="text-xs px-2 py-0.5 bg-white/20 rounded-full">
+                    <span className="text-sm px-2 py-0.5 bg-white/20 rounded-full">
                         {anime.type}
                     </span>
                 </div>
 
-                <div className="flex flex-wrap gap-1 text-xs text-gray-300 mb-2">
+                <div className="flex flex-wrap gap-1 text-sm text-gray-300 mb-2">
                     {anime.genres.slice(0, 3).map((genre) => (
                         <span key={genre.name} className="bg-primary-500/20 text-primary-200 px-1.5 py-0.5 rounded">
                             {genre.name}
@@ -32,7 +32,7 @@ export const AnimeHoverModal: React.FC<AnimeHoverModalProps> = ({ anime }) => {
                     ))}
                 </div>
 
-                <p className="text-xs text-gray-400">
+                <p className="text-sm text-gray-400">
                     {anime.status} • {anime.episodes ?? "?"} eps
                 </p>
             </div>

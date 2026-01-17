@@ -14,17 +14,22 @@ interface MangaFilterBarProps {
 
 const TYPE_OPTIONS = [
     { label: "All Types", value: "" },
-    { label: "Manga", value: "Manga" },
-    { label: "Novel", value: "Novel" },
-    { label: "Light Novel", value: "Light Novel" },
-    { label: "One-shot", value: "One-shot" },
+    { label: "Manga", value: "manga" },
+    { label: "Novel", value: "novel" },
+    { label: "Light Novel", value: "lightnovel" },
+    { label: "One-shot", value: "oneshot" },
+    { label: "Doujin", value: "doujin" },
+    { label: "Manhwa", value: "manhwa" },
+    { label: "Manhua", value: "manhua" },
 ];
 
 const STATUS_OPTIONS = [
     { label: "All Status", value: "" },
-    { label: "Publishing", value: "Publishing" },
-    { label: "Finished", value: "Finished" },
-    { label: "On Hiatus", value: "On Hiatus" },
+    { label: "Publishing", value: "publishing" },
+    { label: "Finished", value: "complete" },
+    { label: "On Hiatus", value: "hiatus" },
+    { label: "Discontinued", value: "discontinued" },
+    { label: "Upcoming", value: "upcoming" },
 ];
 
 export const MangaFilterBar: React.FC<MangaFilterBarProps> = ({

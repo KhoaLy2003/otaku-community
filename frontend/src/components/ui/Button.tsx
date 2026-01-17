@@ -2,7 +2,7 @@ import { Colors } from "../../constants/colors";
 import { cn } from "../../lib/utils";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-type ButtonVariant = "filled" | "outline";
+type ButtonVariant = "filled" | "outline" | "ghost";
 type ButtonSize = "sm" | "md";
 type ButtonColor = "blue" | "orange" | "grey";
 
@@ -28,7 +28,7 @@ const palette: Record<
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-  sm: "h-9 rounded-full px-4 text-xs font-semibold",
+  sm: "h-9 rounded-full px-4 text-sm font-semibold",
   md: "h-11 rounded-full px-5 text-sm font-semibold",
 };
 
@@ -61,11 +61,17 @@ export function Button({
         color: c.textOnFilled,
         borderColor: c.main,
       }
-      : {
-        backgroundColor: Colors.Grey.White,
-        color: c.main,
-        borderColor: c.main,
-      };
+      : variant === "outline"
+        ? {
+          backgroundColor: Colors.Grey.White,
+          color: c.main,
+          borderColor: c.main,
+        }
+        : {
+          backgroundColor: "transparent",
+          color: c.main,
+          borderColor: "transparent",
+        };
 
   return (
     <button

@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -117,7 +118,7 @@ public class InteractionController {
             @RequestParam("postId") UUID postId,
             @RequestParam(value = "content", required = false) String content,
             @RequestParam(value = "parentId", required = false) UUID parentId,
-            @RequestParam(value = "file", required = false) org.springframework.web.multipart.MultipartFile file) {
+            @RequestParam(value = "file", required = false) MultipartFile file) {
 
         CreateCommentRequest request = new CreateCommentRequest(postId, content, null, parentId);
         CommentResponse response = interactionService.createComment(request, file);
@@ -151,7 +152,7 @@ public class InteractionController {
     public ResponseEntity<ApiResponse<CommentResponse>> updateCommentMultipart(
             @PathVariable UUID commentId,
             @RequestParam(value = "content", required = false) String content,
-            @RequestParam(value = "file", required = false) org.springframework.web.multipart.MultipartFile file,
+            @RequestParam(value = "file", required = false) MultipartFile file,
             @CurrentUserId UUID interactionUserId) {
 
         UpdateCommentRequest request = new UpdateCommentRequest(content, null);

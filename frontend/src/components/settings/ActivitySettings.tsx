@@ -91,7 +91,7 @@ export const ActivitySettings: React.FC = () => {
                                         )}>
                                             {getActionLabel(log.actionType)}
                                         </span>
-                                        <span className="flex items-center text-xs text-gray-400">
+                                        <span className="flex items-center text-sm text-gray-400">
                                             <Clock size={12} className="mr-1" />
                                             {parseDate(log.createdAt)?.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                                         </span>

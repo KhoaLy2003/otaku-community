@@ -1,5 +1,6 @@
 package com.otaku.community.common.dto;
 
+import com.otaku.community.feature.integration.jikan.dto.JikanListResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -44,5 +45,34 @@ public class PageResponse<T> {
                 .data(data)
                 .pagination(pagination)
                 .build();
+    }
+
+    public static <S, T> PageResponse<T> toPageResponseFromJikan(
+            JikanListResponse<S> response,
+            List<T> dtos
+    ) {
+        JikanListResponse.JikanPagination pagination = response.getPagination();
+
+        int page = 1;
+        int limit = 20;
+        long total = 0;
+
+        if (pagination != null) {
+            page = pagination.getCurrentPage() != null
+                    ? pagination.getCurrentPage()
+                    : page;
+
+            if (pagination.getItems() != null) {
+                limit = pagination.getItems().getPerPage() != null
+                        ? pagination.getItems().getPerPage()
+                        : limit;
+
+                total = pagination.getItems().getTotal() != null
+                        ? pagination.getItems().getTotal()
+                        : total;
+            }
+        }
+
+        return PageResponse.of(dtos, page, limit, total);
     }
 }

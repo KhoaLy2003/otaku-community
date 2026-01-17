@@ -93,7 +93,7 @@ const HelpPage: React.FC = () => {
                     </div>
                     <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg flex gap-3">
                         <AlertCircle className="w-5 h-5 text-blue-600 shrink-0" />
-                        <p className="text-xs text-blue-800 dark:text-blue-300">
+                        <p className="text-sm text-blue-800 dark:text-blue-300">
                             Notice incorrect data? You can report it through our feedback channels for manual review.
                         </p>
                     </div>
@@ -243,7 +243,7 @@ const HelpPage: React.FC = () => {
 
             {/* Footer Meta */}
             <footer className="text-center py-8">
-                <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">
+                <p className="text-sm text-gray-400 uppercase tracking-widest font-bold">
                     Otaku Community • Last Updated January 2026
                 </p>
             </footer>

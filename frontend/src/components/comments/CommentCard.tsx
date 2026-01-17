@@ -92,7 +92,7 @@ export function CommentCard({
         <div className="p-3">
           {/* Header */}
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2 text-xs text-[#7c7c7c]">
+            <div className="flex items-center gap-2 text-sm text-[#7c7c7c]">
               <Link to={`/profile/${author}`} className="font-semibold text-[#1a1a1b] hover:underline">
                 {author}
               </Link>
@@ -206,7 +206,7 @@ export function CommentCard({
           )}
 
           {/* Actions */}
-          <div className="flex items-center gap-4 mt-3 text-xs font-semibold text-[#7c7c7c]">
+          <div className="flex items-center gap-4 mt-3 text-sm font-semibold text-[#7c7c7c]">
             {/* Vote buttons */}
             <div className="flex items-center gap-1">
               <button

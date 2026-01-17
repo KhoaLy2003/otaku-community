@@ -17,7 +17,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
 
   return (
     <div className="space-y-4">
-       <div className="text-center mb-6">
+      <div className="text-center mb-6">
         <p className="text-gray-600 text-sm">
           Join Otaku Community using your Auth0 account
         </p>
@@ -39,7 +39,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
         </Link>
       </div>
 
-      <p className="text-xs text-gray-500 text-center mt-4">
+      <p className="text-sm text-gray-500 text-center mt-4">
         By signing up, you agree to our Terms of Service and Privacy Policy
       </p>
     </div>

@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import type { PostMedia } from '@/types/post';
-import { Colors } from '@/constants/colors';
 
 interface PostMediaGalleryProps {
     media: PostMedia[];
@@ -65,7 +63,7 @@ export const PostMediaGallery: React.FC<PostMediaGalleryProps> = ({ media, title
                     </button>
 
                     {/* Counter / Dots */}
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 bg-black/50 rounded-full text-white text-xs font-bold backdrop-blur-sm">
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 bg-black/50 rounded-full text-white text-sm font-bold backdrop-blur-sm">
                         {currentIndex + 1} / {media.length}
                     </div>
                 </>

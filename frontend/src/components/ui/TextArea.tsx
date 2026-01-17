@@ -25,7 +25,7 @@ export function TextArea({ label, error, className, ...props }: TextAreaProps) {
                 style={{ backgroundColor: Colors.Grey[10] }}
                 {...props}
             />
-            {error && <span className="text-xs text-red-500 ml-1 mt-1">{error}</span>}
+            {error && <span className="text-sm text-red-500 ml-1 mt-1">{error}</span>}
         </div>
     );
 }

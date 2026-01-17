@@ -1,4 +1,4 @@
-package com.otaku.community.feature.anime.integration.dto;
+package com.otaku.community.feature.integration.jikan.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;

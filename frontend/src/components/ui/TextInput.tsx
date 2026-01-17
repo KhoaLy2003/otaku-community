@@ -56,7 +56,7 @@ export function TextInput({ className, leadingIcon, trailingIcon, pill = true, l
         </label>
       )}
       {inputContainer}
-      {error && <span className="text-xs text-red-500 ml-1 mt-1">{error}</span>}
+      {error && <span className="text-sm text-red-500 ml-1 mt-1">{error}</span>}
     </div>
   )
 }

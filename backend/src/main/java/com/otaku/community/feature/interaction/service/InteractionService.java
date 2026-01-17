@@ -23,7 +23,7 @@ import com.otaku.community.feature.post.entity.Post;
 import com.otaku.community.feature.post.entity.PostStats;
 import com.otaku.community.feature.post.repository.PostRepository;
 import com.otaku.community.feature.post.service.PostStatsService;
-import com.otaku.community.feature.user.dto.UserSummaryDto;
+import com.otaku.community.feature.user.dto.UserSummaryResponse;
 import com.otaku.community.feature.user.entity.User;
 import com.otaku.community.feature.user.service.UserFollowService;
 import com.otaku.community.feature.user.service.UserService;
@@ -160,7 +160,7 @@ public class InteractionService {
      * Get paginated users who liked a post
      */
     @Transactional(readOnly = true)
-    public PageResponse<UserSummaryDto> getPostLikes(UUID postId, UUID currentUserId, int page, int limit) {
+    public PageResponse<UserSummaryResponse> getPostLikes(UUID postId, UUID currentUserId, int page, int limit) {
         log.debug("Fetching likes for post {}", postId);
 
         // Verify post exists

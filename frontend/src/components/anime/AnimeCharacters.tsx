@@ -54,7 +54,7 @@ export const AnimeCharacters: React.FC<AnimeCharactersProps> = ({ characters }) 
                             <div className="flex items-center gap-3 pr-3 text-right">
                                 <div className="py-2">
                                     <p className="font-medium text-gray-900 dark:text-white text-sm line-clamp-1">{char.voiceActors[0].name}</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{char.voiceActors[0].language}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{char.voiceActors[0].language}</p>
                                 </div>
                                 <img
                                     src={char.voiceActors[0].imageUrl}

@@ -2,6 +2,7 @@ package com.otaku.community.feature.anime.controller;
 
 import com.otaku.community.common.dto.PageResponse;
 import com.otaku.community.feature.anime.dto.AnimeDto;
+import com.otaku.community.feature.anime.dto.CharacterDto;
 import com.otaku.community.feature.anime.dto.SeasonArchiveDto;
 import com.otaku.community.feature.anime.service.AnimeService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -64,5 +65,13 @@ public class AnimeController {
             @PathVariable String season,
             @RequestParam(defaultValue = "1") int page) {
         return animeService.getSeasonalAnime(year, season, page);
+    }
+
+    @GetMapping("/characters/search")
+    @Operation(summary = "Search characters", description = "Search characters by name")
+    public PageResponse<CharacterDto> searchCharacters(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "1") int page) {
+        return animeService.searchCharacters(q, page);
     }
 }

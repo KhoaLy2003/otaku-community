@@ -1,5 +1,5 @@
 import { apiClient } from "./client";
-import type { Anime, SeasonArchive } from "../../types/anime";
+import type { Anime, SeasonArchive, Character } from "../../types/anime";
 
 export interface PageResponse<T> {
   data: T[];
@@ -76,5 +76,17 @@ export const animeApi = {
    */
   getSeasonsArchive: async (): Promise<SeasonArchive[]> => {
     return apiClient.get<SeasonArchive[]>("/v1/anime/seasons");
+  },
+
+  /**
+   * Search characters
+   */
+  searchCharacters: async (
+    query: string,
+    page: number = 1
+  ): Promise<PageResponse<Character>> => {
+    return apiClient.get<PageResponse<Character>>(
+      `/v1/anime/characters/search?q=${query}&page=${page}`
+    );
   },
 };

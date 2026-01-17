@@ -19,12 +19,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     Optional<User> findByAuth0Id(String auth0Id);
 
-    Optional<User> findByEmail(String email);
-
     Optional<User> findByUsername(String username);
-
-    @Query("SELECT u FROM User u WHERE u.deletedAt IS NULL AND u.id = :id")
-    Optional<User> findByIdAndNotDeleted(@Param("id") UUID id);
 
     @Query("SELECT u FROM User u WHERE u.deletedAt IS NULL AND u.username = :username")
     Optional<User> findByUsernameAndNotDeleted(@Param("username") String username);
@@ -35,9 +30,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     boolean existsByEmail(String email);
 
     boolean existsByUsername(String username);
-
-    @Query("SELECT COUNT(u) FROM User u WHERE u.deletedAt IS NULL")
-    long countActiveUsers();
 
     List<User> findAllByIdIn(Set<UUID> ids);
 

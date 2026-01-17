@@ -36,7 +36,7 @@ export function ConfirmDialog({
             isOpen={isOpen}
             onClose={onClose}
             title={title}
-            className="max-w-md"
+            className="max-w-xl"
             footer={
                 <>
                     <Button
@@ -64,7 +64,7 @@ export function ConfirmDialog({
                     <AlertTriangle size={24} />
                 </div>
                 <div className="flex-1">
-                    <p className="text-sm text-gray-700 leading-relaxed">
+                    <p className="text-base text-gray-700 leading-relaxed">
                         {message}
                     </p>
                 </div>
