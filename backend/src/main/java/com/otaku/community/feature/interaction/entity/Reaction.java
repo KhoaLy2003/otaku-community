@@ -21,16 +21,13 @@ import lombok.Setter;
 import java.util.UUID;
 
 @Entity
-@Table(name = "reactions",
-        uniqueConstraints = {
-                @UniqueConstraint(name = "uk_reactions_user_target",
-                        columnNames = {"user_id", "target_type", "target_id"})
-        },
-        indexes = {
-                @Index(name = "idx_reactions_target", columnList = "target_type, target_id"),
-                @Index(name = "idx_reactions_user_id", columnList = "user_id"),
-                @Index(name = "idx_reactions_type", columnList = "reaction_type")
-        })
+@Table(name = "reactions", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_reactions_user_target", columnNames = {"user_id", "target_type", "target_id"})
+}, indexes = {
+        @Index(name = "idx_reactions_target", columnList = "target_type, target_id"),
+        @Index(name = "idx_reactions_user_id", columnList = "user_id"),
+        @Index(name = "idx_reactions_type", columnList = "reaction_type")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -57,7 +54,7 @@ public class Reaction extends BaseEntity {
     private ReactionType reactionType;
 
     public enum TargetType {
-        POST, COMMENT
+        POST, COMMENT, TRANSLATION
     }
 
     public enum ReactionType {

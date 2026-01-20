@@ -8,11 +8,11 @@ import com.otaku.community.common.util.SecurityUtils;
 import com.otaku.community.feature.activity.entity.ActivityTargetType;
 import com.otaku.community.feature.activity.entity.ActivityType;
 import com.otaku.community.feature.activity.event.ActivityEvent;
+import com.otaku.community.feature.manga.service.RankingService;
 import com.otaku.community.feature.notification.service.NotificationService;
-import com.otaku.community.feature.post.repository.PostRepository;
-import com.otaku.community.feature.user.dto.UserMainFavoriteResponse;
 import com.otaku.community.feature.user.dto.UpdateMainFavoriteRequest;
 import com.otaku.community.feature.user.dto.UpdateUserRequest;
+import com.otaku.community.feature.user.dto.UserMainFavoriteResponse;
 import com.otaku.community.feature.user.dto.UserProfileResponse;
 import com.otaku.community.feature.user.dto.UserResponse;
 import com.otaku.community.feature.user.dto.UserSyncResponse;
@@ -45,16 +45,15 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final UserFollowService userFollowService;
-    private final PostRepository postRepository;
     private final UserMainFavoriteRepository userMainFavoriteRepository;
     private final NotificationService notificationService;
+    private final RankingService rankingService;
     private final ApplicationEventPublisher eventPublisher;
 
     @Value("${default.avatar.url}")
     private String defaultAvatarUrl;
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "userProfile", key = "#username")
     public UserProfileResponse getUserProfileByUsername(String username) {
         log.debug("Fetching user profile from database for username: {}", username);
         User user = userRepository.findByUsernameAndNotDeleted(username)
@@ -86,7 +85,15 @@ public class UserService {
         } else {
             response.setFollowersCount(userFollowService.getFollowersCount(user.getId()));
             response.setFollowingCount(userFollowService.getFollowingCount(user.getId()));
-            response.setPostsCount(postRepository.countByUserIdAndNotDeleted(user.getId()));
+
+            // Set Translator Stats & Rank
+            response.setTotalMangaViews(user.getTotalMangaViews());
+            response.setTotalMangaUpvotes(user.getTotalMangaUpvotes());
+            response.setTotalTranslations(user.getTotalTranslations());
+
+            if (user.getTotalMangaViews() > 0 || user.getTotalMangaUpvotes() > 0) {
+                response.setRank(rankingService.getUserRank(user.getId()));
+            }
         }
 
         String auth0Id = SecurityUtils.getCurrentAuth0Id();

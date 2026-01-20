@@ -58,13 +58,15 @@ public class Notification extends BaseEntity {
         UNFOLLOW,
         MENTION,
         SYSTEM,
-        MESSAGE
+        MESSAGE,
+        NEW_TRANSLATION
     }
 
     public enum TargetType {
         POST,
         COMMENT,
         USER,
-        CHAT
+        CHAT,
+        TRANSLATION
     }
 }

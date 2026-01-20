@@ -13,13 +13,13 @@ import org.springframework.data.domain.Pageable;
 import java.util.UUID;
 
 public interface PostService {
-    PostResponse createPost(CreatePostRequest request);
+    PostResponse createPost(CreatePostRequest request, UUID userId);
 
     PostResponse updatePost(UUID postId, UpdatePostRequest request);
 
     void deletePost(UUID postId);
 
-    PostDetailResponse getPostDetail(UUID postId);
+    PostDetailResponse getPostDetail(UUID postId, UUID userId);
 
     Page<PostResponse> getPostsByUser(UUID userId, Pageable pageable);
 

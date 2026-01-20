@@ -42,8 +42,8 @@ const AnimeListPage = () => {
     useEffect(() => {
         const fetchSeasons = async () => {
             try {
-                const archive = await animeApi.getSeasonsArchive();
-                setSeasonsArchive(archive);
+                const response = await animeApi.getSeasonsArchive();
+                setSeasonsArchive(response.data);
             } catch (err) {
                 console.error("Failed to fetch seasons archive:", err);
             }
@@ -106,8 +106,8 @@ const AnimeListPage = () => {
                     }
                 }
 
-                setAnimeData(response.data);
-                setTotalPages(response.pagination.totalPages);
+                setAnimeData(response.data.data);
+                setTotalPages(response.data.pagination.totalPages);
             } catch (err) {
                 console.error("Failed to fetch anime:", err);
                 setError(err instanceof Error ? err.message : "Failed to load anime");

@@ -1,4 +1,4 @@
-package com.otaku.community.feature.manga.dto;
+package com.otaku.community.feature.manga.dto.manga;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

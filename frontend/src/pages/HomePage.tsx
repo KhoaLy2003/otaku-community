@@ -8,7 +8,11 @@ import { RecentPostsCard } from '@/components/sidebar/RecentPostsCard'
 import { useFeedUpdates } from '@/hooks/useFeedUpdates'
 import { scrollToTop } from '@/lib/utils'
 
+import { TranslationFeed } from '@/components/feed/TranslationFeed'
+
 const HomePage: React.FC = () => {
+  const [activeTab, setActiveTab] = React.useState('best')
+
   // Enable real-time feed updates
   const { notification, isConnected, dismissNotification, handleRefresh } = useFeedUpdates({
     enabled: true,
@@ -58,8 +62,12 @@ const HomePage: React.FC = () => {
       <div className="flex-1 mx-auto flex gap-6 py-4">
         <section className="flex-1 space-y-4">
           <CreatePostCard />
-          <FeedTabs />
-          <FeedList />
+          <FeedTabs activeTab={activeTab} onChange={setActiveTab} />
+          {activeTab === 'translations' ? (
+            <TranslationFeed />
+          ) : (
+            <FeedList />
+          )}
         </section>
         <aside className="hidden w-full max-w-[312px] space-y-4 lg:block">
           <HomeCard />

@@ -8,9 +8,10 @@ import { ProfileFavorites } from '@/components/profile/ProfileFavorites'
 import { useAuth } from '@/hooks/useAuth'
 import { Shield } from 'lucide-react'
 import { usersApi } from '@/lib/api/users'
-import type { UserProfile } from '@/types/user'
+import { ProfileTranslations } from '@/components/profile/ProfileTranslations'
+import type { UserProfile } from '@/types'
 
-type TabType = 'posts' | 'replies' | 'media' | 'likes' | 'favorites';
+type TabType = 'posts' | 'translations' | 'replies' | 'media' | 'likes' | 'favorites';
 
 const ProfilePage: React.FC = () => {
   const { user: authUser, isLoading: authLoading } = useAuth()
@@ -50,7 +51,7 @@ const ProfilePage: React.FC = () => {
   return (
     <div className="flex-1 mx-auto flex gap-6">
       <section className="flex-1 min-w-0">
-        <div className="rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="rounded-lg border-gray-200 overflow-hidden">
           {loading && !user ? (
             <div className="bg-white p-12 text-center">
               <p className="text-gray-500 italic animate-pulse">Loading profile...</p>
@@ -77,10 +78,10 @@ const ProfilePage: React.FC = () => {
                 </div>
               ) : activeTab === 'media' ? (
                 <ProfileMedia username={user.username} />
+              ) : activeTab === 'translations' ? (
+                <ProfileTranslations username={user.username} />
               ) : activeTab === 'favorites' ? (
-                <div className="p-4">
-                  <ProfileFavorites isOwner={username === authUser?.username} />
-                </div>
+                <ProfileFavorites isOwner={username === authUser?.username} />
               ) : (
                 <ProfileFeed
                   username={user.username}

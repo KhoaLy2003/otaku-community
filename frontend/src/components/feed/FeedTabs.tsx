@@ -1,10 +1,10 @@
-import { useState } from 'react'
-import { Flame, Sparkles, TrendingUp } from 'lucide-react'
+import { Flame, Sparkles, TrendingUp, BookOpen } from 'lucide-react'
 import { Tabs, type TabItem } from '../ui/Tabs'
 import { Button } from '../ui/Button'
 
 const tabItems: TabItem[] = [
   { id: 'best', label: 'Best', icon: <Sparkles className="h-4 w-4" /> },
+  { id: 'translations', label: 'Translations', icon: <BookOpen className="h-4 w-4" /> },
   { id: 'hot', label: 'Hot', icon: <Flame className="h-4 w-4" /> },
   { id: 'new', label: 'New', icon: <PlusIcon className="h-4 w-4" /> },
   { id: 'top', label: 'Top', icon: <TrendingUp className="h-4 w-4" /> },
@@ -18,12 +18,15 @@ function PlusIcon(props: React.ComponentProps<'svg'>) {
   )
 }
 
-export function FeedTabs() {
-  const [activeTab, setActiveTab] = useState('best')
+interface FeedTabsProps {
+  activeTab: string;
+  onChange: (id: string) => void;
+}
 
+export function FeedTabs({ activeTab, onChange }: FeedTabsProps) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 rounded border bg-white p-3 shadow-sm">
-      <Tabs tabs={tabItems} activeTab={activeTab} onChange={setActiveTab} />
+      <Tabs tabs={tabItems} activeTab={activeTab} onChange={onChange} />
       <Button variant="outline" color="grey" size="sm">
         More
       </Button>

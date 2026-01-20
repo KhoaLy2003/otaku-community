@@ -1,15 +1,16 @@
 import { apiClient } from "./client";
 import type { Anime, SeasonArchive, Character } from "../../types/anime";
+import type { ApiResponse } from "../../types/api";
 
 export interface PageResponse<T> {
   data: T[];
   pagination: {
-    currentPage: number;
+    page: number;
+    limit: number;
+    total: number;
     totalPages: number;
-    totalItems: number;
-    itemsPerPage: number;
-    hasNextPage: boolean;
-    hasPreviousPage: boolean;
+    hasNext: boolean;
+    hasPrev: boolean;
   };
 }
 
@@ -25,8 +26,8 @@ export const animeApi = {
    * Search anime with filters
    */
   searchAnime: async (
-    params: AnimeSearchParams
-  ): Promise<PageResponse<Anime>> => {
+    params: AnimeSearchParams,
+  ): Promise<ApiResponse<PageResponse<Anime>>> => {
     const queryParams = new URLSearchParams();
 
     if (params.q) queryParams.append("q", params.q);
@@ -37,22 +38,24 @@ export const animeApi = {
     const endpoint = `/v1/anime/search${
       queryParams.toString() ? `?${queryParams.toString()}` : ""
     }`;
-    return apiClient.get<PageResponse<Anime>>(endpoint);
+    return apiClient.get<ApiResponse<PageResponse<Anime>>>(endpoint);
   },
 
   /**
    * Get anime by ID
    */
-  getAnimeById: async (id: number | string): Promise<Anime> => {
-    return apiClient.get<Anime>(`/v1/anime/${id}`);
+  getAnimeById: async (id: number | string): Promise<ApiResponse<Anime>> => {
+    return apiClient.get<ApiResponse<Anime>>(`/v1/anime/${id}`);
   },
 
   /**
    * Get trending/top anime
    */
-  getTrendingAnime: async (page: number = 1): Promise<PageResponse<Anime>> => {
-    return apiClient.get<PageResponse<Anime>>(
-      `/v1/anime/trending?page=${page}`
+  getTrendingAnime: async (
+    page: number = 1,
+  ): Promise<ApiResponse<PageResponse<Anime>>> => {
+    return apiClient.get<ApiResponse<PageResponse<Anime>>>(
+      `/v1/anime/trending?page=${page}`,
     );
   },
 
@@ -62,20 +65,20 @@ export const animeApi = {
   getSeasonalAnime: async (
     page: number = 1,
     year?: number,
-    season?: string
-  ): Promise<PageResponse<Anime>> => {
+    season?: string,
+  ): Promise<ApiResponse<PageResponse<Anime>>> => {
     const endpoint =
       year && season
         ? `/v1/anime/seasons/${year}/${season}?page=${page}`
         : `/v1/anime/seasonal?page=${page}`;
-    return apiClient.get<PageResponse<Anime>>(endpoint);
+    return apiClient.get<ApiResponse<PageResponse<Anime>>>(endpoint);
   },
 
   /**
    * Get seasons archive
    */
-  getSeasonsArchive: async (): Promise<SeasonArchive[]> => {
-    return apiClient.get<SeasonArchive[]>("/v1/anime/seasons");
+  getSeasonsArchive: async (): Promise<ApiResponse<SeasonArchive[]>> => {
+    return apiClient.get<ApiResponse<SeasonArchive[]>>("/v1/anime/seasons");
   },
 
   /**
@@ -83,10 +86,10 @@ export const animeApi = {
    */
   searchCharacters: async (
     query: string,
-    page: number = 1
-  ): Promise<PageResponse<Character>> => {
-    return apiClient.get<PageResponse<Character>>(
-      `/v1/anime/characters/search?q=${query}&page=${page}`
+    page: number = 1,
+  ): Promise<ApiResponse<PageResponse<Character>>> => {
+    return apiClient.get<ApiResponse<PageResponse<Character>>>(
+      `/v1/anime/characters/search?q=${query}&page=${page}`,
     );
   },
 };

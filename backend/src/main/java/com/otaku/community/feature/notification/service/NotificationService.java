@@ -32,7 +32,7 @@ public class NotificationService {
 
     @Transactional
     public void createAndSendNotification(UUID recipientId, UUID senderId, Notification.NotificationType type,
-                                          UUID targetId, Notification.TargetType targetType, String preview) {
+            UUID targetId, Notification.TargetType targetType, String preview) {
 
         // Do not notify if sender is the same as recipient
         if (recipientId.equals(senderId)) {
@@ -60,6 +60,22 @@ public class NotificationService {
                 recipientId.toString(),
                 "/queue/notifications",
                 response);
+    }
+
+    @Transactional
+    public void broadcastNewTranslationNotification(UUID senderId, UUID translationId, String translationName) {
+        List<UUID> recipients = userRepository.findAllUserIdsExcept(senderId);
+        String preview = "New translation published: " + translationName;
+
+        for (UUID recipientId : recipients) {
+            createAndSendNotification(
+                    recipientId,
+                    senderId,
+                    Notification.NotificationType.NEW_TRANSLATION,
+                    translationId,
+                    Notification.TargetType.TRANSLATION,
+                    preview);
+        }
     }
 
     @Transactional(readOnly = true)

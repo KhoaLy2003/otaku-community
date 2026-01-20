@@ -6,6 +6,7 @@ import com.otaku.community.feature.anime.dto.AnimeCharacterDto;
 import com.otaku.community.feature.anime.dto.AnimeDto;
 import com.otaku.community.feature.anime.dto.CharacterDto;
 import com.otaku.community.feature.anime.dto.SeasonArchiveDto;
+import com.otaku.community.feature.anime.mapper.AnimeMapper;
 import com.otaku.community.feature.integration.jikan.JikanIntegrationService;
 import com.otaku.community.feature.integration.jikan.dto.JikanAnimeData;
 import com.otaku.community.feature.integration.jikan.dto.JikanCharacterData;
@@ -13,7 +14,6 @@ import com.otaku.community.feature.integration.jikan.dto.JikanCharactersResponse
 import com.otaku.community.feature.integration.jikan.dto.JikanListResponse;
 import com.otaku.community.feature.integration.jikan.dto.JikanSeasonArchiveResponse;
 import com.otaku.community.feature.integration.jikan.dto.JikanSingleResponse;
-import com.otaku.community.feature.anime.mapper.AnimeMapper;
 import com.otaku.community.feature.post.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

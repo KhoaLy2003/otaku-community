@@ -5,6 +5,7 @@ This is a full-stack web application for a community of otaku (people who love a
 ## Features
 
 - **User Authentication:** Users can sign up, log in, and manage their profiles.
+- **Manga Reader:** Community-driven manga translation publishing, translator ranking system, and high-performance, mobile-friendly reading experience using Swiper.js.
 - **Posts:** Users can create, read, update, and delete posts.
 - **Topics:** Posts are organized by topics.
 - **Feed:** Users can see a feed of posts from topics they follow.

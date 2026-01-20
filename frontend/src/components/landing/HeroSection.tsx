@@ -9,7 +9,7 @@ export function HeroSection() {
       {/* Animated background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-pink-900 to-orange-900 opacity-50" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.3),transparent_50%)]" />
-      
+
       {/* Floating particles effect */}
       <div className="absolute inset-0 overflow-hidden">
         {[...Array(20)].map((_, i) => (
@@ -36,9 +36,9 @@ export function HeroSection() {
           <br />
           <span className="text-white">& Create Together</span>
         </h1>
-        
+
         <p className="text-xl sm:text-2xl text-gray-200 mb-10 max-w-3xl mx-auto animate-slide-in-from-bottom-2">
-          Share posts, follow creators, discuss topics, and build your anime universe.
+          Share posts, read manga, follow creators, discuss topics, and build your anime universe.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-zoom-in-95">

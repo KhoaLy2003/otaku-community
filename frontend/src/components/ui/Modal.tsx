@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { IconButton } from './IconButton';
+import { createPortal } from "react-dom";
 
 interface ModalProps {
     isOpen: boolean;
@@ -13,6 +14,7 @@ interface ModalProps {
 }
 
 export function Modal({ isOpen, onClose, title, children, footer, className }: ModalProps) {
+    if (!isOpen) return null;
     const modalRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -31,9 +33,7 @@ export function Modal({ isOpen, onClose, title, children, footer, className }: M
         };
     }, [isOpen, onClose]);
 
-    if (!isOpen) return null;
-
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
             <div
                 ref={modalRef}
@@ -67,6 +67,7 @@ export function Modal({ isOpen, onClose, title, children, footer, className }: M
                     </div>
                 )}
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

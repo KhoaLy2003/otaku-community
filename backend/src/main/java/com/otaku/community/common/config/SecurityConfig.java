@@ -1,5 +1,6 @@
 package com.otaku.community.common.config;
 
+import com.otaku.community.common.constant.SecurityEndpoints;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,10 +25,6 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-
-    // @Value("${auth0.audience}")
-    // private String audience;
-    //
     @Value("${auth0.domain}")
     private String domain;
 
@@ -36,55 +33,18 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // JwtWebSecurityConfigurer
-        // .forRS256(audience, String.format("https://%s/", domain))
-        // .configure(http)
-        // .csrf(AbstractHttpConfigurer::disable)
-        // .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-        // //.oauth2Login(Customizer.withDefaults())
-        // .sessionManagement(session ->
-        // session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        // .authorizeHttpRequests(auth -> auth
-        // // Public endpoints
-        // .requestMatchers(HttpMethod.GET, "/health", "/docs/**",
-        // "/swagger-ui/**").permitAll()
-        // .requestMatchers(HttpMethod.GET, "/posts/**", "/topics/**",
-        // "/users/**").permitAll()
-        // .requestMatchers(HttpMethod.GET, "/feed/explore").permitAll()
-        //
-        // // Authenticated endpoints
-        // .requestMatchers("/posts/**", "/comments/**", "/likes/**").authenticated()
-        // .requestMatchers("/feed/home", "/feed/following").authenticated()
-        // .requestMatchers("/notifications/**").authenticated()
-        // .requestMatchers("/users/me/**").authenticated()
-        //
-        // // Admin endpoints
-        // .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
-        //
-        // // All other requests require authentication
-        // .anyRequest().authenticated()
-        // );
-        //
-        // return http.build();
-
         return http
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
-                        .requestMatchers(HttpMethod.GET, "/health", "/docs/**", "/swagger-ui/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/feed/explore/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/anime/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/manga/**").permitAll()
-                        .requestMatchers("/api/ws-registry/**", "/ws-registry/**", "/ws-native/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, SecurityEndpoints.PUBLIC_GET).permitAll()
+                        .requestMatchers(HttpMethod.POST, SecurityEndpoints.PUBLIC_POST).permitAll()
+                        .requestMatchers(SecurityEndpoints.PUBLIC_ANY).permitAll()
 
                         // Authenticated endpoints
-                        .requestMatchers("/posts/**", "/comments/**", "/likes/**").authenticated()
-                        .requestMatchers("/feed/home", "/feed/following").authenticated()
-                        .requestMatchers("/notifications/**").authenticated()
-                        .requestMatchers("/users/me/**").authenticated()
-                        .requestMatchers("/api/v1/chats/**").authenticated()
+                        .requestMatchers(SecurityEndpoints.AUTHENTICATED).authenticated()
 
                         // Admin endpoints
-                        .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(SecurityEndpoints.ADMIN).hasAuthority("ROLE_ADMIN")
 
                         // All other requests require authentication
                         .anyRequest().authenticated())

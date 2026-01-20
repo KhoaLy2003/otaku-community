@@ -63,6 +63,7 @@ public class PostController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Authentication required")
     })
     public ResponseEntity<ApiResponse<PostResponse>> createPost(
+            @CurrentUserId UUID userId,
             @Parameter(description = "Post title") @RequestParam String title,
             @Parameter(description = "Post content") @RequestParam(required = false) String content,
             @Parameter(description = "Post status") @RequestParam(defaultValue = "DRAFT") String status,
@@ -91,7 +92,7 @@ public class PostController {
                 .references(references)
                 .build();
 
-        PostResponse response = postServiceImpl.createPost(request);
+        PostResponse response = postServiceImpl.createPost(request, userId);
 
         // Upload files if provided
         if (files != null && !files.isEmpty()) {
@@ -147,10 +148,12 @@ public class PostController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Post not found")
     })
     public ResponseEntity<ApiResponse<PostDetailResponse>> getPostDetail(
-            @Parameter(description = "Post ID") @PathVariable UUID postId) {
+            @CurrentUserId UUID userId,
+            @Parameter(description = "Post ID")
+            @PathVariable UUID postId) {
         log.debug("Retrieving detailed post information for ID: {}", postId);
 
-        PostDetailResponse response = postServiceImpl.getPostDetail(postId);
+        PostDetailResponse response = postServiceImpl.getPostDetail(postId, userId);
         return ResponseEntity.ok(ApiResponse.success("Post details retrieved successfully", response));
     }
 

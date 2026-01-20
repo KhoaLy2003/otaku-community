@@ -1,11 +1,13 @@
 # Functional Requirements
 
 ## Overview
+
 This document defines what the system must do from a functional perspective for the Japan Community Social Platform MVP.
 
 ---
 
 ## User Roles
+
 - **Guest**: Unauthenticated users who can view public content
 - **Registered User**: Authenticated users who can create content, interact, and customize their experience
 - **Admin/Moderator**: Users with elevated privileges to manage content, users, and platform settings
@@ -15,6 +17,7 @@ This document defines what the system must do from a functional perspective for 
 ## Core Functional Requirements
 
 ### 1. User Management & Authentication
+
 - Users must be able to register with email and password
 - Users must be able to log in with email and password
 - Users must be able to log out
@@ -27,6 +30,7 @@ This document defines what the system must do from a functional perspective for 
 - Users must be able to see follower/following counts on profiles
 
 ### 2. Post Management
+
 - Users must be able to create text posts
 - Users must be able to create posts with images (single or multiple)
 - Users must be able to tag posts with one or more topics
@@ -37,6 +41,7 @@ This document defines what the system must do from a functional perspective for 
 - Posts must be paginated in feeds (default 20 per page)
 
 ### 3. Topic System
+
 - System must provide predefined topics (Anime, Manga, JLPT Learning, Japan Culture, Japan Food, Japan Travel, Japanese Life & Work)
 - Admins must be able to create new topics
 - Admins must be able to edit topic names and descriptions
@@ -46,6 +51,7 @@ This document defines what the system must do from a functional perspective for 
 - Posts can be associated with multiple topics
 
 ### 4. Social Interactions
+
 - Users must be able to like posts
 - Users must be able to unlike posts
 - Users must be able to comment on posts
@@ -58,6 +64,7 @@ This document defines what the system must do from a functional perspective for 
 - System must prevent duplicate likes and follows
 
 ### 5. Feed System
+
 - Users must see a personalized home feed with posts from followed users and topics
 - Users must be able to view an explore feed with trending/recent content
 - Users must be able to view topic-specific feeds
@@ -67,6 +74,7 @@ This document defines what the system must do from a functional perspective for 
 - System must exclude soft-deleted content from feeds
 
 ### 6. Search Functionality
+
 - Users must be able to search for posts by keywords
 - Users must be able to search for users by username
 - Users must be able to search for topics by name
@@ -75,6 +83,7 @@ This document defines what the system must do from a functional perspective for 
 - Search must exclude soft-deleted content
 
 ### 7. Notification System
+
 - System must create notifications when a user's post is liked
 - System must create notifications when a user's post is commented on
 - System must create notifications when a user is followed
@@ -84,6 +93,7 @@ This document defines what the system must do from a functional perspective for 
 - Unread notifications must be visually distinguished
 
 ### 8. Content Moderation
+
 - Users must be able to report inappropriate posts
 - Reports must include a reason field
 - Admins must be able to view all reports
@@ -94,6 +104,7 @@ This document defines what the system must do from a functional perspective for 
 - Banned users must not be able to log in
 
 ### 9. Image Management
+
 - System must support image uploads via Cloudinary
 - Images must be validated for type (JPEG, PNG, GIF, WebP)
 - Images must be validated for size (max 5MB per image)
@@ -101,11 +112,23 @@ This document defines what the system must do from a functional perspective for 
 - System must handle image upload failures gracefully
 
 ### 10. User Profile Features
+
 - Profiles must display user information (username, avatar, bio, interests, location)
 - Profiles must display user statistics (followers, following, post count)
 - Profiles must display user's posts in chronological order
 - Profiles must show follow/unfollow button for other users
 - Users must be able to view their own profile with edit capabilities
 
----
+### 11. Manga Translation Reader
 
+- Users must be able to read manga translations in a swipe-based reader
+- System must support both horizontal (page-by-page) and vertical (webtoon-style) reading modes
+- Translators must be able to upload chapters with multiple images
+- System must support multiple translations per chapter by different users/groups
+- System must track views, upvotes, and comments for each translation
+- System must display a Home Feed "Translations" tab with latest/trending content
+- **System must calculate and display Translator Rankings (Weekly, Monthly, All-time)**
+- **System must award badges to translators based on performance and quality**
+- Translators must be able to manage their translations via their profile pages
+
+---
