@@ -25,4 +25,7 @@ public class UserResponse {
     private ProfileVisibility profileVisibility;
     private Instant createdAt;
     private UserMainFavoriteResponse mainFavorite;
+    private Long totalMangaViews;
+    private Long totalMangaUpvotes;
+    private Long totalTranslations;
 }

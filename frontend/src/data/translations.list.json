@@ -1,0 +1,27 @@
+{
+  "chapterId": "chapter_001",
+  "translations": [
+    {
+      "id": "translation_001",
+      "name": "English Scanlation",
+      "translator": {
+        "id": "user_101",
+        "username": "otaku_translator"
+      },
+      "status": "PUBLISHED",
+      "createdAt": "2026-01-10T09:12:00Z",
+      "publishedAt": "2026-01-11T03:00:00Z"
+    },
+    {
+      "id": "translation_002",
+      "name": "Vietnamese Fan Translation",
+      "translator": {
+        "id": "user_202",
+        "username": "vn_scan"
+      },
+      "status": "PUBLISHED",
+      "createdAt": "2026-01-12T14:20:00Z",
+      "publishedAt": "2026-01-12T18:45:00Z"
+    }
+  ]
+}

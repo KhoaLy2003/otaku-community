@@ -18,6 +18,14 @@ public class MediaValidator {
             "video/mp4"
     );
 
+    private static final Set<String> IMAGE_EXTENSIONS = Set.of(
+            "jpg", "jpeg", "png", "gif", "webp"
+    );
+
+    private static final Set<String> VIDEO_EXTENSIONS = Set.of(
+            "mp4"
+    );
+
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of(
             "jpg", "jpeg", "png", "gif", "webp", "mp4"
     );
@@ -31,44 +39,55 @@ public class MediaValidator {
         }
 
         validateFileSize(file);
-        validateFileType(file);
         validateFileExtension(file);
+        validateFileTypeOrExtension(file);
     }
 
     private void validateFileSize(MultipartFile file) {
         if (file.getSize() > maxFileSize) {
             throw new MediaValidationException(
-                    String.format("File size exceeds maximum allowed size of %d bytes (%.1f MB)",
-                            maxFileSize, maxFileSize / 1024.0 / 1024.0)
+                    String.format("File size exceeds maximum allowed size of %.1f MB",
+                            maxFileSize / 1024.0 / 1024.0)
             );
         }
     }
 
-    private void validateFileType(MultipartFile file) {
+    /**
+     * ✔ Content-Type có → validate theo content-type
+     * ✔ Content-Type null → fallback validate theo extension
+     */
+    private void validateFileTypeOrExtension(MultipartFile file) {
         String contentType = file.getContentType();
-        if (contentType == null) {
-            throw new MediaValidationException("File content type cannot be determined");
+        String extension = getFileExtension(file.getOriginalFilename()).toLowerCase();
+
+        if (contentType != null) {
+            if (!ALLOWED_IMAGE_TYPES.contains(contentType)
+                    && !ALLOWED_VIDEO_TYPES.contains(contentType)) {
+                throw new MediaValidationException(
+                        "Unsupported file type: " + contentType
+                );
+            }
+            return;
         }
 
-        if (!ALLOWED_IMAGE_TYPES.contains(contentType) && !ALLOWED_VIDEO_TYPES.contains(contentType)) {
+        // fallback: contentType == null (CustomMultipartFile case)
+        if (!ALLOWED_EXTENSIONS.contains(extension)) {
             throw new MediaValidationException(
-                    String.format("File type '%s' is not supported. Allowed types: JPEG, PNG, GIF, WebP, MP4",
-                            contentType)
+                    "Unsupported file extension: " + extension
             );
         }
     }
 
     private void validateFileExtension(MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
-        if (originalFilename == null || originalFilename.trim().isEmpty()) {
+        if (originalFilename == null || originalFilename.isBlank()) {
             throw new MediaValidationException("File name is required");
         }
 
         String extension = getFileExtension(originalFilename).toLowerCase();
         if (!ALLOWED_EXTENSIONS.contains(extension)) {
             throw new MediaValidationException(
-                    String.format("File extension '%s' is not supported. Allowed extensions: %s",
-                            extension, String.join(", ", ALLOWED_EXTENSIONS))
+                    "Unsupported file extension: " + extension
             );
         }
     }
@@ -82,12 +101,20 @@ public class MediaValidator {
     }
 
     public boolean isImageFile(MultipartFile file) {
-        String contentType = file.getContentType();
-        return contentType != null && ALLOWED_IMAGE_TYPES.contains(contentType);
+        if (file.getContentType() != null) {
+            return ALLOWED_IMAGE_TYPES.contains(file.getContentType());
+        }
+        return IMAGE_EXTENSIONS.contains(
+                getFileExtension(file.getOriginalFilename()).toLowerCase()
+        );
     }
 
     public boolean isVideoFile(MultipartFile file) {
-        String contentType = file.getContentType();
-        return contentType != null && ALLOWED_VIDEO_TYPES.contains(contentType);
+        if (file.getContentType() != null) {
+            return ALLOWED_VIDEO_TYPES.contains(file.getContentType());
+        }
+        return VIDEO_EXTENSIONS.contains(
+                getFileExtension(file.getOriginalFilename()).toLowerCase()
+        );
     }
 }

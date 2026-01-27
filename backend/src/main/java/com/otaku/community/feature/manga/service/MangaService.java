@@ -1,19 +1,27 @@
 package com.otaku.community.feature.manga.service;
 
 import com.otaku.community.common.dto.PageResponse;
+import com.otaku.community.common.exception.ResourceNotFoundException;
 import com.otaku.community.feature.integration.jikan.JikanIntegrationService;
 import com.otaku.community.feature.integration.jikan.dto.JikanListResponse;
-import com.otaku.community.feature.manga.dto.MangaDto;
+import com.otaku.community.feature.manga.dto.chapter.ChapterResponse;
+import com.otaku.community.feature.manga.dto.manga.MangaDto;
+import com.otaku.community.feature.manga.entity.Chapter;
+import com.otaku.community.feature.manga.entity.Manga;
 import com.otaku.community.feature.manga.integration.dto.JikanMangaData;
 import com.otaku.community.feature.manga.integration.dto.JikanMangaSingleResponse;
 import com.otaku.community.feature.manga.mapper.MangaMapper;
+import com.otaku.community.feature.manga.repository.ChapterRepository;
+import com.otaku.community.feature.manga.repository.MangaRepository;
 import com.otaku.community.feature.post.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Service for handling manga-related operations.
@@ -28,6 +36,55 @@ public class MangaService {
     private final JikanIntegrationService jikanIntegrationService;
     private final MangaMapper mangaMapper;
     private final PostService postService;
+    private final MangaRepository mangaRepository;
+    private final ChapterRepository chapterRepository;
+
+    /**
+     * Ensures a manga exists in the local database, syncing from Jikan if
+     * necessary.
+     */
+    public Manga getOrCreateManga(int malId) {
+        return mangaRepository.findByMalId(malId)
+                .orElseGet(() -> {
+                    log.info("Manga not found locally, syncing from Jikan for malId: {}", malId);
+                    JikanMangaSingleResponse response = jikanIntegrationService.getMangaById(malId);
+                    if (response.getData() == null) {
+                        throw new ResourceNotFoundException("Manga not found with id: " + malId);
+                    }
+                    var data = response.getData();
+                    Manga manga = Manga.builder()
+                            .malId(malId)
+                            .title(data.getTitle())
+                            .titleEn(data.getTitle())
+                            .coverImage(data.getImages().getJpg().getLargeImageUrl())
+                            .build();
+                    return mangaRepository.save(manga);
+                });
+    }
+
+    /**
+     * Ensures a chapter exists in the local database for a given manga.
+     */
+    public Chapter getOrCreateChapter(UUID mangaId, BigDecimal chapterNumber, String title) {
+        return chapterRepository.findByMangaIdAndChapterNumber(mangaId, chapterNumber)
+                .orElseGet(() -> {
+                    Manga manga = mangaRepository.findById(mangaId)
+                            .orElseThrow(() -> new RuntimeException("Manga not found with id: " + mangaId));
+                    Chapter chapter = Chapter.builder()
+                            .manga(manga)
+                            .chapterNumber(chapterNumber)
+                            .title(title)
+                            .build();
+                    return chapterRepository.save(chapter);
+                });
+    }
+
+    /**
+     * Finds chapters for a manga.
+     */
+    public List<Chapter> getChapters(UUID mangaId) {
+        return chapterRepository.findByMangaIdAndNotDeleted(mangaId);
+    }
 
     /**
      * Searches for manga based on a query and filters.
@@ -58,15 +115,33 @@ public class MangaService {
      * @sampleCacheKey mangaDetail::1
      * @see Cacheable
      */
-    @Cacheable(value = "mangaDetail", key = "#id")
+    // @Cacheable(value = "mangaDetail", key = "#id")
     public MangaDto getMangaById(int id) {
         log.debug("Fetching manga details for id: {}", id);
         JikanMangaSingleResponse response = jikanIntegrationService.getMangaById(id);
         if (response.getData() == null) {
-            throw new RuntimeException("Manga not found with id: " + id);
+            throw new ResourceNotFoundException("Manga not found with id: " + id);
         }
 
         MangaDto mangaDto = mangaMapper.toDto(response.getData());
+
+        // Check if manga exists locally and set internal ID + chapters
+        mangaRepository.findByMalId(id).ifPresent(manga -> {
+            mangaDto.setId(manga.getId());
+
+            // Fetch and include chapter list
+            List<Chapter> chapters = chapterRepository.findByMangaIdAndNotDeleted(manga.getId());
+            if (!chapters.isEmpty()) {
+                List<ChapterResponse> chapterResponses = chapters.stream()
+                        .map(chapter -> ChapterResponse.builder()
+                                .id(chapter.getId())
+                                .chapterNumber(chapter.getChapterNumber())
+                                .title(chapter.getTitle())
+                                .build())
+                        .toList();
+                mangaDto.setChapterList(chapterResponses);
+            }
+        });
 
         // Fetch related posts
         try {

@@ -25,8 +25,8 @@ const AnimeDetailPage = () => {
             setError(null);
 
             try {
-                const data = await animeApi.getAnimeById(id);
-                setAnime(data);
+                const response = await animeApi.getAnimeById(id);
+                setAnime(response.data);
             } catch (err) {
                 console.error("Failed to fetch anime data:", err);
                 setError(err instanceof Error ? err.message : "Failed to load anime details");
@@ -87,7 +87,7 @@ const AnimeDetailPage = () => {
                     {/* Hero Section with Backdrop simulation */}
                     <div className="relative h-48 md:h-64 bg-gray-200 dark:bg-gray-700 overflow-hidden">
                         <div
-                            className="absolute inset-0 bg-cover bg-center blur-md opacity-40 scale-110"
+                            className="absolute inset-0 bg-cover bg-center blur-sm opacity-40 scale-110"
                             style={{ backgroundImage: `url(${anime.imageUrl})` }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-gray-800 to-transparent" />

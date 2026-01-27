@@ -67,8 +67,8 @@ const MangaListPage = () => {
                     response = await mangaApi.getTopManga(currentPage);
                 }
 
-                setMangaData(response.data);
-                setTotalPages(response.pagination.totalPages);
+                setMangaData(response.data.data);
+                setTotalPages(response.data.pagination.totalPages);
             } catch (err) {
                 console.error("Failed to fetch manga:", err);
                 setError(err instanceof Error ? err.message : "Failed to load manga");

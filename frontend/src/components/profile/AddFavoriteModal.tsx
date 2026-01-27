@@ -37,7 +37,7 @@ export const AddFavoriteModal = ({ onClose, onAdded }: AddFavoriteModalProps) =>
             if (type === "ANIME") {
                 const response = await animeApi.searchAnime({ q });
                 setResults(
-                    response.data.map((anime) => ({
+                    response.data.data.map((anime) => ({
                         externalId: anime.externalId,
                         title: anime.title,
                         imageUrl: anime.imageUrl,
@@ -47,7 +47,7 @@ export const AddFavoriteModal = ({ onClose, onAdded }: AddFavoriteModalProps) =>
             } else {
                 const response = await mangaApi.searchManga({ q });
                 setResults(
-                    response.data.map((manga) => ({
+                    response.data.data.map((manga) => ({
                         externalId: manga.externalId,
                         title: manga.title,
                         imageUrl: manga.imageUrl,

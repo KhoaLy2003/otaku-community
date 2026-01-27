@@ -1,9 +1,9 @@
 package com.otaku.community.feature.manga.mapper;
 
-import com.otaku.community.feature.manga.dto.MangaAuthorDto;
-import com.otaku.community.feature.manga.dto.MangaDatePropDto;
-import com.otaku.community.feature.manga.dto.MangaDto;
-import com.otaku.community.feature.manga.dto.MangaPublishedDto;
+import com.otaku.community.feature.manga.dto.manga.MangaAuthorDto;
+import com.otaku.community.feature.manga.dto.manga.MangaDatePropDto;
+import com.otaku.community.feature.manga.dto.manga.MangaDto;
+import com.otaku.community.feature.manga.dto.manga.MangaPublishedDto;
 import com.otaku.community.feature.manga.integration.dto.JikanMangaData;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

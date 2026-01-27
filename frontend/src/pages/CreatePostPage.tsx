@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
-import { Tabs, type TabItem } from '@/components/ui/Tabs'
 import { TextInput } from '@/components/ui/TextInput'
 import { Alert } from '@/components/ui/Alert'
 import { Colors } from '@/constants/colors'
@@ -13,12 +12,6 @@ import AnimeMangaSearch from '@/components/posts/AnimeMangaSearch'
 import type { PostStatus, PostReferenceRequest } from '@/types/post'
 import type { Topic } from '@/types/topic'
 
-const editorTabs: TabItem[] = [
-  { id: 'text', label: 'Post', icon: <span>✏️</span> },
-  { id: 'media', label: 'Image / Video', icon: <span>📷</span> },
-  { id: 'reference', label: 'Link Anime/Manga', icon: <LinkIcon className="h-4 w-4" /> },
-]
-
 interface UploadedFile {
   id: string
   file: File
@@ -28,7 +21,6 @@ interface UploadedFile {
 
 const CreatePostPage: React.FC = () => {
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState('text')
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [topics, setTopics] = useState<Topic[]>([])
@@ -197,10 +189,13 @@ const CreatePostPage: React.FC = () => {
         </Alert>
       )}
 
-      <Card className="space-y-4 p-0" style={{ borderColor: Colors.Grey[20] }}>
-        <Tabs tabs={editorTabs} activeTab={activeTab} onChange={setActiveTab} />
-
-        <div className="space-y-4 p-4">
+      <div className="space-y-6">
+        {/* Post Content Section */}
+        <Card className="space-y-4 p-4" style={{ borderColor: Colors.Grey[20] }}>
+          <div className="flex items-center gap-2 border-b pb-2" style={{ borderColor: Colors.Grey[10] }}>
+            <span className="text-lg">✏️</span>
+            <h2 className="font-bold text-[#1a1a1b]">Post Content</h2>
+          </div>
           <TextInput
             pill={false}
             placeholder="Title"
@@ -210,152 +205,172 @@ const CreatePostPage: React.FC = () => {
             style={{ borderColor: Colors.Grey[20], backgroundColor: Colors.Grey.White }}
             disabled={loading}
           />
+          <textarea
+            placeholder="Text (optional)"
+            value={content}
+            onChange={event => setContent(event.target.value)}
+            className="min-h-[180px] w-full rounded-lg border p-4 text-sm outline-none resize-none"
+            style={{ borderColor: Colors.Grey[20], backgroundColor: Colors.Grey.White }}
+            disabled={loading}
+          />
+        </Card>
 
-          {activeTab === 'text' && (
-            <textarea
-              placeholder="Text (optional)"
-              value={content}
-              onChange={event => setContent(event.target.value)}
-              className="min-h-[180px] w-full rounded-lg border p-4 text-sm outline-none resize-none"
-              style={{ borderColor: Colors.Grey[20], backgroundColor: Colors.Grey.White }}
-              disabled={loading}
-            />
-          )}
+        {/* Media Section */}
+        <Card className="space-y-4 p-4" style={{ borderColor: Colors.Grey[20] }}>
+          <div className="flex items-center gap-2 border-b pb-2" style={{ borderColor: Colors.Grey[10] }}>
+            <span className="text-lg">📷</span>
+            <h2 className="font-bold text-[#1a1a1b]">Image / Video</h2>
+          </div>
+          <div className="space-y-4">
+            {uploadedFiles.length === 0 ? (
+              <label
+                className={`flex min-h-[200px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-sm text-[#7c7c7c] ${loading ? 'cursor-not-allowed bg-gray-100' : 'cursor-pointer hover:bg-[#F6F7F8]'
+                  } transition`}
+                style={{ borderColor: Colors.Grey[30] }}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,video/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileUpload}
+                  disabled={loading}
+                />
+                <Plus className="h-8 w-8" />
+                Drop media here or click to upload
+              </label>
+            ) : (
+              <div className="space-y-3">
+                {uploadedFiles.map((uploadedFile, index) => {
+                  const isImage = uploadedFile.type === 'image'
+                  const isCurrentImage = isImage && images.indexOf(uploadedFile) === currentImageIndex
+                  const shouldShow = isImage ? isCurrentImage : true
 
-          {activeTab === 'media' && (
-            <div className="space-y-4">
-              {uploadedFiles.length === 0 ? (
-                <label
-                  className={`flex min-h-[220px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-sm text-[#7c7c7c] ${loading ? 'cursor-not-allowed bg-gray-100' : 'cursor-pointer hover:bg-[#F6F7F8]'
-                    } transition`}
-                  style={{ borderColor: Colors.Grey[30] }}
-                >
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*,video/*"
-                    multiple
-                    className="hidden"
-                    onChange={handleFileUpload}
-                    disabled={loading}
-                  />
-                  <Plus className="h-8 w-8" />
-                  Drop media here or click to upload
-                </label>
-              ) : (
-                <div className="space-y-3">
-                  {uploadedFiles.map((uploadedFile, index) => {
-                    const isImage = uploadedFile.type === 'image'
-                    const isCurrentImage = isImage && images.indexOf(uploadedFile) === currentImageIndex
-                    const shouldShow = isImage ? isCurrentImage : true
+                  if (!shouldShow && isImage) return null
 
-                    if (!shouldShow && isImage) return null
+                  return (
+                    <div key={uploadedFile.id} className="relative group">
+                      <div className="relative rounded-lg overflow-hidden border" style={{ borderColor: Colors.Grey[20] }}>
+                        {isImage ? (
+                          <div className="relative w-full h-[400px] bg-[#F6F7F8]">
+                            <img
+                              src={uploadedFile.preview}
+                              alt={`Preview ${index + 1}`}
+                              className="object-contain w-full h-full"
+                            />
+                          </div>
+                        ) : (
+                          <div className="relative w-full h-[400px] bg-[#F6F7F8]">
+                            <video
+                              src={uploadedFile.preview}
+                              controls
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                        )}
 
-                    return (
-                      <div key={uploadedFile.id} className="relative group">
-                        <div className="relative rounded-lg overflow-hidden border" style={{ borderColor: Colors.Grey[20] }}>
-                          {isImage ? (
-                            <div className="relative w-full h-[400px] bg-[#F6F7F8]">
-                              <img
-                                src={uploadedFile.preview}
-                                alt={`Preview ${index + 1}`}
-                                className="object-contain w-full h-full"
-                              />
+                        {/* Action buttons overlay */}
+                        {!loading && (
+                          <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={handleAddMoreFiles}
+                              className="p-2 rounded-full bg-white shadow-md hover:bg-[#F6F7F8]"
+                              style={{ border: `1px solid ${Colors.Grey[20]}` }}
+                              title="Add more files"
+                            >
+                              <Plus className="h-4 w-4 text-[#1a1a1b]" />
+                            </button>
+                            <button
+                              onClick={() => handleRemoveFile(uploadedFile.id)}
+                              className="p-2 rounded-full bg-white shadow-md hover:bg-red-50"
+                              style={{ border: `1px solid ${Colors.Grey[20]}` }}
+                              title="Remove file"
+                            >
+                              <Trash2 className="h-4 w-4 text-red-600" />
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Carousel controls for multiple images */}
+                        {hasMultipleImages && isImage && (
+                          <>
+                            <button
+                              onClick={prevImage}
+                              className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white shadow-md hover:bg-[#F6F7F8] opacity-0 group-hover:opacity-100 transition-opacity"
+                              style={{ border: `1px solid ${Colors.Grey[20]}` }}
+                              disabled={loading}
+                            >
+                              <ChevronLeft className="h-4 w-4 text-[#1a1a1b]" />
+                            </button>
+                            <button
+                              onClick={nextImage}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white shadow-md hover:bg-[#F6F7F8] opacity-0 group-hover:opacity-100 transition-opacity"
+                              style={{ border: `1px solid ${Colors.Grey[20]}` }}
+                              disabled={loading}
+                            >
+                              <ChevronRight className="h-4 w-4 text-[#1a1a1b]" />
+                            </button>
+                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                              {images.map((_, idx) => (
+                                <div
+                                  key={idx}
+                                  className={`h-2 rounded-full transition-all ${idx === currentImageIndex ? 'w-6 bg-white' : 'w-2 bg-white/50'
+                                    }`}
+                                />
+                              ))}
                             </div>
-                          ) : (
-                            <div className="relative w-full h-[400px] bg-[#F6F7F8]">
-                              <video
-                                src={uploadedFile.preview}
-                                controls
-                                className="w-full h-full object-contain"
-                              />
-                            </div>
-                          )}
-
-                          {/* Action buttons overlay */}
-                          {!loading && (
-                            <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button
-                                onClick={handleAddMoreFiles}
-                                className="p-2 rounded-full bg-white shadow-md hover:bg-[#F6F7F8]"
-                                style={{ border: `1px solid ${Colors.Grey[20]}` }}
-                                title="Add more files"
-                              >
-                                <Plus className="h-4 w-4 text-[#1a1a1b]" />
-                              </button>
-                              <button
-                                onClick={() => handleRemoveFile(uploadedFile.id)}
-                                className="p-2 rounded-full bg-white shadow-md hover:bg-red-50"
-                                style={{ border: `1px solid ${Colors.Grey[20]}` }}
-                                title="Remove file"
-                              >
-                                <Trash2 className="h-4 w-4 text-red-600" />
-                              </button>
-                            </div>
-                          )}
-
-                          {/* Carousel controls for multiple images */}
-                          {hasMultipleImages && isImage && (
-                            <>
-                              <button
-                                onClick={prevImage}
-                                className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white shadow-md hover:bg-[#F6F7F8] opacity-0 group-hover:opacity-100 transition-opacity"
-                                style={{ border: `1px solid ${Colors.Grey[20]}` }}
-                                disabled={loading}
-                              >
-                                <ChevronLeft className="h-4 w-4 text-[#1a1a1b]" />
-                              </button>
-                              <button
-                                onClick={nextImage}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white shadow-md hover:bg-[#F6F7F8] opacity-0 group-hover:opacity-100 transition-opacity"
-                                style={{ border: `1px solid ${Colors.Grey[20]}` }}
-                                disabled={loading}
-                              >
-                                <ChevronRight className="h-4 w-4 text-[#1a1a1b]" />
-                              </button>
-                              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-                                {images.map((_, idx) => (
-                                  <div
-                                    key={idx}
-                                    className={`h-2 rounded-full transition-all ${idx === currentImageIndex ? 'w-6 bg-white' : 'w-2 bg-white/50'
-                                      }`}
-                                  />
-                                ))}
-                              </div>
-                            </>
-                          )}
-                        </div>
+                          </>
+                        )}
                       </div>
-                    )
-                  })}
+                    </div>
+                  )
+                })}
 
-                  {/* Hidden file input for adding more files */}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*,video/*"
-                    multiple
-                    className="hidden"
-                    onChange={handleFileUpload}
+                {/* Hidden file input for adding more files */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,video/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileUpload}
+                  disabled={loading}
+                />
+
+                {uploadedFiles.length > 0 && (
+                  <Button
+                    variant="outline"
+                    color="grey"
+                    size="sm"
+                    className="w-full border-dashed"
+                    onClick={handleAddMoreFiles}
                     disabled={loading}
-                  />
-                </div>
-              )}
-            </div>
-          )}
+                  >
+                    <Plus className="mr-2 h-4 w-4" /> Add more media
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+        </Card>
 
-          {activeTab === 'reference' && (
-            <div className="space-y-4">
-              <p className="text-sm text-[#7c7c7c]">Link an Anime or Manga to this post.</p>
-              <AnimeMangaSearch
-                onSelect={handleSelectReference}
-                selectedReferences={selectedReferences}
-                onRemove={handleRemoveReference}
-              />
-            </div>
-          )}
-        </div>
-      </Card>
+        {/* Linkage Section */}
+        <Card className="space-y-4 p-4" style={{ borderColor: Colors.Grey[20] }}>
+          <div className="flex items-center gap-2 border-b pb-2" style={{ borderColor: Colors.Grey[10] }}>
+            <LinkIcon className="h-4 w-4" />
+            <h2 className="font-bold text-[#1a1a1b]">Link Anime/Manga</h2>
+          </div>
+          <div className="space-y-4">
+            <p className="text-sm text-[#7c7c7c]">Link an Anime or Manga to this post.</p>
+            <AnimeMangaSearch
+              onSelect={handleSelectReference}
+              selectedReferences={selectedReferences}
+              onRemove={handleRemoveReference}
+            />
+          </div>
+        </Card>
+      </div>
 
       <Card className="space-y-4">
         <p className="text-sm font-semibold text-[#1a1a1b]">Choose a topic</p>

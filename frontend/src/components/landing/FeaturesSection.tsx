@@ -8,24 +8,14 @@ interface Feature {
 
 const features: Feature[] = [
   {
+    icon: '📖',
+    title: 'Manga Reader',
+    description: 'Read your favorite manga with a smooth, mobile-friendly experience. Supporting multiple community translations per chapter.',
+  },
+  {
     icon: '📝',
     title: 'Create & Share Posts',
     description: 'Express yourself with text, images, and videos. Share your thoughts, fan art, and discoveries with the community.',
-  },
-  {
-    icon: '❤️',
-    title: 'Like / Comment / Vote',
-    description: 'Engage with content you love. Show appreciation, share your opinions, and participate in discussions.',
-  },
-  {
-    icon: '🔔',
-    title: 'Real-time Notifications',
-    description: 'Stay connected with instant updates on likes, comments, follows, and new content from your favorite creators.',
-  },
-  {
-    icon: '👥',
-    title: 'Follow Users & Topics',
-    description: 'Curate your feed by following creators and topics that interest you. Discover new content tailored to your preferences.',
   },
   {
     icon: '🖼️',
@@ -33,9 +23,24 @@ const features: Feature[] = [
     description: 'Share and enjoy high-quality images and videos. Showcase your creativity and discover amazing content from others.',
   },
   {
+    icon: '❤️',
+    title: 'Like / Comment / Vote',
+    description: 'Engage with content you love. Show appreciation, share your opinions, and participate in discussions.',
+  },
+  {
+    icon: '👥',
+    title: 'Follow Users & Topics',
+    description: 'Curate your feed by following creators and topics that interest you. Discover new content tailored to your preferences.',
+  },
+  {
     icon: '🧵',
     title: 'Personalized Feed',
     description: 'Get a customized feed that learns your preferences and shows you the most relevant content from your network.',
+  },
+  {
+    icon: '🔔',
+    title: 'Real-time Notifications',
+    description: 'Stay connected with instant updates on likes, comments, follows, and new content from your favorite creators.',
   },
 ]
 

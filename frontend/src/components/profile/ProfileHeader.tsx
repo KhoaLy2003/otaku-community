@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MapPin, Link as LinkIcon, Calendar, Shield, MessageCircle } from 'lucide-react';
+import { MapPin, Link as LinkIcon, Calendar, Shield, MessageCircle, Eye, ThumbsUp, TrendingUp, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
@@ -236,28 +236,57 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, isOwnProfile
                                 </a>
                             </div>
                         )}
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 mx-2">
                             <Calendar size={18} />
                             <span>Joined {joinedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
                         </div>
                     </div>
 
                     {!user.isRestricted && (
-                        <div className="mt-4 flex gap-5">
-                            <button
-                                className="hover:underline flex items-center gap-1 group"
-                                onClick={() => openUserListModal('following')}
-                            >
-                                <span className="font-bold text-gray-900 group-hover:underline">{currentUser.followingCount || 0}</span>
-                                <span className="text-gray-500">Following</span>
-                            </button>
-                            <button
-                                className="hover:underline flex items-center gap-1 group"
-                                onClick={() => openUserListModal('followers')}
-                            >
-                                <span className="font-bold text-gray-900 group-hover:underline">{currentUser.followersCount || 0}</span>
-                                <span className="text-gray-500">Followers</span>
-                            </button>
+                        <div className="mt-4 flex justify-between flex-wrap gap-5 mx-2">
+                            {/* Translator Stats */}
+                            {(currentUser.totalMangaViews || 0) > 0 && (
+                                <div className="flex  items-center gap-4 py-1 px-3 bg-orange-50 dark:bg-orange-900/10 rounded-lg border border-orange-100 dark:border-orange-900/20">
+                                    <div className="flex items-center gap-1.5 text-orange-700 dark:text-orange-400">
+                                        <Eye size={16} />
+                                        <span className="text-sm font-bold">{currentUser.totalMangaViews?.toLocaleString()}</span>
+                                        <span className="text-xs opacity-70">Views</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 text-orange-700 dark:text-orange-400">
+                                        <ThumbsUp size={16} />
+                                        <span className="text-sm font-bold">{currentUser.totalMangaUpvotes?.toLocaleString()}</span>
+                                        <span className="text-xs opacity-70">Likes</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 text-orange-700 dark:text-orange-400">
+                                        <TrendingUp size={16} />
+                                        <span className="text-sm font-bold">{currentUser.totalTranslations?.toLocaleString()}</span>
+                                        <span className="text-xs opacity-70">Translations</span>
+                                    </div>
+                                    {currentUser.rank && (
+                                        <div className="flex items-center gap-1.5 text-orange-700 dark:text-orange-400 border-l border-orange-200 dark:border-orange-800 pl-4 ml-2">
+                                            <Award size={16} />
+                                            <span className="text-sm font-bold">Rank #{currentUser.rank}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            <div className="flex gap-5 self-center">
+                                <button
+                                    className="hover:underline flex items-center gap-1 group"
+                                    onClick={() => openUserListModal('following')}
+                                >
+                                    <span className="font-bold text-gray-900 group-hover:underline">{currentUser.followingCount || 0}</span>
+                                    <span className="text-gray-500">Following</span>
+                                </button>
+                                <button
+                                    className="hover:underline flex items-center gap-1 group"
+                                    onClick={() => openUserListModal('followers')}
+                                >
+                                    <span className="font-bold text-gray-900 group-hover:underline">{currentUser.followersCount || 0}</span>
+                                    <span className="text-gray-500">Followers</span>
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>

@@ -30,4 +30,8 @@ public class UserProfileResponse {
     private Boolean isRestricted;
     private Instant createdAt;
     private UserMainFavoriteResponse mainFavorite;
+    private Long totalMangaViews;
+    private Long totalMangaUpvotes;
+    private Long totalTranslations;
+    private Integer rank;
 }

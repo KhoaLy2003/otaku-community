@@ -16,6 +16,26 @@ CONSTRAINT uk_chats_user_pair UNIQUE (user_a_id, user_b_id)
 );
 CREATE INDEX idx_chats_user_pair ON public.chats USING btree (user_a_id, user_b_id);
 
+-- public.mangas definition
+
+-- Drop table
+
+-- DROP TABLE public.mangas;
+
+CREATE TABLE public.mangas (
+id uuid NOT NULL,
+created_at timestamptz(6) NOT NULL,
+deleted_at timestamptz(6) NULL,
+updated_at timestamptz(6) NOT NULL,
+cover_image text NULL,
+mal_id int4 NOT NULL,
+title varchar(255) NOT NULL,
+title_en varchar(255) NULL,
+CONSTRAINT mangas_pkey PRIMARY KEY (id),
+CONSTRAINT uk_8i9w64qfbvmrdry7b8date3v UNIQUE (mal_id)
+);
+CREATE INDEX idx_manga_mal_id ON public.mangas USING btree (mal_id);
+
 -- public.messages definition
 
 -- Drop table
@@ -179,6 +199,26 @@ CONSTRAINT fk5bm1lt4f4eevt8lv2517soakd FOREIGN KEY (user_id) REFERENCES public.u
 CREATE INDEX idx_activity_logs_created_at ON public.activity_logs USING btree (created_at);
 CREATE INDEX idx_activity_logs_user_id ON public.activity_logs USING btree (user_id);
 
+-- public.chapters definition
+
+-- Drop table
+
+-- DROP TABLE public.chapters;
+
+CREATE TABLE public.chapters (
+id uuid NOT NULL,
+created_at timestamptz(6) NOT NULL,
+deleted_at timestamptz(6) NULL,
+updated_at timestamptz(6) NOT NULL,
+chapter_number numeric(10, 2) NOT NULL,
+title varchar(255) NULL,
+manga_id uuid NOT NULL,
+CONSTRAINT chapters_pkey PRIMARY KEY (id),
+CONSTRAINT fkdufeyurog26muq6kjx33slujn FOREIGN KEY (manga_id) REFERENCES public.mangas(id)
+);
+CREATE INDEX idx_chapter_manga_id ON public.chapters USING btree (manga_id);
+CREATE INDEX idx_chapter_number ON public.chapters USING btree (chapter_number);
+
 -- public.login_histories definition
 
 -- Drop table
@@ -249,6 +289,58 @@ CONSTRAINT fkqmewaibcp5bxtlqxc2cawhuln FOREIGN KEY (user_id) REFERENCES public.u
 CREATE INDEX idx_reactions_target ON public.reactions USING btree (target_type, target_id);
 CREATE INDEX idx_reactions_type ON public.reactions USING btree (reaction_type);
 CREATE INDEX idx_reactions_user_id ON public.reactions USING btree (user_id);
+
+-- public.translations definition
+
+-- Drop table
+
+-- DROP TABLE public.translations;
+
+CREATE TABLE public.translations (
+id uuid NOT NULL,
+created_at timestamptz(6) NOT NULL,
+deleted_at timestamptz(6) NULL,
+updated_at timestamptz(6) NOT NULL,
+"name" varchar(255) NOT NULL,
+notes text NULL,
+published_at timestamptz(6) NULL,
+status varchar(20) NOT NULL,
+chapter_id uuid NOT NULL,
+translator_id uuid NOT NULL,
+CONSTRAINT translations_pkey PRIMARY KEY (id),
+CONSTRAINT translations_status_check CHECK (((status)::text = ANY ((ARRAY['DRAFT'::character varying, 'PUBLISHED'::character varying, 'HIDDEN'::character varying, 'DELETED'::character varying])::text[]))),
+CONSTRAINT fk5nu825esub70eymsvhnjwwd9d FOREIGN KEY (chapter_id) REFERENCES public.chapters(id),
+CONSTRAINT fk80ivl5g0wqy279h942rfmevnm FOREIGN KEY (translator_id) REFERENCES public.users(id)
+);
+CREATE INDEX idx_translation_chapter_id ON public.translations USING btree (chapter_id);
+CREATE INDEX idx_translation_status ON public.translations USING btree (status);
+CREATE INDEX idx_translation_translator_id ON public.translations USING btree (translator_id);
+
+-- public.upload_jobs definition
+
+-- Drop table
+
+-- DROP TABLE public.upload_jobs;
+
+CREATE TABLE public.upload_jobs (
+id uuid NOT NULL,
+created_at timestamptz(6) NOT NULL,
+deleted_at timestamptz(6) NULL,
+updated_at timestamptz(6) NOT NULL,
+error_message text NULL,
+status varchar(20) NOT NULL,
+total_pages int4 NOT NULL,
+uploaded_pages int4 NOT NULL,
+translation_id uuid NOT NULL,
+user_id uuid NOT NULL,
+CONSTRAINT uk_9tiaev5mtdsubux0j0e3nkff4 UNIQUE (translation_id),
+CONSTRAINT upload_jobs_pkey PRIMARY KEY (id),
+CONSTRAINT upload_jobs_status_check CHECK (((status)::text = ANY ((ARRAY['PENDING'::character varying, 'UPLOADING'::character varying, 'COMPLETED'::character varying, 'FAILED'::character varying, 'CANCELLED'::character varying])::text[]))),
+CONSTRAINT fka6e26y78f8u3pcut7227v3qiv FOREIGN KEY (translation_id) REFERENCES public.translations(id),
+CONSTRAINT fkh1ubj5smhj8s2m556pkk00wr7 FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE INDEX idx_upload_status ON public.upload_jobs USING btree (status);
+CREATE INDEX idx_upload_user_id ON public.upload_jobs USING btree (user_id);
 
 -- public.user_favorites definition
 
@@ -415,3 +507,67 @@ CONSTRAINT fkfl323yis9ff19pj7xiemmyyhh FOREIGN KEY (post_id) REFERENCES public.p
 CREATE INDEX idx_post_topics_created_at ON public.post_topics USING btree (created_at);
 CREATE INDEX idx_post_topics_post_id ON public.post_topics USING btree (post_id);
 CREATE INDEX idx_post_topics_topic_id ON public.post_topics USING btree (topic_id);
+
+-- public.translation_pages definition
+
+-- Drop table
+
+-- DROP TABLE public.translation_pages;
+
+CREATE TABLE public.translation_pages (
+id uuid NOT NULL,
+created_at timestamptz(6) NOT NULL,
+deleted_at timestamptz(6) NULL,
+updated_at timestamptz(6) NOT NULL,
+height int4 NULL,
+image_url text NOT NULL,
+page_index int4 NOT NULL,
+width int4 NULL,
+translation_id uuid NOT NULL,
+CONSTRAINT translation_pages_pkey PRIMARY KEY (id),
+CONSTRAINT fk5o7jl5o8xn3q0yog1s4icmua0 FOREIGN KEY (translation_id) REFERENCES public.translations(id)
+);
+CREATE INDEX idx_page_translation_id ON public.translation_pages USING btree (translation_id);
+CREATE INDEX idx_page_translation_order ON public.translation_pages USING btree (page_index);
+-- PROPOSAL: Manga Reader Social Features (IN REVIEW)
+-- ===============================================
+
+-- public.translation_stats definition
+CREATE TABLE public.translation_stats (
+translation_id uuid NOT NULL,
+comment_count int4 NOT NULL DEFAULT 0,
+upvote_count int4 NOT NULL DEFAULT 0,
+view_count int8 NOT NULL DEFAULT 0,
+updated_at timestamptz(6) NOT NULL,
+CONSTRAINT translation_stats_pkey PRIMARY KEY (translation_id),
+CONSTRAINT fk_translation_stats_id FOREIGN KEY (translation_id) REFERENCES public.translations(id)
+);
+CREATE INDEX idx_translation_stats_upvotes ON public.translation_stats USING btree (upvote_count DESC);
+CREATE INDEX idx_translation_stats_views ON public.translation_stats USING btree (view_count DESC);
+
+-- public.translation_comments definition
+CREATE TABLE public.translation_comments (
+id uuid NOT NULL,
+created_at timestamptz(6) NOT NULL,
+deleted_at timestamptz(6) NULL,
+updated_at timestamptz(6) NOT NULL,
+content varchar(1000) NOT NULL,
+parent_id uuid NULL,
+translation_id uuid NOT NULL,
+user_id uuid NOT NULL,
+image_url varchar(500) NULL,
+CONSTRAINT translation_comments_pkey PRIMARY KEY (id),
+CONSTRAINT fk_comment_parent FOREIGN KEY (parent_id) REFERENCES public.translation_comments(id),
+CONSTRAINT fk_comment_translation FOREIGN KEY (translation_id) REFERENCES public.translations(id),
+CONSTRAINT fk_comment_user FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE INDEX idx_translation_comments_translation_id ON public.translation_comments USING btree (translation_id);
+CREATE INDEX idx_translation_comments_parent_id ON public.translation_comments USING btree (parent_id);
+
+-- USER TABLE UPDATES (Planned)
+-- ALTER TABLE public.users ADD COLUMN group_name varchar(100);
+-- ALTER TABLE public.users ADD COLUMN total_manga_views int8 DEFAULT 0;
+-- ALTER TABLE public.users ADD COLUMN total_manga_upvotes int8 DEFAULT 0;
+
+-- REACTION TYPE UPDATES (Planned)
+-- Update constraint for reactions.target_type to include 'TRANSLATION'

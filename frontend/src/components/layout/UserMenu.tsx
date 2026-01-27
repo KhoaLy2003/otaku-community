@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, User, Settings, LogOut } from "lucide-react";
+import { ChevronDown, User, Settings, LogOut, BookOpen } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { Colors } from "../../constants/colors";
+import { ROUTES } from "../../constants/routes";
 
 export function UserMenu() {
   const { user, auth0User, logout } = useAuth();
@@ -38,6 +39,11 @@ export function UserMenu() {
 
   const handleSettings = () => {
     navigate("/settings");
+    setIsOpen(false);
+  };
+
+  const handleMangaDashboard = () => {
+    navigate(ROUTES.MANGA_DASHBOARD);
     setIsOpen(false);
   };
 
@@ -111,6 +117,14 @@ export function UserMenu() {
             >
               <Settings className="h-4 w-4" />
               <span>Settings</span>
+            </button>
+
+            <button
+              onClick={handleMangaDashboard}
+              className="flex w-full items-center gap-3 px-4 py-2 text-sm text-[#1a1a1b] hover:bg-gray-50 transition"
+            >
+              <BookOpen className="h-4 w-4" />
+              <span>Manga Dashboard</span>
             </button>
           </div>
 

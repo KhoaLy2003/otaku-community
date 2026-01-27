@@ -1,0 +1,18 @@
+{
+  "id": "1",
+  "title": "One Piece",
+  "chapters": [
+    {
+      "id": "chapter_001",
+      "number": 1,
+      "title": "Romance Dawn",
+      "publishedAt": "1997-07-22"
+    },
+    {
+      "id": "chapter_002",
+      "number": 2,
+      "title": "They Call Him 'Straw Hat Luffy'",
+      "publishedAt": "1997-08-04"
+    }
+  ]
+}

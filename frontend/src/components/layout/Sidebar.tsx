@@ -27,7 +27,7 @@ const menuItems: MenuItem[] = [
   { id: "home", label: "Home", icon: Home, href: ROUTES.HOME },
   { id: "anime", label: "Anime", icon: Tv, href: ROUTES.ANIME_LIST },
   { id: "manga", label: "Manga", icon: Book, href: ROUTES.MANGA_LIST },
-  { id: "popular", label: "Popular", icon: TrendingUp, href: ROUTES.POPULAR },
+  { id: "ranking", label: "Ranking", icon: TrendingUp, href: ROUTES.RANKINGS },
   { id: "communities", label: "Communities", icon: Users, href: ROUTES.COMMUNITIES },
   { id: "help", label: "Help", icon: HelpCircle, href: ROUTES.HELP },
   { id: "blog", label: "Blog", icon: BookOpen, href: ROUTES.BLOG },

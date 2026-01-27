@@ -7,6 +7,11 @@ const previews = [
     gradient: 'from-purple-500 to-pink-500',
   },
   {
+    title: 'Manga Reader',
+    description: 'Experience manga like never before with our smooth, high-performance viewer',
+    gradient: 'from-blue-500 to-indigo-500',
+  },
+  {
     title: 'Profile Page',
     description: 'Showcase your profile, posts, and connect with other otaku',
     gradient: 'from-pink-500 to-orange-500',
@@ -57,7 +62,7 @@ export function PreviewSection() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Overlay with title and description */}
               <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
                 <div className="p-6 w-full">

@@ -84,7 +84,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     @LogExecutionTime
-    public PostResponse createPost(CreatePostRequest request) {
+    public PostResponse createPost(CreatePostRequest request, UUID userId) {
         log.debug("Creating new post with title: {}", request.getTitle());
 
         // Validate title is not empty (additional validation beyond @NotBlank)
@@ -93,8 +93,7 @@ public class PostServiceImpl implements PostService {
         }
 
         // Get current user ID
-        User user = userService.findByAuth0Id();
-        UUID userId = user.getId();
+        User user = userService.findById(userId);
 
         // Create post entity
         Post post = postMapper.toEntity(request);
@@ -211,16 +210,12 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(readOnly = true)
     @LogExecutionTime
-    public PostDetailResponse getPostDetail(UUID postId) {
+    public PostDetailResponse getPostDetail(UUID postId, UUID userId) {
         log.debug("Retrieving detailed post information for ID: {}", postId);
 
         // Get the post (this handles soft delete check)
         Post post = postRepository.findByIdAndNotDeleted(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
-
-        // Get current user ID (null for guests)
-        User user = userService.findByAuth0Id();
-        UUID userId = user.getId();
 
         // Get topics associated with this post
         List<TopicResponse> topics = topicService.getTopicsByPostId(postId);

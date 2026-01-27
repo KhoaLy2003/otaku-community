@@ -1,0 +1,38 @@
+{
+  "id": "translation_001",
+  "chapterId": "chapter_001",
+  "name": "English Scanlation",
+  "notes": "Translated by Otaku Team",
+  "status": "PUBLISHED",
+  "translator": {
+    "id": "user_101",
+    "username": "otaku_translator"
+  },
+  "pages": [
+    {
+      "id": "page_001",
+      "pageIndex": 0,
+      "imageUrl": "https://res.cloudinary.com/dfdwupiah/image/upload/v1768744174/demo/%E3%82%88%E3%81%A4%E3%81%B0%E3%81%A8_%E7%AC%AC01%E5%B7%BB_page-0008_qvl1gn.jpg"
+    },
+    {
+      "id": "page_002",
+      "pageIndex": 1,
+      "imageUrl": "https://res.cloudinary.com/dfdwupiah/image/upload/v1768744175/demo/%E3%82%88%E3%81%A4%E3%81%B0%E3%81%A8_%E7%AC%AC01%E5%B7%BB_page-0006_rpxrzh.jpg"
+    },
+    {
+      "id": "page_003",
+      "pageIndex": 2,
+      "imageUrl": "https://res.cloudinary.com/dfdwupiah/image/upload/v1768744175/demo/%E3%82%88%E3%81%A4%E3%81%B0%E3%81%A8_%E7%AC%AC01%E5%B7%BB_page-0009_nsuxoz.jpg"
+    },
+    {
+      "id": "page_004",
+      "pageIndex": 3,
+      "imageUrl": "https://res.cloudinary.com/dfdwupiah/image/upload/v1768744176/demo/%E3%82%88%E3%81%A4%E3%81%B0%E3%81%A8_%E7%AC%AC01%E5%B7%BB_page-0007_l41bu2.jpg"
+    },
+    {
+      "id": "page_005",
+      "pageIndex": 4,
+      "imageUrl": "https://res.cloudinary.com/dfdwupiah/image/upload/v1768744178/demo/%E3%82%88%E3%81%A4%E3%81%B0%E3%81%A8_%E7%AC%AC01%E5%B7%BB_page-0012_wm9ivi.jpg"
+    }
+  ]
+}

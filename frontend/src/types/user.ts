@@ -40,6 +40,10 @@ export interface User {
   createdAt: string;
   updatedAt: string;
   mainFavorite?: MainFavorite;
+  groupName?: string;
+  totalMangaViews?: number;
+  totalMangaUpvotes?: number;
+  totalTranslations?: number;
 }
 
 export interface UserProfile extends User {
@@ -48,6 +52,7 @@ export interface UserProfile extends User {
   postsCount: number | null;
   isFollowing: boolean;
   isRestricted: boolean;
+  rank?: number;
 }
 
 export interface UserListItem {

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom'
 import { Search, Loader2, X } from 'lucide-react';
 import { animeApi } from '@/lib/api/anime';
 import { mangaApi } from '@/lib/api/manga';
@@ -19,6 +20,24 @@ const AnimeMangaSearch: React.FC<AnimeMangaSearchProps> = ({ onSelect, selectedR
     const [type, setType] = useState<'ANIME' | 'MANGA'>('ANIME');
     const [results, setResults] = useState<(Anime | Manga)[]>([]);
     const [loading, setLoading] = useState(false);
+    const inputRef = useRef<HTMLDivElement>(null);
+    const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
+
+    useEffect(() => {
+        if (inputRef.current && results.length > 0) {
+            const rect = inputRef.current.getBoundingClientRect()
+            setDropdownStyle({
+                position: 'fixed',
+                top: rect.bottom + 4,
+                left: rect.left,
+                width: rect.width,
+                maxHeight: 300,
+                overflowY: 'auto',
+                zIndex: 9999,
+            })
+        }
+    }, [results])
+
 
     const search = useCallback(async (q: string, t: 'ANIME' | 'MANGA') => {
         if (!q.trim()) {
@@ -30,10 +49,10 @@ const AnimeMangaSearch: React.FC<AnimeMangaSearchProps> = ({ onSelect, selectedR
         try {
             if (t === 'ANIME') {
                 const response = await animeApi.searchAnime({ q });
-                setResults(response.data);
+                setResults(response.data.data);
             } else {
                 const response = await mangaApi.searchManga({ q });
-                setResults(response.data);
+                setResults(response.data.data);
             }
         } catch (error) {
             console.error('Search failed', error);
@@ -81,7 +100,7 @@ const AnimeMangaSearch: React.FC<AnimeMangaSearchProps> = ({ onSelect, selectedR
                 </button>
             </div>
 
-            <div className="relative">
+            <div ref={inputRef} className="relative">
                 <TextInput
                     placeholder={`Search ${type.toLowerCase()} to link...`}
                     value={query}
@@ -94,7 +113,7 @@ const AnimeMangaSearch: React.FC<AnimeMangaSearchProps> = ({ onSelect, selectedR
             </div>
 
             {results.length > 0 && (
-                <Card className="absolute z-10 w-full max-h-[300px] overflow-y-auto p-0 shadow-lg border-[#edeff1]">
+                <Card style={dropdownStyle} className="absolute z-10 w-full max-h-[300px] overflow-y-auto p-0 shadow-lg border-[#edeff1]">
                     {results.map((item) => {
                         const isSelected = selectedReferences.some(r => r.externalId === item.externalId && r.referenceType === type);
                         return (

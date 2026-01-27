@@ -26,8 +26,8 @@ export const MangaHoverModal: React.FC<MangaHoverModalProps> = ({ manga }) => {
 
                 <div className="flex flex-wrap gap-1 text-sm text-gray-300 mb-2">
                     {manga.genres.slice(0, 3).map((genre) => (
-                        <span key={genre.name} className="bg-primary-500/20 text-primary-200 px-1.5 py-0.5 rounded">
-                            {genre.name}
+                        <span key={genre} className="bg-primary-500/20 text-primary-200 px-1.5 py-0.5 rounded">
+                            {genre}
                         </span>
                     ))}
                 </div>

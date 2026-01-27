@@ -11,7 +11,9 @@ import {
     MessageSquare,
     ShieldCheck,
     Activity,
-    Github
+    Github,
+    BookOpen,
+    Zap
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { useNavigate } from "react-router-dom";
@@ -75,7 +77,7 @@ const AboutPage: React.FC = () => {
                     <div className="h-1.5 w-24 bg-orange-600 mx-auto rounded-full"></div>
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-8">
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {[
                         {
                             icon: FileText,
@@ -103,6 +105,15 @@ const AboutPage: React.FC = () => {
                                 "Secure message handling",
                                 "Cursor-based pagination"
                             ]
+                        },
+                        {
+                            icon: BookOpen,
+                            title: "Manga Reader",
+                            features: [
+                                "High-performance interface",
+                                "Dual Flip/Scroll modes",
+                                "Chapter social interaction"
+                            ]
                         }
                     ].map((feature, idx) => (
                         <Card key={idx} className="p-8 hover:shadow-lg transition-shadow border-gray-100 dark:border-gray-800">
@@ -121,6 +132,59 @@ const AboutPage: React.FC = () => {
                         </Card>
                     ))}
                 </div>
+            </section>
+
+            {/* Manga Reader Highlight */}
+            <section className="relative overflow-hidden rounded-[3rem] bg-gradient-to-br from-orange-600 to-orange-400 p-8 md:p-16 text-white shadow-2xl shadow-orange-600/20 group">
+                <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
+                    <div className="space-y-8">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-black uppercase tracking-widest border border-white/20">
+                            <Zap className="w-3 h-3 fill-current" />
+                            Premium Feature
+                        </div>
+                        <h2 className="text-4xl md:text-5xl font-black leading-tight">
+                            Immersive Reading <br />
+                            Experience
+                        </h2>
+                        <ul className="space-y-4">
+                            {[
+                                "Seamlessly flip through pages with high-performance rendering",
+                                "Switch between Horizontal (Flip) and Vertical (Scroll) modes",
+                                "Real-time translation community with live discussions",
+                                "Personalized reading history and library tracking"
+                            ].map((item, i) => (
+                                <li key={i} className="flex items-start gap-3">
+                                    <div className="mt-1.5 p-0.5 bg-white rounded-full">
+                                        <ShieldCheck className="w-3 h-3 text-orange-600" />
+                                    </div>
+                                    <span className="text-orange-50 font-medium">{item}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div className="relative">
+                        <div className="absolute -inset-4 bg-white/10 blur-3xl rounded-full"></div>
+                        <Card className="relative bg-white/10 backdrop-blur-xl border-white/20 p-4 transform hover:scale-105 transition-transform duration-500 overflow-hidden group-hover:shadow-2xl">
+                            <img
+                                src="https://res.cloudinary.com/dfdwupiah/image/upload/v1737812580/fbebe176251f33f443b81_sog4gq.png"
+                                alt="Manga Reader Preview"
+                                className="rounded-xl shadow-2xl w-full"
+                            />
+                            <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/60 to-transparent flex justify-between items-end">
+                                <div>
+                                    <div className="text-xs font-black uppercase tracking-widest opacity-80 mb-1">Now Reading</div>
+                                    <div className="font-bold truncate">Yotsubato! - Chapter 1</div>
+                                </div>
+                                <div className="flex gap-2">
+                                    <div className="p-2 bg-white/20 rounded-lg"><Activity className="w-4 h-4" /></div>
+                                </div>
+                            </div>
+                        </Card>
+                    </div>
+                </div>
+                {/* Decoration Circles */}
+                <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-orange-700/20 rounded-full blur-3xl"></div>
             </section>
 
             {/* Tech Architecture */}
@@ -161,15 +225,15 @@ const AboutPage: React.FC = () => {
                     Currently in **Active Development (MVP)**. We are focusing on core posting, anime integration, and foundational infrastructure.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    {/* <a
-                        href="https://github.com/KhoaLy2003/otaku-community"
+                    <a
+                        href="https://github.com/KhoaLy2003"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="px-8 py-4 bg-gray-900 dark:bg-white dark:text-gray-900 text-white font-bold rounded-2xl flex items-center justify-center gap-2 hover:scale-105 transition-transform"
                     >
                         <Github className="w-5 h-5" />
                         Check Github
-                    </a> */}
+                    </a>
                     <button
                         className="px-8 py-4 border-2 border-orange-200 dark:border-gray-700 text-orange-600 dark:text-orange-400 font-bold rounded-2xl hover:bg-orange-600 hover:text-white hover:border-orange-600 transition-all"
                         onClick={() => navigate('/signup')}

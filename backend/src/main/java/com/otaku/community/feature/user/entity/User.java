@@ -60,6 +60,21 @@ public class User extends BaseEntity {
     @Builder.Default
     private ProfileVisibility profileVisibility = ProfileVisibility.PUBLIC;
 
+    @Column(name = "group_name", length = 100)
+    private String groupName;
+
+    @Column(name = "total_manga_views", nullable = false, columnDefinition = "bigint default 0")
+    @Builder.Default
+    private Long totalMangaViews = 0L;
+
+    @Column(name = "total_manga_upvotes", nullable = false, columnDefinition = "bigint default 0")
+    @Builder.Default
+    private Long totalMangaUpvotes = 0L;
+
+    @Column(name = "total_translations", nullable = false, columnDefinition = "bigint default 0")
+    @Builder.Default
+    private Long totalTranslations = 0L;
+
     public enum UserRole {
         USER, ADMIN
     }

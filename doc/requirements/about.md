@@ -37,6 +37,14 @@ To become a trusted and engaging hub where otaku culture thrives through high-qu
 - Structured references for anime and manga entities
 - Enhanced discovery through linked content
 
+### 📚 Manga Translation Reader
+
+- Community-driven manga translation publishing and management
+- Mobile-first reading experience using Swiper.js with vertical/horizontal modes
+- Social engagement via upvotes, views, and comments on translations
+- **Translator Ranking system** to highlight high-quality contributors
+- Home feed integration for latest and trending translations
+
 ### 💬 Chat & Interaction (MVP)
 
 - One-to-one private chat

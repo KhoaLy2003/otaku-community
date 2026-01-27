@@ -1,0 +1,34 @@
+{
+  "translations": [
+    {
+      "id": "trans_001",
+      "mangaId": "13",
+      "mangaTitle": "Yotsuba&!",
+      "chapter": "Chapter 01",
+      "status": "PUBLISHED",
+      "createdAt": "2026-01-10T10:00:00Z",
+      "publishedAt": "2026-01-11T12:00:00Z",
+      "viewCount": 1250
+    },
+    {
+      "id": "trans_002",
+      "mangaId": "13",
+      "mangaTitle": "Yotsuba&!",
+      "chapter": "Chapter 02",
+      "status": "DRAFT",
+      "createdAt": "2026-01-18T15:30:00Z",
+      "publishedAt": null,
+      "viewCount": 0
+    },
+    {
+      "id": "trans_003",
+      "mangaId": "100",
+      "mangaTitle": "One Piece",
+      "chapter": "Chapter 1100",
+      "status": "PUBLISHED",
+      "createdAt": "2025-12-25T08:00:00Z",
+      "publishedAt": "2025-12-26T09:00:00Z",
+      "viewCount": 54200
+    }
+  ]
+}

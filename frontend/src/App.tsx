@@ -23,9 +23,13 @@ import AnimeListPage from "./pages/AnimeListPage";
 import AnimeDetailPage from "./pages/AnimeDetailPage";
 import MangaListPage from "./pages/MangaListPage";
 import MangaDetailPage from "./pages/MangaDetailPage";
+import MangaDashboardPage from "./pages/MangaDashboardPage";
+import MangaUploadPage from "./pages/MangaUploadPage";
+import MangaModerationPage from "./pages/MangaModerationPage";
 import ComingSoonPage from "./pages/ComingSoonPage";
 import AboutPage from "./pages/AboutPage";
 import HelpPage from "./pages/HelpPage";
+import RankingPage from "./pages/RankingPage";
 
 // Auth components
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
@@ -69,6 +73,39 @@ function App() {
                   <Route path="/anime/:id" element={<AnimeDetailPage />} />
                   <Route path={ROUTES.MANGA_LIST} element={<MangaListPage />} />
                   <Route path="/manga/:id" element={<MangaDetailPage />} />
+                  <Route
+                    path={ROUTES.MANGA_DASHBOARD}
+                    element={
+                      <ProtectedRoute>
+                        <MangaDashboardPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path={ROUTES.MANGA_UPLOAD}
+                    element={
+                      <ProtectedRoute>
+                        <MangaUploadPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path={ROUTES.MANGA_UPLOAD_BY_ID(":id")}
+                    element={
+                      <ProtectedRoute>
+                        <MangaUploadPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  TODO: Add Manga Moderation
+                  {/* <Route
+                    path={ROUTES.MANGA_MODERATION}
+                    element={
+                      <ProtectedRoute roles={["STAFF", "ADMIN"]}>
+                        <MangaModerationPage />
+                      </ProtectedRoute>
+                    }
+                  /> */}
                   <Route
                     path="/profile/:username"
                     element={
@@ -114,6 +151,7 @@ function App() {
                   <Route path={ROUTES.HELP} element={<HelpPage />} />
                   <Route path={ROUTES.BLOG} element={<ComingSoonPage />} />
                   <Route path={ROUTES.ABOUT} element={<AboutPage />} />
+                  <Route path={ROUTES.RANKINGS} element={<RankingPage />} />
                 </Route>
 
                 <Route element={<PublicLayout />}>

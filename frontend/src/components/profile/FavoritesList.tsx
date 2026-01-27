@@ -14,6 +14,8 @@ export const FavoritesList = ({ isOwner, onAddClick }: FavoritesListProps) => {
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(false);
 
+    const hasFavorites = favorites.length > 0;
+
     const fetchFavorites = async (pageNum: number, append: boolean = false) => {
         try {
             setLoading(true);
@@ -53,11 +55,11 @@ export const FavoritesList = ({ isOwner, onAddClick }: FavoritesListProps) => {
     };
 
     return (
-        <div className="space-y-6">
+        <div className={hasFavorites ? "space-y-6" : ""}>
             {/* Header / Empty State with CTA */}
-            <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-gray-900">Favorites</h2>
-                {isOwner && (
+            <div className={`flex justify-between items-center ${hasFavorites ? "mt-6" : ""}`}>
+                <h2 className="text-xl font-bold text-gray-900"></h2>
+                {isOwner && favorites.length !== 0 && (
                     <button
                         onClick={onAddClick}
                         className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors font-medium text-sm"
@@ -73,8 +75,8 @@ export const FavoritesList = ({ isOwner, onAddClick }: FavoritesListProps) => {
                     <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
                 </div>
             ) : favorites.length === 0 ? (
-                <div className="text-center py-12 bg-white rounded-lg border border-dashed border-gray-300">
-                    <p className="text-gray-500 mb-2">No favorites added yet.</p>
+                <div className="bg-white p-12 text-center border-t border-gray-200">
+                    <h3 className="text-xl font-black text-gray-900 mb-2">No favorites added yet.</h3>
                     {isOwner && (
                         <button
                             onClick={onAddClick}

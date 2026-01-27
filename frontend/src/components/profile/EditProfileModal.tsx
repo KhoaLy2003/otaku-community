@@ -126,7 +126,7 @@ export function EditProfileModal({ isOpen, onClose, user, onUpdate }: EditProfil
         setIsSearching(true);
         try {
             const response = await animeApi.searchCharacters(searchQuery);
-            setSearchResults(response.data);
+            setSearchResults(response.data.data);
         } catch (error) {
             console.error('Failed to search characters:', error);
         } finally {

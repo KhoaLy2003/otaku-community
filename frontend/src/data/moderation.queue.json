@@ -1,0 +1,28 @@
+{
+  "items": [
+    {
+      "id": "mod_001",
+      "mangaId": 13,
+      "mangaTitle": "Yotsuba&!",
+      "chapterNumber": 2,
+      "chapterTitle": "Chapter 02: Yotsuba & Ena",
+      "translationName": "Otaku Team Scanlation",
+      "submitter": "otaku_translator",
+      "submittedAt": "2026-01-18T15:30:00Z",
+      "status": "PENDING",
+      "mangaImage": "https://res.cloudinary.com/dfdwupiah/image/upload/v1768744174/demo/%E3%82%88%E3%81%A4%E3%81%B0%E3%81%A8_%E7%AC%AC01%E5%B7%BB_page-0008_qvl1gn.jpg"
+    },
+    {
+      "id": "mod_002",
+      "mangaId": 101,
+      "mangaTitle": "Solo Leveling",
+      "chapterNumber": 180,
+      "chapterTitle": "Chapter 180",
+      "status": "PENDING",
+      "translationName": "LevelUp Scans",
+      "submitter": "hunter_x",
+      "submittedAt": "2026-01-18T14:15:00Z",
+      "mangaImage": "https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=200&auto=format&fit=crop"
+    }
+  ]
+}
