@@ -2,7 +2,7 @@ spring:
   jpa:
     show-sql: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
   data:
     redis:
       host: ${REDIS_HOST:redis-17342.c54.ap-northeast-1-2.ec2.cloud.redislabs.com}

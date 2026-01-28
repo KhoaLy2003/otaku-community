@@ -4,6 +4,7 @@ import com.otaku.community.common.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -29,7 +30,7 @@ import java.math.BigDecimal;
 public class Chapter extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "manga_id", nullable = false)
+    @JoinColumn(name = "manga_id", nullable = false, foreignKey = @ForeignKey(name = "fk_chapters_mangas"))
     private Manga manga;
 
     @Column(name = "chapter_number", nullable = false, precision = 10, scale = 2)

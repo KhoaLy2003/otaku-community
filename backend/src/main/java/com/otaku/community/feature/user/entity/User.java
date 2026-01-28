@@ -7,6 +7,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,7 +15,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "users", indexes = {
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_users_auth0_id", columnNames = "auth0_id"),
+        @UniqueConstraint(name = "uk_users_email", columnNames = "email"),
+        @UniqueConstraint(name = "uk_users_username", columnNames = "username")
+}, indexes = {
         @Index(name = "idx_users_email", columnList = "email"),
         @Index(name = "idx_users_username", columnList = "username"),
         @Index(name = "idx_users_deleted_at", columnList = "deleted_at")

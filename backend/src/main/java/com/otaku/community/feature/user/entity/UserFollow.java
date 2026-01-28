@@ -20,11 +20,11 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "user_follows", uniqueConstraints = @UniqueConstraint(columnNames = {"follower_id",
-        "followed_id"}), indexes = {
-        @Index(name = "idx_user_follow_follower", columnList = "follower_id"),
-        @Index(name = "idx_user_follow_followed", columnList = "followed_id")
-})
+@Table(name = "user_follows", uniqueConstraints = @UniqueConstraint(name = "uk_user_follows_follower_followed", columnNames = {
+        "follower_id", "followed_id" }), indexes = {
+                @Index(name = "idx_user_follow_follower", columnList = "follower_id"),
+                @Index(name = "idx_user_follow_followed", columnList = "followed_id")
+        })
 @Getter
 @Setter
 @NoArgsConstructor

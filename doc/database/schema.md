@@ -76,9 +76,9 @@ recipient_id uuid NOT NULL,
 sender_id uuid NULL,
 target_id uuid NULL,
 target_type varchar(255) NULL,
-CONSTRAINT notifications_notification_type_check CHECK (((notification_type)::text = ANY ((ARRAY['LIKE'::character varying, 'COMMENT'::character varying, 'REPLY'::character varying, 'FOLLOW'::character varying, 'UNFOLLOW'::character varying, 'MENTION'::character varying, 'SYSTEM'::character varying, 'MESSAGE'::character varying])::text[]))),
+CONSTRAINT notifications_notification_type_check CHECK (((notification_type)::text = ANY ((ARRAY['LIKE'::character varying, 'COMMENT'::character varying, 'REPLY'::character varying, 'FOLLOW'::character varying, 'UNFOLLOW'::character varying, 'MENTION'::character varying, 'SYSTEM'::character varying, 'MESSAGE'::character varying, 'NEW_TRANSLATION'::character varying])::text[]))),
 CONSTRAINT notifications_pkey PRIMARY KEY (id),
-CONSTRAINT notifications_target_type_check CHECK (((target_type)::text = ANY ((ARRAY['POST'::character varying, 'COMMENT'::character varying, 'USER'::character varying, 'CHAT'::character varying])::text[])))
+CONSTRAINT notifications_target_type_check CHECK (((target_type)::text = ANY ((ARRAY['POST'::character varying, 'COMMENT'::character varying, 'USER'::character varying, 'CHAT'::character varying, 'TRANSLATION'::character varying])::text[])))
 );
 CREATE INDEX idx_notifications_recipient_created ON public.notifications USING btree (recipient_id, created_at DESC);
 CREATE INDEX idx_notifications_unread ON public.notifications USING btree (recipient_id);
@@ -116,12 +116,12 @@ CREATE INDEX idx_topics_slug ON public.topics USING btree (slug);
 
 CREATE TABLE public.user_feeds (
 id uuid NOT NULL,
-created_at timestamp(6) NULL,
+author_id uuid NOT NULL,
+created_at timestamptz(6) NOT NULL,
 post_id uuid NOT NULL,
 reason varchar(255) NULL,
 score float8 NOT NULL,
 user_id uuid NOT NULL,
-author_id uuid NOT NULL,
 CONSTRAINT user_feeds_pkey PRIMARY KEY (id)
 );
 CREATE INDEX idx_user_feed_score ON public.user_feeds USING btree (score);
@@ -158,13 +158,17 @@ updated_at timestamptz(6) NOT NULL,
 auth0_id varchar(255) NOT NULL,
 avatar_url text NULL,
 bio text NULL,
+cover_image_url text NULL,
 email varchar(255) NOT NULL,
+group_name varchar(100) NULL,
 interests \_text NULL,
 "location" varchar(100) NULL,
-"role" varchar(20) NOT NULL,
-username varchar(50) NOT NULL,
-cover_image_url text NULL,
 profile_visibility varchar(20) NULL,
+"role" varchar(20) NOT NULL,
+total_manga_upvotes int8 DEFAULT 0 NOT NULL,
+total_manga_views int8 DEFAULT 0 NOT NULL,
+total_translations int8 DEFAULT 0 NOT NULL,
+username varchar(50) NOT NULL,
 CONSTRAINT uk_6dotkott2kjsp8vw4d0m25fb7 UNIQUE (email),
 CONSTRAINT uk_6muhtnbpqcydo2lsv78rginj8 UNIQUE (auth0_id),
 CONSTRAINT uk_r43af9ap4edm43mmtq01oddj6 UNIQUE (username),
@@ -187,13 +191,14 @@ id uuid NOT NULL,
 created_at timestamptz(6) NOT NULL,
 deleted_at timestamptz(6) NULL,
 updated_at timestamptz(6) NOT NULL,
-action_type varchar(50) NOT NULL,
+action_type varchar(255) NOT NULL,
 metadata text NULL,
-user_id uuid NOT NULL,
 target_id varchar(255) NULL,
 target_type varchar(255) NULL,
+user_id uuid NOT NULL,
+CONSTRAINT activity_logs_action_type_check CHECK (((action_type)::text = ANY ((ARRAY['LOGIN'::character varying, 'LOGOUT'::character varying, 'CREATE_POST'::character varying, 'UPDATE_POST'::character varying, 'DELETE_POST'::character varying, 'CREATE_COMMENT'::character varying, 'UPDATE_COMMENT'::character varying, 'DELETE_COMMENT'::character varying, 'LIKE_POST'::character varying, 'UNLIKE_POST'::character varying, 'FOLLOW_USER'::character varying, 'UNFOLLOW_USER'::character varying, 'UPDATE_PROFILE'::character varying, 'UPLOAD_TRANSLATION'::character varying, 'PUBLISH_TRANSLATION'::character varying, 'DELETE_TRANSLATION'::character varying])::text[]))),
 CONSTRAINT activity_logs_pkey PRIMARY KEY (id),
-CONSTRAINT activity_logs_target_type_check CHECK (((target_type)::text = ANY ((ARRAY['USER'::character varying, 'POST'::character varying, 'COMMENT'::character varying, 'IP_ADDRESS'::character varying])::text[]))),
+CONSTRAINT activity_logs_target_type_check CHECK (((target_type)::text = ANY ((ARRAY['USER'::character varying, 'POST'::character varying, 'COMMENT'::character varying, 'IP_ADDRESS'::character varying, 'TRANSLATION'::character varying])::text[]))),
 CONSTRAINT fk5bm1lt4f4eevt8lv2517soakd FOREIGN KEY (user_id) REFERENCES public.users(id)
 );
 CREATE INDEX idx_activity_logs_created_at ON public.activity_logs USING btree (created_at);
@@ -230,15 +235,14 @@ id uuid NOT NULL,
 created_at timestamptz(6) NOT NULL,
 deleted_at timestamptz(6) NULL,
 updated_at timestamptz(6) NOT NULL,
-ip_address varchar(45) NULL,
-user_agent text NULL,
+ip_address varchar(255) NULL,
+user_agent varchar(255) NULL,
 user_id uuid NOT NULL,
-CONSTRAINT login_history_pkey PRIMARY KEY (id),
-CONSTRAINT fk20v0mimmdegh2afs39uixlxpm FOREIGN KEY (user_id) REFERENCES public.users(id)
+CONSTRAINT login_histories_pkey PRIMARY KEY (id),
+CONSTRAINT fko6o8fq7e5r8aq31dydpe05828 FOREIGN KEY (user_id) REFERENCES public.users(id)
 );
 CREATE INDEX idx_login_histories_created_at ON public.login_histories USING btree (created_at);
 CREATE INDEX idx_login_histories_user_id ON public.login_histories USING btree (user_id);
-CREATE INDEX idx_login_history_user_id ON public.login_histories USING btree (user_id);
 
 -- public.posts definition
 
@@ -282,7 +286,7 @@ target_type varchar(20) NOT NULL,
 user_id uuid NOT NULL,
 CONSTRAINT reactions_pkey PRIMARY KEY (id),
 CONSTRAINT reactions_reaction_type_check CHECK (((reaction_type)::text = ANY ((ARRAY['LIKE'::character varying, 'UNLIKE'::character varying])::text[]))),
-CONSTRAINT reactions_target_type_check CHECK (((target_type)::text = ANY ((ARRAY['POST'::character varying, 'COMMENT'::character varying])::text[]))),
+CONSTRAINT reactions_target_type_check CHECK (((target_type)::text = ANY ((ARRAY['POST'::character varying, 'COMMENT'::character varying, 'TRANSLATION'::character varying])::text[]))),
 CONSTRAINT uk_reactions_user_target UNIQUE (user_id, target_type, target_id),
 CONSTRAINT fkqmewaibcp5bxtlqxc2cawhuln FOREIGN KEY (user_id) REFERENCES public.users(id)
 );
@@ -401,11 +405,11 @@ id uuid NOT NULL,
 created_at timestamptz(6) NOT NULL,
 deleted_at timestamptz(6) NULL,
 updated_at timestamptz(6) NOT NULL,
-"content" varchar(1000) NOT NULL,
-parent_id uuid NULL,
+"content" varchar(1000) NULL,
+image_url varchar(500) NULL,
+parent_id uuid NOT NULL,
 post_id uuid NOT NULL,
 user_id uuid NOT NULL,
-image_url varchar(500) NULL,
 CONSTRAINT comments_pkey PRIMARY KEY (id),
 CONSTRAINT fk8omq0tc18jd43bu5tjh6jvraq FOREIGN KEY (user_id) REFERENCES public.users(id),
 CONSTRAINT fkh4c7lvsc298whoyd4w9ta25cr FOREIGN KEY (post_id) REFERENCES public.posts(id),
@@ -508,6 +512,28 @@ CREATE INDEX idx_post_topics_created_at ON public.post_topics USING btree (creat
 CREATE INDEX idx_post_topics_post_id ON public.post_topics USING btree (post_id);
 CREATE INDEX idx_post_topics_topic_id ON public.post_topics USING btree (topic_id);
 
+-- public.translation_comments definition
+
+-- Drop table
+
+-- DROP TABLE public.translation_comments;
+
+CREATE TABLE public.translation_comments (
+id uuid NOT NULL,
+created_at timestamptz(6) NOT NULL,
+deleted_at timestamptz(6) NULL,
+updated_at timestamptz(6) NOT NULL,
+"content" varchar(1000) NOT NULL,
+image_url varchar(500) NULL,
+parent_id uuid NULL,
+translation_id uuid NOT NULL,
+user_id uuid NOT NULL,
+CONSTRAINT translation_comments_pkey PRIMARY KEY (id),
+CONSTRAINT fk6tntqlfdd07f17b7pyhrq102o FOREIGN KEY (user_id) REFERENCES public.users(id),
+CONSTRAINT fk92o1c18kkohilkt1xgwxuur8l FOREIGN KEY (parent_id) REFERENCES public.translation_comments(id),
+CONSTRAINT fkikjj3dmjgi3jp4nuumc0lo4f8 FOREIGN KEY (translation_id) REFERENCES public.translations(id)
+);
+
 -- public.translation_pages definition
 
 -- Drop table
@@ -529,45 +555,19 @@ CONSTRAINT fk5o7jl5o8xn3q0yog1s4icmua0 FOREIGN KEY (translation_id) REFERENCES p
 );
 CREATE INDEX idx_page_translation_id ON public.translation_pages USING btree (translation_id);
 CREATE INDEX idx_page_translation_order ON public.translation_pages USING btree (page_index);
--- PROPOSAL: Manga Reader Social Features (IN REVIEW)
--- ===============================================
 
 -- public.translation_stats definition
+
+-- Drop table
+
+-- DROP TABLE public.translation_stats;
+
 CREATE TABLE public.translation_stats (
 translation_id uuid NOT NULL,
-comment_count int4 NOT NULL DEFAULT 0,
-upvote_count int4 NOT NULL DEFAULT 0,
-view_count int8 NOT NULL DEFAULT 0,
+comment_count int4 NOT NULL,
 updated_at timestamptz(6) NOT NULL,
+upvote_count int4 NOT NULL,
+view_count int8 NOT NULL,
 CONSTRAINT translation_stats_pkey PRIMARY KEY (translation_id),
-CONSTRAINT fk_translation_stats_id FOREIGN KEY (translation_id) REFERENCES public.translations(id)
+CONSTRAINT fklaob5yhlhjyad4wcedy1runk0 FOREIGN KEY (translation_id) REFERENCES public.translations(id)
 );
-CREATE INDEX idx_translation_stats_upvotes ON public.translation_stats USING btree (upvote_count DESC);
-CREATE INDEX idx_translation_stats_views ON public.translation_stats USING btree (view_count DESC);
-
--- public.translation_comments definition
-CREATE TABLE public.translation_comments (
-id uuid NOT NULL,
-created_at timestamptz(6) NOT NULL,
-deleted_at timestamptz(6) NULL,
-updated_at timestamptz(6) NOT NULL,
-content varchar(1000) NOT NULL,
-parent_id uuid NULL,
-translation_id uuid NOT NULL,
-user_id uuid NOT NULL,
-image_url varchar(500) NULL,
-CONSTRAINT translation_comments_pkey PRIMARY KEY (id),
-CONSTRAINT fk_comment_parent FOREIGN KEY (parent_id) REFERENCES public.translation_comments(id),
-CONSTRAINT fk_comment_translation FOREIGN KEY (translation_id) REFERENCES public.translations(id),
-CONSTRAINT fk_comment_user FOREIGN KEY (user_id) REFERENCES public.users(id)
-);
-CREATE INDEX idx_translation_comments_translation_id ON public.translation_comments USING btree (translation_id);
-CREATE INDEX idx_translation_comments_parent_id ON public.translation_comments USING btree (parent_id);
-
--- USER TABLE UPDATES (Planned)
--- ALTER TABLE public.users ADD COLUMN group_name varchar(100);
--- ALTER TABLE public.users ADD COLUMN total_manga_views int8 DEFAULT 0;
--- ALTER TABLE public.users ADD COLUMN total_manga_upvotes int8 DEFAULT 0;
-
--- REACTION TYPE UPDATES (Planned)
--- Update constraint for reactions.target_type to include 'TRANSLATION'
