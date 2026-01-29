@@ -4,3 +4,5 @@
 .cursor/
 .gemini/
 .vite/
+config/
+.agent/
