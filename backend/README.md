@@ -68,7 +68,7 @@ cd backend
 Copy the example environment file:
 
 ```bash
-cp .env.example .env
+cp .env.prod.example .env.prod
 ```
 
 Edit `.env` with your configuration:
