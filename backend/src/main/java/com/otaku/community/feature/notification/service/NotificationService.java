@@ -32,7 +32,7 @@ public class NotificationService {
 
     @Transactional
     public void createAndSendNotification(UUID recipientId, UUID senderId, Notification.NotificationType type,
-            UUID targetId, Notification.TargetType targetType, String preview) {
+                                          UUID targetId, Notification.TargetType targetType, String preview) {
 
         // Do not notify if sender is the same as recipient
         if (recipientId.equals(senderId)) {

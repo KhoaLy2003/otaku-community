@@ -31,6 +31,14 @@ import AboutPage from "./pages/AboutPage";
 import HelpPage from "./pages/HelpPage";
 import RankingPage from "./pages/RankingPage";
 
+// Admin pages
+import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
+import { UserManagementPage } from "./pages/admin/UserManagementPage";
+import { UserDetailPage } from "./pages/admin/UserDetailPage";
+import { ContentModerationPage } from "./pages/admin/ContentModerationPage";
+import { DatabaseManagementPage } from "./pages/admin/DatabaseManagementPage";
+import { SystemSettingsPage } from "./pages/admin/SystemSettingsPage";
+
 // Auth components
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { PublicRoute } from "./components/auth/PublicRoute";
@@ -42,6 +50,7 @@ import WebSocketProvider from "./components/socket/WebSocketProvider";
 import { ToastProvider } from "./components/ui/ToastProvider";
 import { MainLayout } from "./components/layout/MainLayout";
 import { PublicLayout } from "./components/layout/PublicLayout";
+import { AdminLayout } from "./components/layout/AdminLayout";
 
 import { ChatSocketListener } from "./components/socket/ChatSocketListener";
 
@@ -152,6 +161,22 @@ function App() {
                   <Route path={ROUTES.BLOG} element={<ComingSoonPage />} />
                   <Route path={ROUTES.ABOUT} element={<AboutPage />} />
                   <Route path={ROUTES.RANKINGS} element={<RankingPage />} />
+                </Route>
+
+                {/* Admin Routes */}
+                <Route
+                  element={
+                    <ProtectedRoute roles={["ADMIN"]}>
+                      <AdminLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route path={ROUTES.ADMIN_DASHBOARD} element={<AdminDashboardPage />} />
+                  <Route path={ROUTES.ADMIN_USERS} element={<UserManagementPage />} />
+                  <Route path="/admin/users/:id" element={<UserDetailPage />} />
+                  <Route path={ROUTES.ADMIN_CONTENT} element={<ContentModerationPage />} />
+                  <Route path={ROUTES.ADMIN_DATABASE} element={<DatabaseManagementPage />} />
+                  <Route path={ROUTES.ADMIN_SETTINGS} element={<SystemSettingsPage />} />
                 </Route>
 
                 <Route element={<PublicLayout />}>

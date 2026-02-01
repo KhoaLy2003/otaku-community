@@ -27,8 +27,11 @@ public interface TranslationRepository extends JpaRepository<Translation, UUID> 
     long countByChapterIdAndNotDeleted(@Param("chapterId") UUID chapterId);
 
     @Query("SELECT t FROM Translation t WHERE t.status = :status AND t.deletedAt IS NULL ORDER BY t.publishedAt DESC")
-    List<Translation> findByStatusOrderByPublishedAtDesc(@Param("status") Translation.TranslationStatus status, Pageable pageable);
+    List<Translation> findByStatusOrderByPublishedAtDesc(@Param("status") Translation.TranslationStatus status,
+                                                         Pageable pageable);
 
     @Query("SELECT t FROM Translation t JOIN TranslationStats s ON t.id = s.translationId WHERE t.status = 'PUBLISHED' AND t.deletedAt IS NULL ORDER BY (s.upvoteCount * 10 + s.viewCount) DESC")
     List<Translation> findTrendingTranslations(Pageable pageable);
+
+    long countByStatus(Translation.TranslationStatus status);
 }
