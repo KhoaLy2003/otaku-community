@@ -21,6 +21,7 @@ export { interactionsApi, type LikeResponse } from "./interactions";
 export { chatApi } from "./chat";
 export { animeApi, type PageResponse, type AnimeSearchParams } from "./anime";
 export { mangaApi, type MangaSearchParams } from "./manga";
+export { newsApi } from "./news";
 
 // Re-export common types
 export type { ApiResponse, PaginatedResponse } from "../../types/api";

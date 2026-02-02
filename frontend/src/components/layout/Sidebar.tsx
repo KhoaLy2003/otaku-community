@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Tv,
   Book,
+  Newspaper,
   Shield,
 } from "lucide-react";
 import { Colors } from "../../constants/colors";
@@ -31,6 +32,7 @@ const menuItems: MenuItem[] = [
   { id: "anime", label: "Anime", icon: Tv, href: ROUTES.ANIME_LIST },
   { id: "manga", label: "Manga", icon: Book, href: ROUTES.MANGA_LIST },
   { id: "ranking", label: "Ranking", icon: TrendingUp, href: ROUTES.RANKINGS },
+  { id: "news", label: "News", icon: Newspaper, href: ROUTES.NEWS },
   { id: "communities", label: "Communities", icon: Users, href: ROUTES.COMMUNITIES },
   { id: "admin", label: "Admin Panel", icon: Shield, href: ROUTES.ADMIN_DASHBOARD, adminOnly: true },
   { id: "help", label: "Help", icon: HelpCircle, href: ROUTES.HELP },

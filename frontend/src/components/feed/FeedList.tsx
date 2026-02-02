@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
 import { PostCard, type BasePost } from '../posts/PostCard'
+import { NewsCard } from '../news/NewsCard'
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { feedApi } from '@/lib/api/feed'
 import type { FeedPost } from '@/types/post'
+import type { NewsResponse } from '@/types/news'
 import { timeAgo, scrollToTop } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { postsApi } from '@/lib/api/posts'
@@ -11,20 +13,26 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 export function FeedList() {
   const { isAuthenticated } = useAuth()
   const [posts, setPosts] = useState<FeedPost[]>([])
+  const [news, setNews] = useState<NewsResponse[]>([])
   const [loading, setLoading] = useState(true)
   const [isFetchingMore, setIsFetchingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [nextCursor, setNextCursor] = useState<string | undefined>(undefined)
-  const [hasMore, setHasMore] = useState(false)
+
+  const [postCursor, setPostCursor] = useState<string | undefined>(undefined)
+  const [newsCursor, setNewsCursor] = useState<string | undefined>(undefined)
+  const [hasMorePosts, setHasMorePosts] = useState(false)
+  const [hasMoreNews, setHasMoreNews] = useState(false)
+
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [postToDelete, setPostToDelete] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
   const observerTarget = useRef<HTMLDivElement>(null)
 
-  const fetchFeed = useCallback(async (cursor?: string) => {
+  const fetchFeed = useCallback(async (pCursor?: string, nCursor?: string) => {
     try {
-      if (cursor) {
+      const isInitial = !pCursor && !nCursor;
+      if (!isInitial) {
         setIsFetchingMore(true)
       } else {
         setLoading(true)
@@ -32,13 +40,21 @@ export function FeedList() {
       }
 
       const response = isAuthenticated
-        ? await feedApi.getHomeFeed({ cursor, limit: 10 })
-        : await feedApi.getExploreFeed({ cursor, limit: 10 })
+        ? await feedApi.getHomeFeed({ postCursor: pCursor, newsCursor: nCursor })
+        : await feedApi.getExploreFeed({ postCursor: pCursor, newsCursor: nCursor })
 
       if (response.success && response.data) {
-        setPosts(prev => cursor ? [...prev, ...response.data!.posts] : response.data!.posts)
-        setNextCursor(response.data.nextCursor)
-        setHasMore(response.data.hasMore)
+        if (isInitial) {
+          setPosts(response.data.posts)
+          setNews(response.data.news)
+        } else {
+          setPosts(prev => [...prev, ...response.data!.posts])
+          setNews(prev => [...prev, ...response.data!.news])
+        }
+        setPostCursor(response.data.postCursor)
+        setNewsCursor(response.data.newsCursor)
+        setHasMorePosts(response.data.hasMorePosts)
+        setHasMoreNews(response.data.hasMoreNews)
       } else {
         setError(response.message || 'Failed to fetch feed')
       }
@@ -67,13 +83,14 @@ export function FeedList() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       entries => {
-        if (entries[0].isIntersecting && hasMore && !loading && !isFetchingMore) {
-          fetchFeed(nextCursor)
+        const canFetchMore = (hasMorePosts || hasMoreNews) && !loading && !isFetchingMore;
+        if (entries[0].isIntersecting && canFetchMore) {
+          fetchFeed(postCursor, newsCursor)
         }
       },
       {
         threshold: 0.1,
-        rootMargin: '100px' // Start loading before reaching the very end
+        rootMargin: '200px'
       }
     )
 
@@ -87,10 +104,10 @@ export function FeedList() {
         observer.unobserve(currentTarget)
       }
     }
-  }, [hasMore, loading, isFetchingMore, nextCursor, fetchFeed])
+  }, [hasMorePosts, hasMoreNews, loading, isFetchingMore, postCursor, newsCursor, fetchFeed])
 
-  const adaptPosts = (postsToAdapt: FeedPost[]): BasePost[] => {
-    return postsToAdapt.map(post => ({
+  const adaptPost = (post: FeedPost): BasePost => {
+    return {
       id: post.id,
       title: post.title,
       body: post.content,
@@ -105,7 +122,7 @@ export function FeedList() {
       likesCount: post.likesCount,
       isLiked: post.isLiked || false,
       comments: post.commentCount,
-    }))
+    }
   }
 
   const handleDeletePost = (postId: string) => {
@@ -120,7 +137,7 @@ export function FeedList() {
     try {
       const response = await postsApi.deletePost(postToDelete);
       if (response.success) {
-        setPosts(prev => prev.filter(p => p.id !== postToDelete));
+        setPosts(prev => prev.filter(post => post.id !== postToDelete));
         setShowDeleteDialog(false);
         setPostToDelete(null);
       } else {
@@ -135,7 +152,7 @@ export function FeedList() {
     }
   };
 
-  if (loading && posts.length === 0) {
+  if (loading && posts.length === 0 && news.length === 0) {
     return (
       <div className="space-y-4">
         {[...Array(3)].map((_, i) => (
@@ -146,7 +163,7 @@ export function FeedList() {
     )
   }
 
-  if (error && posts.length === 0) {
+  if (error && posts.length === 0 && news.length === 0) {
     return (
       <div className="bg-red-50 p-4 rounded-md border border-red-200 text-red-700 text-center">
         <p>Error: {error}</p>
@@ -160,17 +177,36 @@ export function FeedList() {
     )
   }
 
-  const adaptedPosts = adaptPosts(posts)
-
   return (
     <div className="space-y-4">
-      {adaptedPosts.map(post => (
-        <div key={post.id} className="relative">
-          <Link to={`/posts/${post.id}?returnTo=${encodeURIComponent('/')}`} className="block">
-            <PostCard post={post} onDelete={handleDeletePost} />
-          </Link>
+      {/* Posts Section */}
+      <div className="space-y-4">
+        {posts.map(post => (
+          <div key={post.id} className="relative">
+            <Link to={`/posts/${post.id}?returnTo=${encodeURIComponent('/')}`} className="block">
+              <PostCard post={adaptPost(post)} onDelete={handleDeletePost} />
+            </Link>
+          </div>
+        ))}
+      </div>
+
+      {/* Visual Separator if both exist */}
+      {posts.length > 0 && news.length > 0 && (
+        <div className="py-4 flex items-center gap-4">
+          <div className="h-px flex-1 bg-gray-200" />
+          <span className="text-sm font-medium text-gray-400 uppercase tracking-wider">Latest News</span>
+          <div className="h-px flex-1 bg-gray-200" />
         </div>
-      ))}
+      )}
+
+      {/* News Section */}
+      <div className="space-y-4">
+        {news.map(item => (
+          <div key={item.id} className="relative">
+            <NewsCard news={item} />
+          </div>
+        ))}
+      </div>
 
       {/* Sentinel element for infinite scroll */}
       <div ref={observerTarget} className="h-10 flex items-center justify-center">
@@ -180,7 +216,7 @@ export function FeedList() {
             Loading more...
           </div>
         )}
-        {!hasMore && posts.length > 0 && (
+        {!(hasMorePosts || hasMoreNews) && (posts.length > 0 || news.length > 0) && (
           <p className="text-gray-500 text-sm">You've reached the end of the feed.</p>
         )}
       </div>

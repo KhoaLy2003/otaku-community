@@ -10,9 +10,9 @@
 
 ## 2️⃣ User Stories
 
-| ID             | As a        | I want to     | So that          |
-| :------------- | :---------- | :------------ | :--------------- |
-| **US-XXX-001** | [User Role] | [Action/Goal] | [Reason/Benefit] |
+| ID             | As a        | I want to     | So that          | Status                         |
+| :------------- | :---------- | :------------ | :--------------- | ------------------------------ |
+| **US-XXX-001** | [User Role] | [Action/Goal] | [Reason/Benefit] | [Planned/Implemented/Canceled] |
 
 > _Example: As a Registered User, I want to see a list of activities related to my account so that I can stay engaged with the community._
 

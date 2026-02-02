@@ -4,4 +4,6 @@ databaseChangeLog:
   - include:
       file: db/changelog/migrations/002-seed-topics.sql
   - include:
+      file: db/changelog/migrations/003-news-schema.sql
+  - include:
       file: db/changelog/migrations/003-admin-features.sql
