@@ -98,8 +98,6 @@ export function PostCard({
   );
 }
 
-
-
 function PostActions({
   post,
   onShare,
@@ -320,7 +318,7 @@ function PostContent({
         authorAvatarUrl={post.authorAvatarUrl}
         time={post.time}
       />
-      <h2 className="mt-2 text-lg font-semibold text-[#1a1a1b]">
+      <h2 className="mt-2 text-md font-semibold text-[#1a1a1b]">
         {post.title}
       </h2>
       {post.body && (

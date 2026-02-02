@@ -30,6 +30,7 @@ import ComingSoonPage from "./pages/ComingSoonPage";
 import AboutPage from "./pages/AboutPage";
 import HelpPage from "./pages/HelpPage";
 import RankingPage from "./pages/RankingPage";
+import NewsPage from "./pages/NewsPage";
 
 // Auth components
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
@@ -152,6 +153,7 @@ function App() {
                   <Route path={ROUTES.BLOG} element={<ComingSoonPage />} />
                   <Route path={ROUTES.ABOUT} element={<AboutPage />} />
                   <Route path={ROUTES.RANKINGS} element={<RankingPage />} />
+                  <Route path={ROUTES.NEWS} element={<NewsPage />} />
                 </Route>
 
                 <Route element={<PublicLayout />}>
