@@ -43,4 +43,14 @@ public class HealthController {
     public ResponseEntity<?> secureEndpoint(@AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(jwt.getClaims());
     }
+
+    @GetMapping("/admin/health-test")
+    @Operation(summary = "Admin health check", description = "Sample endpoint that only admin account can access")
+    public ResponseEntity<Map<String, Object>> adminHealthTest() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "UP");
+        response.put("role", "ADMIN");
+        response.put("message", "You have successfully accessed the admin health check endpoint");
+        return ResponseEntity.ok(response);
+    }
 }

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>User Detail &amp; Account Control - AniAdmin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#135bec",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#0d121b] dark:text-white min-h-screen">
+<div class="flex flex-col w-full">
+<!-- TopNavBar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#cfd7e7] dark:border-gray-800 bg-white dark:bg-background-dark px-10 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 text-primary">
+<div class="size-6">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M36.7273 44C33.9891 44 31.6043 39.8386 30.3636 33.69C29.123 39.8386 26.7382 44 24 44C21.2618 44 18.877 39.8386 17.6364 33.69C16.3957 39.8386 14.0109 44 11.2727 44C7.25611 44 4 35.0457 4 24C4 12.9543 7.25611 4 11.2727 4C14.0109 4 16.3957 8.16144 17.6364 14.31C18.877 8.16144 21.2618 4 24 4C26.7382 4 29.123 8.16144 30.3636 14.31C31.6043 8.16144 33.9891 4 36.7273 4C40.7439 4 44 12.9543 44 24C44 35.0457 40.7439 44 36.7273 44Z" fill="currentColor"></path>
+</svg>
+</div>
+<h2 class="text-[#0d121b] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">AniAdmin</h2>
+</div>
+<label class="flex flex-col min-w-40 h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+<div class="text-[#4c669a] flex border-none bg-[#e7ebf3] dark:bg-gray-800 items-center justify-center pl-4 rounded-l-lg">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 border-none bg-[#e7ebf3] dark:bg-gray-800 text-[#0d121b] dark:text-white focus:ring-0 h-full placeholder:text-[#4c669a] px-4 rounded-r-lg text-base font-normal" placeholder="Search users or content" value=""/>
+</div>
+</label>
+</div>
+<div class="flex flex-1 justify-end gap-8">
+<nav class="flex items-center gap-9">
+<a class="text-primary text-sm font-semibold leading-normal border-b-2 border-primary pb-1" href="#">Users</a>
+<a class="text-[#4c669a] dark:text-gray-400 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Moderation</a>
+<a class="text-[#4c669a] dark:text-gray-400 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Database</a>
+<a class="text-[#4c669a] dark:text-gray-400 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Logs</a>
+</nav>
+<div class="flex gap-2">
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-[#e7ebf3] dark:bg-gray-800 text-[#0d121b] dark:text-white">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-[#e7ebf3] dark:bg-gray-800 text-[#0d121b] dark:text-white">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary" data-alt="Admin user profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC1SdElNWI2P54o6tutzqSqxclTO3KXoNaX5xm1HiBzDR2SElSGfxVBurUoX9u1-WX2WqY7g_8EwVYsVgenwdH5UxbSvb1Lexynji_95yrZXRqTrfaCugaOuLyr1cDks48v6Qm4R1yfG_7ju-CTiJT4mqkMIH_GgYWedOjGRBAzOxJg2tsnrAemixwwB3RyV7WMekQeeeiwovfq3jMBibleISpgvjL8dCa87h-GR1Y_wEWqz4nzbo5A1clIQaV7wOIvihqY-bkcM-2v");'></div>
+</div>
+</header>
+<main class="flex-1 max-w-[1200px] mx-auto w-full px-6 py-8">
+<!-- Breadcrumbs -->
+<div class="flex flex-wrap gap-2 pb-6">
+<a class="text-[#4c669a] dark:text-gray-400 text-sm font-medium hover:text-primary" href="#">User Management</a>
+<span class="text-[#4c669a] dark:text-gray-400 text-sm font-medium">/</span>
+<span class="text-primary text-sm font-bold">Shinji Ikari (ID: #98231)</span>
+</div>
+<!-- ProfileHeader -->
+<div class="bg-white dark:bg-gray-900 rounded-xl p-6 border border-[#cfd7e7] dark:border-gray-800 shadow-sm mb-8">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+<div class="flex gap-6 items-center">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-24 w-24 border-4 border-[#e7ebf3] dark:border-gray-700" data-alt="Anime character avatar portrait" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCzawUgcGIBEN2GRjLBC9604JPC8ol3cLzL2z6qHRinq3bbYjWnu-f9y8d2tCjUnBBB4ouYn5mSPEQNlQVMj97h6VTZGwk5I1CI_5hyHh9rY0pxeQec4ebhbz1Yp8Id2C6ZjvXjo50K5QACEnRvo00yaMEdbTVYZVz83Zobqkk-aO1NwlVKa8JGdfic_9KSXD_z2kAabU3IV4INq7Zkk6SPJCimlGt2zMD6xMgbSwadqFs8c2-16lJ_zH7nhOoJBdyqqzfmuEi3NqGq");'></div>
+<div class="flex flex-col justify-center">
+<h1 class="text-[#0d121b] dark:text-white text-2xl font-bold leading-tight flex items-center gap-3">
+                                Shinji Ikari
+                                <span class="bg-primary/10 text-primary text-xs font-bold px-2 py-1 rounded">ID: #98231</span>
+</h1>
+<p class="text-[#4c669a] dark:text-gray-400 text-sm font-normal mt-1">Member since June 2021 • Last active: 2 hours ago</p>
+<div class="flex gap-2 mt-3">
+<span class="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 text-[10px] font-bold uppercase px-2 py-0.5 rounded border border-yellow-200 dark:border-yellow-800">Top Translator</span>
+<span class="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 text-[10px] font-bold uppercase px-2 py-0.5 rounded border border-blue-200 dark:border-blue-800">OG Member</span>
+<span class="bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 text-[10px] font-bold uppercase px-2 py-0.5 rounded border border-purple-200 dark:border-purple-800">Wiki Contributor</span>
+</div>
+</div>
+</div>
+<div class="flex gap-3 w-full md:w-auto">
+<button class="flex-1 md:flex-none flex items-center justify-center rounded-lg h-10 px-6 bg-[#e7ebf3] dark:bg-gray-800 text-[#0d121b] dark:text-white text-sm font-bold border border-transparent hover:border-primary transition-all">
+                            Message
+                        </button>
+<button class="flex-1 md:flex-none flex items-center justify-center rounded-lg h-10 px-6 bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-all">
+                            Edit Profile
+                        </button>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+<!-- Left Column: Account Controls -->
+<div class="lg:col-span-2 space-y-6">
+<div class="bg-white dark:bg-gray-900 rounded-xl p-6 border border-[#cfd7e7] dark:border-gray-800 shadow-sm">
+<h3 class="text-[#0d121b] dark:text-white text-lg font-bold mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">admin_panel_settings</span>
+                            Account Control &amp; Access
+                        </h3>
+<div class="space-y-4">
+<!-- Status Toggle: Locked -->
+<div class="flex items-center justify-between p-4 rounded-lg border border-[#cfd7e7] dark:border-gray-800 bg-[#f8f9fc] dark:bg-background-dark/50">
+<div class="flex flex-col gap-1">
+<p class="text-[#0d121b] dark:text-white text-sm font-bold">Account Locked</p>
+<p class="text-[#4c669a] dark:text-gray-400 text-xs">Prevents user from changing password or email.</p>
+</div>
+<label class="relative flex h-[28px] w-[48px] cursor-pointer items-center rounded-full bg-[#e7ebf3] dark:bg-gray-700 p-1 has-[:checked]:bg-primary">
+<input class="sr-only peer" type="checkbox"/>
+<div class="h-5 w-5 rounded-full bg-white transition-all peer-checked:translate-x-5 shadow-sm"></div>
+</label>
+</div>
+<!-- Role Selector -->
+<div class="flex flex-col gap-2 p-4 rounded-lg border border-[#cfd7e7] dark:border-gray-800">
+<label class="text-[#0d121b] dark:text-white text-sm font-bold">Assigned User Role</label>
+<select class="form-select w-full rounded-lg border-[#cfd7e7] dark:border-gray-700 bg-white dark:bg-gray-800 text-[#0d121b] dark:text-white focus:ring-primary focus:border-primary text-sm">
+<option>Standard Member</option>
+<option selected="">Elite Translator</option>
+<option>Moderator</option>
+<option>Admin Assistant</option>
+</select>
+</div>
+<!-- Destructive Action: Ban -->
+<div class="flex items-center justify-between p-4 rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900/50 mt-4">
+<div class="flex flex-col gap-1">
+<p class="text-red-600 dark:text-red-400 text-sm font-bold">Ban Account</p>
+<p class="text-red-500/80 dark:text-red-400/60 text-xs">Permanently revoke access to all platform features.</p>
+</div>
+<button class="rounded-lg bg-red-600 text-white px-4 py-2 text-xs font-bold hover:bg-red-700 transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">gavel</span>
+                                    Apply Ban
+                                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Statistics -->
+<div class="lg:col-span-1">
+<div class="bg-white dark:bg-gray-900 rounded-xl p-6 border border-[#cfd7e7] dark:border-gray-800 shadow-sm h-full">
+<h3 class="text-[#0d121b] dark:text-white text-lg font-bold mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">monitoring</span>
+                            User Statistics
+                        </h3>
+<div class="space-y-6">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">description</span>
+</div>
+<div>
+<p class="text-2xl font-bold text-[#0d121b] dark:text-white">1,248</p>
+<p class="text-xs text-[#4c669a] dark:text-gray-400 uppercase font-bold tracking-wider">Total Posts</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-lg bg-green-500/10 flex items-center justify-center text-green-500">
+<span class="material-symbols-outlined">forum</span>
+</div>
+<div>
+<p class="text-2xl font-bold text-[#0d121b] dark:text-white">4,892</p>
+<p class="text-xs text-[#4c669a] dark:text-gray-400 uppercase font-bold tracking-wider">Comments</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-500">
+<span class="material-symbols-outlined">translate</span>
+</div>
+<div>
+<p class="text-2xl font-bold text-[#0d121b] dark:text-white">156</p>
+<p class="text-xs text-[#4c669a] dark:text-gray-400 uppercase font-bold tracking-wider">Translations</p>
+</div>
+</div>
+<div class="flex items-center gap-4 border-t border-[#e7ebf3] dark:border-gray-800 pt-6">
+<div class="size-10 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500">
+<span class="material-symbols-outlined">star</span>
+</div>
+<div>
+<p class="text-2xl font-bold text-[#0d121b] dark:text-white">98th</p>
+<p class="text-xs text-[#4c669a] dark:text-gray-400 uppercase font-bold tracking-wider">Platform Percentile</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Activity Log Table -->
+<div class="bg-white dark:bg-gray-900 rounded-xl border border-[#cfd7e7] dark:border-gray-800 shadow-sm overflow-hidden">
+<div class="px-6 py-5 border-b border-[#cfd7e7] dark:border-gray-800 flex justify-between items-center">
+<h3 class="text-[#0d121b] dark:text-white text-lg font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">history</span>
+                        Recent Activity Log
+                    </h3>
+<button class="text-sm font-semibold text-primary hover:underline">Download CSV</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-background-light dark:bg-background-dark/30">
+<th class="px-6 py-3 text-[#4c669a] dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Action</th>
+<th class="px-6 py-3 text-[#4c669a] dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Location/IP</th>
+<th class="px-6 py-3 text-[#4c669a] dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Device</th>
+<th class="px-6 py-3 text-[#4c669a] dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Timestamp</th>
+<th class="px-6 py-3 text-[#4c669a] dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#e7ebf3] dark:divide-gray-800">
+<tr>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#4c669a] text-sm">login</span>
+<span class="text-sm font-medium">User Login</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm">Tokyo, JP (192.168.1.45)</td>
+<td class="px-6 py-4 text-sm">Chrome / MacOS</td>
+<td class="px-6 py-4 text-sm text-[#4c669a]">Oct 24, 2023 - 14:22</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 text-[10px] font-bold rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">SUCCESS</span>
+</td>
+</tr>
+<tr>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#4c669a] text-sm">edit</span>
+<span class="text-sm font-medium">Updated Translation: #4512</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm">Tokyo, JP (192.168.1.45)</td>
+<td class="px-6 py-4 text-sm">Chrome / MacOS</td>
+<td class="px-6 py-4 text-sm text-[#4c669a]">Oct 24, 2023 - 11:05</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 text-[10px] font-bold rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">SAVED</span>
+</td>
+</tr>
+<tr>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#4c669a] text-sm">report</span>
+<span class="text-sm font-medium">Report Filed (Spam)</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm">Tokyo, JP (192.168.1.45)</td>
+<td class="px-6 py-4 text-sm">Chrome / MacOS</td>
+<td class="px-6 py-4 text-sm text-[#4c669a]">Oct 23, 2023 - 22:40</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 text-[10px] font-bold rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">PENDING</span>
+</td>
+</tr>
+<tr>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#4c669a] text-sm">lock_reset</span>
+<span class="text-sm font-medium">Password Changed</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm">Tokyo, JP (192.168.1.45)</td>
+<td class="px-6 py-4 text-sm">Mobile App / iOS</td>
+<td class="px-6 py-4 text-sm text-[#4c669a]">Oct 20, 2023 - 09:15</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 text-[10px] font-bold rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">VERIFIED</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-6 py-4 bg-background-light dark:bg-background-dark/30 border-t border-[#e7ebf3] dark:border-gray-800 flex justify-center">
+<button class="text-sm font-bold text-[#4c669a] dark:text-gray-400 hover:text-primary transition-colors">Load More History</button>
+</div>
+</div>
+</main>
+<footer class="mt-auto py-10 px-6 border-t border-[#cfd7e7] dark:border-gray-800">
+<div class="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+<p class="text-sm text-[#4c669a] dark:text-gray-400">© 2023 AniAdmin Platform Management System</p>
+<div class="flex gap-6">
+<a class="text-sm text-[#4c669a] dark:text-gray-400 hover:text-primary" href="#">Privacy Policy</a>
+<a class="text-sm text-[#4c669a] dark:text-gray-400 hover:text-primary" href="#">System Status</a>
+<a class="text-sm text-[#4c669a] dark:text-gray-400 hover:text-primary" href="#">Support</a>
+</div>
+</div>
+</footer>
+</div>
+</body></html>

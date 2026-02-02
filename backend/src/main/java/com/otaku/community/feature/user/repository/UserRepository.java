@@ -23,6 +23,10 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     Optional<User> findByUsername(String username);
 
+    Page<User> findByRole(User.UserRole role, Pageable pageable);
+
+    long countByCreatedAtAfter(Instant since);
+
     @Query("SELECT u FROM User u WHERE u.deletedAt IS NULL AND u.username = :username")
     Optional<User> findByUsernameAndNotDeleted(@Param("username") String username);
 

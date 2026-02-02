@@ -51,6 +51,10 @@ public class Translation extends BaseEntity {
     @Builder.Default
     private TranslationStatus status = TranslationStatus.DRAFT;
 
+    @Column(name = "is_verified", nullable = false)
+    @Builder.Default
+    private boolean isVerified = false;
+
     @Column(name = "published_at")
     private Instant publishedAt;
 

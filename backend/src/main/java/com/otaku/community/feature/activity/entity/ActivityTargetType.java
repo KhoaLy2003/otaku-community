@@ -5,5 +5,7 @@ public enum ActivityTargetType {
     POST,
     COMMENT,
     IP_ADDRESS,
-    TRANSLATION
+    TRANSLATION,
+    REPORT,
+    SYSTEM_CONFIG
 }
