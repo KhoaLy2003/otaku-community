@@ -2,11 +2,19 @@ package com.otaku.community.feature.feed.mapper;
 
 import com.otaku.community.common.dto.post.PostAuthorRecord;
 import com.otaku.community.common.dto.post.PostResponseRecord;
+import com.otaku.community.feature.news.mapper.NewsMapper;
 import com.otaku.community.feature.post.entity.Post;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
+@Getter
 public class FeedMapper {
+
+    private final NewsMapper newsMapper;
+
     public PostResponseRecord toFeedPostResponse(Post post, Boolean isLiked) {
         return new PostResponseRecord(
                 post.getId(),

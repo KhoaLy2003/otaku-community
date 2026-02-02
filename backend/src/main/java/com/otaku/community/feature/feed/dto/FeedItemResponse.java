@@ -7,21 +7,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.time.Instant;
+import java.util.UUID;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class FeedResponse {
-    private List<PostResponseRecord> posts;
-    private String postCursor;
-    private boolean hasMorePosts;
-
-    private List<NewsResponse> news;
-    private String newsCursor;
-    private boolean hasMoreNews;
-
-    private int totalPosts;
-    private int totalNews;
+public class FeedItemResponse {
+    private UUID id;
+    private FeedItemType type;
+    private Instant timestamp;
+    private PostResponseRecord post;
+    private NewsResponse news;
 }

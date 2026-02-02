@@ -25,4 +25,5 @@ export const ROUTES = {
   BLOG: "/blog",
   ABOUT: "/about",
   RANKINGS: "/rankings",
+  NEWS: "/news",
 } as const;

@@ -5,18 +5,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Loader2, MoreVertical, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/Popover";
-function formatTimeAgo(date: string): string {
-  const now = new Date();
-  const messageDate = new Date(date);
-  const diffInSeconds = Math.floor((now.getTime() - messageDate.getTime()) / 1000);
-
-  if (diffInSeconds < 60) return "just now";
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-  return messageDate.toLocaleDateString();
-}
-import { cn } from "@/lib/utils";
+import { cn, formatTimeAgo } from "@/lib/utils";
 import type { Chat } from "@/types/chat";
 
 interface ChatListProps {

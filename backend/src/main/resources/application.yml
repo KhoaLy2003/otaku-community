@@ -79,9 +79,15 @@ app:
   upload:
     max-images-per-post: 4
     max-image-size: 15728640 # 15MB in bytes
+  feed:
+    posts-limit: 10
+    news-limit: 5
   rate-limit:
     enabled: true
     requests-per-minute: 100
+  rss:
+    sync:
+      interval: 1800000
 
 # Logging
 logging:
