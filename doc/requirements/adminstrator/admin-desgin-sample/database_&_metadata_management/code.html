@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Database &amp; Metadata Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#135bec",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#0d121b] dark:text-white font-display">
+<div class="flex flex-col min-h-screen">
+<!-- TopNavBar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#e7ebf3] dark:border-gray-800 bg-white dark:bg-background-dark px-6 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-primary">
+<div class="size-8 bg-primary rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined">auto_stories</span>
+</div>
+<h2 class="text-[#0d121b] dark:text-white text-lg font-bold leading-tight tracking-tight">Admin Core</h2>
+</div>
+<label class="flex flex-col min-w-40 h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full bg-[#f0f2f5] dark:bg-gray-800">
+<div class="text-[#4c669a] dark:text-gray-400 flex items-center justify-center pl-4">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 border-none bg-transparent focus:ring-0 placeholder:text-[#4c669a] dark:placeholder:text-gray-500 px-3 text-sm" placeholder="Search entries..." value=""/>
+</div>
+</label>
+</div>
+<div class="flex flex-1 justify-end gap-6 items-center">
+<nav class="flex items-center gap-6">
+<a class="text-[#0d121b] dark:text-gray-300 text-sm font-medium hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-[#0d121b] dark:text-gray-300 text-sm font-medium hover:text-primary transition-colors" href="#">Users</a>
+<a class="text-primary text-sm font-bold underline underline-offset-8" href="#">Database</a>
+<a class="text-[#0d121b] dark:text-gray-300 text-sm font-medium hover:text-primary transition-colors" href="#">Moderation</a>
+</nav>
+<div class="flex gap-2">
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-[#f0f2f5] dark:bg-gray-800 text-[#0d121b] dark:text-white">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-[#f0f2f5] dark:bg-gray-800 text-[#0d121b] dark:text-white">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+</button>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border border-gray-200" data-alt="User profile avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC0en-ajazQDghgE6kBHQ72R4neg5bPLaAsiPJA9iVE2n2shjkIMNQCjXb6EbBzcj0idigpLkGP_gsaNBAztLYFXMkN12SJ93XhTmNeqzWBT_mSVKSa5JJdIlRaE2L16wjBFbPjILg31k86zaXk5vBlXM0Fb1s6IRPgoyt2MIMyuyj3sLt9rCIczdQYaaH385swIimc-44jvBPtmLY35jNddo4nJj4xdpo5GXjye0-YN_wxTcH87njJLuXpazIW8zGABMCrfdPHz_3a");'></div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- SideNavBar -->
+<aside class="w-64 border-r border-[#e7ebf3] dark:border-gray-800 bg-white dark:bg-background-dark flex flex-col p-4 gap-6">
+<div>
+<h1 class="text-[#4c669a] dark:text-gray-400 text-xs font-bold uppercase tracking-wider mb-4">Database Admin</h1>
+<nav class="flex flex-col gap-1">
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary">
+<span class="material-symbols-outlined text-[22px]">database</span>
+<p class="text-sm font-semibold">Media Library</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-[#f0f2f5] dark:hover:bg-gray-800 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined text-[22px]">layers</span>
+<p class="text-sm font-medium">Batch Updates</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-[#f0f2f5] dark:hover:bg-gray-800 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined text-[22px]">history</span>
+<p class="text-sm font-medium">Audit Logs</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-[#f0f2f5] dark:hover:bg-gray-800 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined text-[22px]">gavel</span>
+<p class="text-sm font-medium">Metadata Rules</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-[#f0f2f5] dark:hover:bg-gray-800 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined text-[22px]">api</span>
+<p class="text-sm font-medium">API Settings</p>
+</div>
+</nav>
+</div>
+<div class="mt-auto border-t border-gray-100 dark:border-gray-800 pt-4">
+<div class="p-4 bg-primary/5 rounded-xl">
+<p class="text-xs text-primary font-bold mb-1">System Status</p>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-green-500"></div>
+<p class="text-[11px] text-gray-500">All systems operational</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto bg-background-light dark:bg-[#0a0f18] p-8">
+<div class="max-w-6xl mx-auto space-y-6">
+<!-- Breadcrumbs -->
+<div class="flex items-center gap-2 text-sm">
+<a class="text-[#4c669a] dark:text-gray-400 font-medium hover:text-primary transition-colors" href="#">Database</a>
+<span class="text-gray-400">/</span>
+<span class="text-[#0d121b] dark:text-white font-semibold">Manage Media</span>
+</div>
+<!-- PageHeading -->
+<div class="flex flex-wrap items-center justify-between gap-4">
+<div class="space-y-1">
+<h2 class="text-[#0d121b] dark:text-white text-3xl font-black tracking-tight">Database Management</h2>
+<p class="text-gray-500 text-sm">Update and manage content metadata for global anime/manga directory</p>
+</div>
+<button class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span>Add New Entry</span>
+</button>
+</div>
+<!-- Two Column Layout: Table and Edit Form -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+<!-- Left Column: Table View -->
+<div class="xl:col-span-2 space-y-4">
+<div class="bg-white dark:bg-background-dark rounded-xl border border-[#cfd7e7] dark:border-gray-800 overflow-hidden shadow-sm">
+<div class="p-4 border-b border-[#cfd7e7] dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/50">
+<span class="text-sm font-bold text-gray-700 dark:text-gray-300">Library Records (1,248)</span>
+<div class="flex gap-2">
+<button class="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded text-gray-500">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+</button>
+<button class="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded text-gray-500">
+<span class="material-symbols-outlined text-[18px]">sort</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-white dark:bg-background-dark text-[#4c669a] dark:text-gray-400 text-xs font-bold uppercase tracking-wider">
+<th class="px-6 py-4 w-16">Cover</th>
+<th class="px-6 py-4">Title</th>
+<th class="px-6 py-4">Type</th>
+<th class="px-6 py-4">Status</th>
+<th class="px-6 py-4 text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#cfd7e7] dark:divide-gray-800">
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="size-12 rounded bg-gray-200 bg-cover bg-center" data-alt="One Piece volume cover" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAdrDHOar_nYaHN6l4P3GkWcb2Kvwqfs8oV0gJHYYmpG-whp7VW2kFqNBB7tMLDTmPVJzkljZcHu2JlHRDAWCccIWqGeUGJiXWFuLxV4rS8edf-BxNcNawHoFGRmzO45oxVnoONJcqh0mcVWuJxrQ5l_iKVOdC4MABIU2FgFP_wb4ya0KlW_wB42lz5soOUZcu_qaktO1ptCmPwT772h28hM8-4QaNaz4sr05MMl0cE8kgA9J0GQHdrCCZRMpD3-AQBPjZS1CkAXTxh');"></div>
+</td>
+<td class="px-6 py-4">
+<div class="text-sm font-bold text-[#0d121b] dark:text-white">One Piece</div>
+<div class="text-[11px] text-gray-400">ID: OP-1997</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded text-[10px] font-bold uppercase tracking-wide">Anime</span>
+</td>
+<td class="px-6 py-4">
+<span class="flex items-center gap-1.5 text-xs font-medium text-green-600 dark:text-green-400">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Published
+                                                    </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary font-bold text-xs hover:underline">Edit</button>
+</td>
+</tr>
+<tr class="bg-primary/5 dark:bg-primary/10 border-l-4 border-l-primary">
+<td class="px-6 py-4">
+<div class="size-12 rounded bg-gray-200 bg-cover bg-center" data-alt="Berserk manga volume cover" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDHbNG9AKvJyoW198UYHY9t6HZ3w90Y848lwYbKMyIPbpz_Z_52WRDKvi2x2LxsedJ-TyF_qnxxZcg9vVKbHQwUNJf-zfI7i6NZcVJM1JYFtf_MLo2fEaP9GCQBLM9TlILAkTD95iGb0YvobhL7EmlvYywXB2YnfL6QNCmywOsh0mIxJs0r_1553l3LHhHvZC4GxAJZq38uJ1ATHCQO_aRXv05zWfGS5cDQriDlSpTqA4wLvst46LxS7HuTrBMHbNkiILXLkUE_VDIa');"></div>
+</td>
+<td class="px-6 py-4">
+<div class="text-sm font-bold text-[#0d121b] dark:text-white">Berserk</div>
+<div class="text-[11px] text-gray-400">ID: B-1989</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 rounded text-[10px] font-bold uppercase tracking-wide">Manga</span>
+</td>
+<td class="px-6 py-4">
+<span class="flex items-center gap-1.5 text-xs font-medium text-amber-600 dark:text-amber-400">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Draft
+                                                    </span>
+</td>
+<td class="px-6 py-4 text-right text-primary">
+<span class="text-xs font-bold uppercase tracking-tighter">Editing</span>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="size-12 rounded bg-gray-200 bg-cover bg-center" data-alt="Naruto series poster" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA8B7iqN7DBGITB5s4l8z0E8ZF0Jup276Tbmgc_VF3140VhCzECjceH1uzzZQgA-8GC1jtGNK5jkSgF4Sb7PrUDP9bydgkmE_5mOULwDZiipxgNnAVGoBi2swa0l5xgjFbe2d36nx9taj-Jz93VyccLPmxhH0PdzIaOlHl5MDw851R4ZKjaJZyHjwIYBK1l-ajeIAeYwQ-N2gbEp_lOC1gh14XATMWk6Q0Lcu0oICscN2uIrrcxvzgDsDAvc0wUeYEVw7CAbFo7KDrc');"></div>
+</td>
+<td class="px-6 py-4">
+<div class="text-sm font-bold text-[#0d121b] dark:text-white">Naruto</div>
+<div class="text-[11px] text-gray-400">ID: N-1999</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded text-[10px] font-bold uppercase tracking-wide">Anime</span>
+</td>
+<td class="px-6 py-4">
+<span class="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
+<span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span> Archived
+                                                    </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary font-bold text-xs hover:underline">Edit</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 border-t border-[#cfd7e7] dark:border-gray-800 flex justify-between items-center text-xs text-gray-500">
+<span>Showing 1-10 of 1,248 entries</span>
+<div class="flex gap-2">
+<button class="px-3 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-sm hover:bg-gray-50">Previous</button>
+<button class="px-3 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-sm hover:bg-gray-50">Next</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Edit Metadata Form -->
+<div class="xl:col-span-1">
+<div class="bg-white dark:bg-background-dark rounded-xl border border-[#cfd7e7] dark:border-gray-800 shadow-xl overflow-hidden sticky top-24">
+<div class="p-5 border-b border-[#cfd7e7] dark:border-gray-800 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">edit_note</span>
+<h3 class="font-bold text-[#0d121b] dark:text-white">Edit Metadata</h3>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-bold text-gray-400 uppercase">Lock</span>
+<button class="relative inline-flex h-5 w-9 items-center rounded-full bg-primary">
+<span class="inline-block h-3 w-3 transform rounded-full bg-white translate-x-5 transition duration-200 ease-in-out"></span>
+</button>
+</div>
+</div>
+<div class="p-6 space-y-5">
+<!-- Cover Image Upload -->
+<div class="space-y-2">
+<label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cover Image</label>
+<div class="group relative aspect-[3/4] w-full max-w-[160px] mx-auto overflow-hidden rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-800 cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Cover of Berserk manga" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDIMn8RDsd46H3qAumJH5mZZrKQlk05tCWerFYdZzlQ0cpVwK5CLV04X0WKkdFDBjxGNGz3EgjE72-XL6PPeiKVsQIrallLRUy3SA88bVOTZUBXrNLiZwD1nl3iaHq0ycq4hbAys5D8bMCSBb-ooes1wqAWQ5KmrjWv3TQEWkvhsGQo-7NLvJq47bboC6EgLC7ZsdLPA9q9jcso4dIHDGTWLXRJ-rWcja9Yo5VAMl79tNSCzaS_-pqGdaIrkZ4-pK4uCF1FE7niup2I');"></div>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white">
+<span class="material-symbols-outlined">cloud_upload</span>
+<span class="text-[10px] font-bold mt-1">Change Image</span>
+</div>
+</div>
+</div>
+<!-- Basic Info -->
+<div class="space-y-4">
+<div class="space-y-1.5">
+<label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Title</label>
+<input class="w-full bg-[#f0f2f5] dark:bg-gray-800 border-none rounded-lg text-sm font-medium focus:ring-2 focus:ring-primary/50 text-[#0d121b] dark:text-white" type="text" value="Berserk"/>
+</div>
+<div class="space-y-1.5">
+<label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Synopsis</label>
+<textarea class="w-full bg-[#f0f2f5] dark:bg-gray-800 border-none rounded-lg text-sm leading-relaxed text-gray-600 dark:text-gray-300 focus:ring-2 focus:ring-primary/50" rows="4">Guts, a former mercenary now known as the "Black Swordsman," seeks revenge against his former master, Griffith, who sacrificed his band for power.</textarea>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1.5">
+<label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Media Type</label>
+<select class="w-full bg-[#f0f2f5] dark:bg-gray-800 border-none rounded-lg text-sm font-medium focus:ring-2 focus:ring-primary/50 text-[#0d121b] dark:text-white">
+<option>Manga</option>
+<option>Anime</option>
+<option>Light Novel</option>
+</select>
+</div>
+<div class="space-y-1.5">
+<label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Genres</label>
+<div class="flex flex-wrap gap-1 p-2 bg-[#f0f2f5] dark:bg-gray-800 rounded-lg min-h-[38px]">
+<span class="px-2 py-0.5 bg-primary/20 text-primary rounded text-[10px] font-bold">Seinen</span>
+<span class="px-2 py-0.5 bg-primary/20 text-primary rounded text-[10px] font-bold">Dark Fantasy</span>
+<button class="text-primary"><span class="material-symbols-outlined text-[14px]">add_circle</span></button>
+</div>
+</div>
+</div>
+<!-- External IDs -->
+<div class="pt-4 border-t border-gray-100 dark:border-gray-800 space-y-3">
+<label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">External Integration IDs</label>
+<div class="grid grid-cols-2 gap-3">
+<div class="flex items-center gap-2 bg-[#f0f2f5] dark:bg-gray-800 p-2 rounded-lg">
+<span class="text-[10px] font-bold text-gray-400 w-10">MAL</span>
+<input class="w-full bg-transparent border-none p-0 text-xs font-bold focus:ring-0" type="text" value="2"/>
+</div>
+<div class="flex items-center gap-2 bg-[#f0f2f5] dark:bg-gray-800 p-2 rounded-lg">
+<span class="text-[10px] font-bold text-gray-400 w-12">AniList</span>
+<input class="w-full bg-transparent border-none p-0 text-xs font-bold focus:ring-0" type="text" value="30002"/>
+</div>
+</div>
+</div>
+</div>
+<div class="pt-4 flex gap-3">
+<button class="flex-1 py-2.5 bg-primary text-white rounded-lg font-bold text-sm shadow-lg shadow-primary/20 hover:brightness-110 transition-all">Save Changes</button>
+<button class="px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-lg font-bold text-sm hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">Discard</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

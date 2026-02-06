@@ -26,12 +26,12 @@ export const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
                     />
                 ) : (
                     <div className="w-full h-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center">
-                        <span className="text-white font-bold text-xl">{news.source}</span>
+                        <span className="text-white font-bold text-xl">{news.source?.name}</span>
                     </div>
                 )}
                 <div className="absolute top-2 left-2 flex gap-2">
                     <span className="px-2 py-1 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-wider rounded-md">
-                        {news.source.replace('_', ' ')}
+                        {news.source?.name}
                     </span>
                     {news.category && (
                         <span className="px-2 py-1 bg-orange-500 text-white text-[10px] font-bold uppercase tracking-wider rounded-md">

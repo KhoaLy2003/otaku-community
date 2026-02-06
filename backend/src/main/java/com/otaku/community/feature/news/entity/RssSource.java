@@ -34,6 +34,6 @@ public class RssSource extends BaseEntity {
     @Column(name = "last_sync_at")
     private Instant lastSyncAt;
 
-    @Column(name = "last_sync_status", length = 50)
+    @Column(name = "last_sync_status", length = 100)
     private String lastSyncStatus;
 }

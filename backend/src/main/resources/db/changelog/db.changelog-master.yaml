@@ -5,3 +5,7 @@ databaseChangeLog:
       file: db/changelog/migrations/002-seed-topics.sql
   - include:
       file: db/changelog/migrations/003-news-schema.sql
+  - include:
+      file: db/changelog/migrations/004-admin-features.sql
+  - include:
+      file: db/changelog/migrations/005-update-news-source.sql

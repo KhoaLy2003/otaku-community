@@ -1,5 +1,6 @@
--- Liquibase Migration: 003-news-schema.sql
+--liquibase formatted sql
 
+--changeset khoa:1770125722705
 -- Create news table
 CREATE TABLE news (
     id UUID PRIMARY KEY,
@@ -27,7 +28,7 @@ CREATE TABLE rss_sources (
     priority INTEGER DEFAULT 0,
     enabled BOOLEAN DEFAULT TRUE,
     last_sync_at TIMESTAMP,
-    last_sync_status VARCHAR(50),
+    last_sync_status VARCHAR(100),
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
     deleted_at TIMESTAMP,

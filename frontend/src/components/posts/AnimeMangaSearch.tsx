@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { createPortal } from 'react-dom'
 import { Search, Loader2, X } from 'lucide-react';
 import { animeApi } from '@/lib/api/anime';
 import { mangaApi } from '@/lib/api/manga';

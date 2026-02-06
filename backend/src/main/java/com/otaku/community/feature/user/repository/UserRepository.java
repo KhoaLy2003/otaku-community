@@ -26,6 +26,10 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Query("SELECT u FROM User u WHERE u.deletedAt IS NULL AND u.username = :username")
     Optional<User> findByUsernameAndNotDeleted(@Param("username") String username);
 
+    Page<User> findByRole(User.UserRole role, Pageable pageable);
+
+    long countByCreatedAtAfter(Instant since);
+
     @Query("SELECT u FROM User u WHERE u.deletedAt IS NULL AND LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%'))")
     Page<User> searchByUsername(@Param("query") String query, Pageable pageable);
 

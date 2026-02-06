@@ -11,4 +11,7 @@ import java.util.UUID;
 @Repository
 public interface ActivityLogRepository extends JpaRepository<ActivityLog, UUID> {
     Page<ActivityLog> findByUserIdOrderByCreatedAtDesc(UUID userId, Pageable pageable);
+
+    long countByActionTypeIn(
+            java.util.Collection<com.otaku.community.feature.activity.entity.ActivityType> actionTypes);
 }

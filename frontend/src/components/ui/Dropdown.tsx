@@ -45,6 +45,7 @@ export function Dropdown({
     return (
         <div className={cn("relative min-w-[140px]", className)} ref={menuRef}>
             <button
+                type="button"
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex w-full items-center justify-between gap-2 rounded-lg border px-4 py-2 text-left transition hover:border-gray-300 bg-white dark:bg-gray-800 shadow-sm"
                 style={{
@@ -70,6 +71,7 @@ export function Dropdown({
                 >
                     {items.map((item) => (
                         <button
+                            type="button"
                             key={item.value}
                             onClick={() => {
                                 onChange(item.value);

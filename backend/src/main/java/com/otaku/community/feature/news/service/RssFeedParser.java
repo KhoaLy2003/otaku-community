@@ -1,7 +1,7 @@
 package com.otaku.community.feature.news.service;
 
 import com.otaku.community.feature.news.dto.RssItemDto;
-import com.otaku.community.feature.news.entity.NewsSource;
+import com.otaku.community.feature.news.entity.RssSource;
 import com.rometools.rome.feed.synd.SyndCategory;
 import com.rometools.rome.feed.synd.SyndEnclosure;
 import com.rometools.rome.feed.synd.SyndEntry;
@@ -23,7 +23,7 @@ import java.util.List;
 @Slf4j
 public class RssFeedParser {
 
-    public List<RssItemDto> parseRssFeed(String rssUrl, NewsSource source) {
+    public List<RssItemDto> parseRssFeed(String rssUrl, RssSource source) {
         try {
             SyndFeedInput input = new SyndFeedInput();
             SyndFeed feed = input.build(new XmlReader(new URL(rssUrl)));
@@ -38,7 +38,7 @@ public class RssFeedParser {
         }
     }
 
-    private RssItemDto mapToRssItemDto(SyndEntry entry, NewsSource source) {
+    private RssItemDto mapToRssItemDto(SyndEntry entry, RssSource source) {
         return RssItemDto.builder()
                 .title(entry.getTitle())
                 .summary(extractSummary(entry))

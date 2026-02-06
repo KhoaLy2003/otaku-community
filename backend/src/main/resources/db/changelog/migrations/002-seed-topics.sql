@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset khoa:002-seed-topics
+--changeset khoa:1770125817644
 INSERT INTO public.topics (
     id,
     name,

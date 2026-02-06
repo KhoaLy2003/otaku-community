@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset khoa:001-initial-schema
+--changeset khoa:1770125807414
 -- public.chats definition
 CREATE TABLE public.chats
 (

@@ -41,6 +41,7 @@ public class SecurityEndpoints {
     };
 
     public static final String[] ADMIN = {
+            "/api/admin/**",
             "/admin/**"
     };
 }

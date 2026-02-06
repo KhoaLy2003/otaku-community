@@ -1,6 +1,6 @@
 package com.otaku.community.feature.news.dto;
 
-import com.otaku.community.feature.news.entity.NewsSource;
+import com.otaku.community.feature.news.entity.RssSource;
 import lombok.Builder;
 import lombok.Data;
 
@@ -17,6 +17,6 @@ public class RssItemDto {
     private String imageUrl;
     private String author;
     private Instant publishedAt;
-    private NewsSource source;
+    private RssSource source;
     private List<String> categories;
 }

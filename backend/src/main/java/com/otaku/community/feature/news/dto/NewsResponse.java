@@ -1,7 +1,6 @@
 package com.otaku.community.feature.news.dto;
 
 import com.otaku.community.feature.news.entity.NewsCategory;
-import com.otaku.community.feature.news.entity.NewsSource;
 import lombok.Builder;
 import lombok.Data;
 
@@ -18,7 +17,7 @@ public class NewsResponse {
     private String link;
     private String imageUrl;
     private String author;
-    private NewsSource source;
+    private RssSourceResponse source;
     private NewsCategory category;
     private Instant publishedAt;
     private Instant fetchedAt;
