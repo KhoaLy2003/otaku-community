@@ -70,8 +70,8 @@ export const NewsManagementPage = () => {
             const response = await adminApi.getAdminNews({
                 source,
                 deleted: isDeleted,
-                page: currentPage - 1,
-                size: pageSize
+                page: currentPage,
+                limit: pageSize
             });
 
             if (response.success) {

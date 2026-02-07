@@ -1,5 +1,6 @@
 package com.otaku.community.feature.favorite.service;
 
+import com.otaku.community.common.constant.CommonConstant;
 import com.otaku.community.common.dto.PageResponse;
 import com.otaku.community.common.exception.BadRequestException;
 import com.otaku.community.common.exception.ResourceNotFoundException;
@@ -40,7 +41,7 @@ public class UserFavoriteService {
 
         // Verify user exists
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(CommonConstant.ERR_MSG_USER_NOT_FOUND));
 
         // Check for duplicates
         if (userFavoriteRepository.existsByUserIdAndTypeAndExternalId(userId, request.getType(),
@@ -93,7 +94,7 @@ public class UserFavoriteService {
     public PageResponse<FavoriteResponse> getUserFavorites(UUID userId, int page, int limit) {
         // Verify user exists
         if (!userRepository.existsById(userId)) {
-            throw new ResourceNotFoundException("User not found");
+            throw new ResourceNotFoundException(CommonConstant.ERR_MSG_USER_NOT_FOUND);
         }
 
         int pageSize = PaginationUtils.validateAndGetPageSize(limit);

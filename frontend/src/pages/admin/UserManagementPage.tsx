@@ -5,7 +5,6 @@ import {
     MoreVertical,
     Shield,
     UserX,
-    Key,
     History,
     CheckCircle2,
     XCircle,
@@ -25,6 +24,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ROUTES } from "@/constants/routes";
 import { adminApi } from "@/lib/api/admin";
 import type { AdminUserListItem, AdminUserRole } from "@/types/admin";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const roleOptions: DropdownItem[] = [
     { label: "All Roles", value: "ALL" },
@@ -49,6 +49,7 @@ export const UserManagementPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize] = useState(10);
     const [totalPages, setTotalPages] = useState(0);
+    const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
     const fetchUsers = useCallback(async () => {
         setIsLoading(true);
@@ -57,11 +58,11 @@ export const UserManagementPage = () => {
             const status = statusFilter === "ALL" ? undefined : statusFilter;
 
             const response = await adminApi.getUsers({
-                query: searchQuery || undefined,
+                query: debouncedSearchQuery || undefined,
                 role,
                 status,
-                page: currentPage - 1,
-                size: pageSize
+                page: currentPage,
+                limit: pageSize
             });
 
             if (response.success) {
@@ -74,13 +75,10 @@ export const UserManagementPage = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [searchQuery, roleFilter, statusFilter, currentPage, pageSize]);
+    }, [debouncedSearchQuery, roleFilter, statusFilter, currentPage, pageSize]);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            fetchUsers();
-        }, 300);
-        return () => clearTimeout(timer);
+        fetchUsers();
     }, [fetchUsers]);
 
     // Dialog state

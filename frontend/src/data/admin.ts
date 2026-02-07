@@ -3,7 +3,7 @@ import type { UserListItem } from "@/types/user";
 export const mockAdminStats = {
   totalUsers: 1240,
   newUsers24h: 15,
-  pendingReports: 8,
+  pendingFeedbacks: 8,
   pendingTranslations: 12,
   activePosts: 450,
   moderationActions: 124,
@@ -82,7 +82,7 @@ export const mockUsers: (UserListItem & {
   },
 ];
 
-export const mockReports = [
+export const mockFeedbacks = [
   {
     id: "rep1",
     contentId: "post123",

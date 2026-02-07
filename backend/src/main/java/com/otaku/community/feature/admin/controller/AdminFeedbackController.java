@@ -4,10 +4,9 @@ import com.otaku.community.common.annotation.CurrentUserId;
 import com.otaku.community.common.dto.ApiResponse;
 import com.otaku.community.common.dto.PageResponse;
 import com.otaku.community.feature.admin.service.AdminService;
-import com.otaku.community.feature.report.entity.Report;
-import com.otaku.community.feature.report.entity.ReportStatus;
+import com.otaku.community.feature.feedback.dto.FeedbackResponseDto;
+import com.otaku.community.feature.feedback.entity.FeedbackStatus;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,28 +19,29 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/admin/reports")
+@RequestMapping("/api/admin/feedbacks")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
-public class AdminReportController {
+public class AdminFeedbackController {
 
     private final AdminService adminService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<PageResponse<Report>>> getReports(
-            @RequestParam(required = false) ReportStatus status,
-            Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.success(adminService.getReports(status, pageable)));
+    public ResponseEntity<ApiResponse<PageResponse<FeedbackResponseDto>>> getFeedbacks(
+            @RequestParam(required = false) FeedbackStatus status,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int limit) {
+        return ResponseEntity.ok(ApiResponse.success(adminService.getFeedbacks(status, page, limit)));
     }
 
     @PostMapping("/{id}/resolve")
-    public ResponseEntity<ApiResponse<Void>> resolveReport(
+    public ResponseEntity<ApiResponse<Void>> resolveFeedback(
             @PathVariable UUID id,
-            @RequestParam ReportStatus status,
+            @RequestParam FeedbackStatus status,
             @RequestParam(required = false) String notes,
             @CurrentUserId UUID moderatorId) {
-        adminService.resolveReport(id, status, notes, moderatorId);
-        return ResponseEntity.ok(ApiResponse.success("Report resolved successfully", null));
+        adminService.resolveFeedback(id, status, notes, moderatorId);
+        return ResponseEntity.ok(ApiResponse.success("Feedback resolved successfully", null));
     }
 
     @PostMapping("/moderate/post/{postId}")

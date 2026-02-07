@@ -11,6 +11,7 @@ import {
     Shield,
     Rss,
     Newspaper,
+    MessageSquare,
 } from "lucide-react";
 import { Colors } from "@/constants/colors";
 import { cn } from "@/lib/utils";
@@ -26,10 +27,11 @@ interface MenuItem {
 const adminMenuItems: MenuItem[] = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: ROUTES.ADMIN_DASHBOARD },
     { id: "users", label: "User Management", icon: Users, href: ROUTES.ADMIN_USERS },
-    { id: "content", label: "Content Moderation", icon: FileText, href: ROUTES.ADMIN_CONTENT },
+    // { id: "content", label: "Content Moderation", icon: FileText, href: ROUTES.ADMIN_CONTENT },
+    { id: "feedback", label: "Feedback Management", icon: MessageSquare, href: ROUTES.ADMIN_FEEDBACK },
     { id: "news", label: "News Management", icon: Newspaper, href: ROUTES.ADMIN_NEWS_MANAGEMENT },
     { id: "rss", label: "RSS Sources", icon: Rss, href: ROUTES.ADMIN_RSS },
-    { id: "database", label: "Database", icon: Database, href: ROUTES.ADMIN_DATABASE },
+    // { id: "database", label: "Database", icon: Database, href: ROUTES.ADMIN_DATABASE },
     { id: "settings", label: "System Settings", icon: Settings, href: ROUTES.ADMIN_SETTINGS },
 ];
 

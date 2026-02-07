@@ -136,7 +136,7 @@ export const RssSourcePage = () => {
             }
             setIsModalOpen(false);
             fetchSources();
-        } catch (error) {
+        } catch (error: any) {
             setFormError(error.message || "Failed to save source.");
         } finally {
             setIsSaving(false);

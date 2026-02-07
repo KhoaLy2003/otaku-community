@@ -7,7 +7,6 @@ import com.otaku.community.feature.admin.dto.AdminUserListItemDto;
 import com.otaku.community.feature.admin.service.AdminService;
 import com.otaku.community.feature.user.entity.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,8 +32,9 @@ public class AdminUserController {
             @RequestParam(required = false) String query,
             @RequestParam(required = false) User.UserRole role,
             @RequestParam(required = false) String status,
-            Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.success(adminService.getUsers(query, role, status, pageable)));
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int limit) {
+        return ResponseEntity.ok(ApiResponse.success(adminService.getUsers(query, role, status, page, limit)));
     }
 
     @PatchMapping("/{id}/role")

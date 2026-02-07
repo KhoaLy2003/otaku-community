@@ -1,6 +1,48 @@
 --liquibase formatted sql
 
---changeset khoa:1770125807414
+--changeset khoa:initial-schema
+-- public.rss_sources definition
+CREATE TABLE public.rss_sources
+(
+    id               UUID PRIMARY KEY,
+    name             VARCHAR(100) NOT NULL,
+    url              VARCHAR(500) NOT NULL,
+    priority         INTEGER DEFAULT 0,
+    enabled          BOOLEAN DEFAULT TRUE,
+    last_sync_at     TIMESTAMP,
+    last_sync_status VARCHAR(100),
+    created_at       TIMESTAMP    NOT NULL,
+    updated_at       TIMESTAMP    NOT NULL,
+    deleted_at       TIMESTAMP,
+    CONSTRAINT uk_rss_sources_name UNIQUE (name),
+    CONSTRAINT uk_rss_sources_url UNIQUE (url)
+);
+
+-- public.news definition
+CREATE TABLE public.news
+(
+    id            UUID PRIMARY KEY,
+    title         VARCHAR(500)  NOT NULL,
+    summary       TEXT,
+    content       TEXT,
+    link          VARCHAR(1000) NOT NULL,
+    image_url     VARCHAR(1000),
+    author        VARCHAR(255),
+    rss_source_id UUID          NOT NULL,
+    category      VARCHAR(50),
+    published_at  TIMESTAMP     NOT NULL,
+    fetched_at    TIMESTAMP,
+    created_at    TIMESTAMP     NOT NULL,
+    updated_at    TIMESTAMP     NOT NULL,
+    deleted_at    TIMESTAMP,
+    CONSTRAINT uk_news_link UNIQUE (link),
+    CONSTRAINT fk_news_rss_source FOREIGN KEY (rss_source_id) REFERENCES public.rss_sources (id)
+);
+CREATE INDEX idx_news_published_at ON public.news (published_at DESC);
+CREATE INDEX idx_news_rss_source ON public.news (rss_source_id);
+CREATE INDEX idx_news_category ON public.news (category);
+CREATE INDEX idx_news_created_at ON public.news (created_at DESC);
+
 -- public.chats definition
 CREATE TABLE public.chats
 (
@@ -124,24 +166,25 @@ CREATE INDEX idx_user_follow_follower ON public.user_follows USING btree (follow
 -- public.users definition
 CREATE TABLE public.users
 (
-    id                  uuid           NOT NULL,
+    id                  uuid               NOT NULL,
     created_at          timestamptz(6) NOT NULL,
     deleted_at          timestamptz(6) NULL,
     updated_at          timestamptz(6) NOT NULL,
-    auth0_id            varchar(255)   NOT NULL,
+    auth0_id            varchar(255)       NOT NULL,
     avatar_url          text NULL,
     bio                 text NULL,
     cover_image_url     text NULL,
-    email               varchar(255)   NOT NULL,
+    email               varchar(255)       NOT NULL,
     group_name          varchar(100) NULL,
     interests           text[] NULL,
     "location"          varchar(100) NULL,
     profile_visibility  varchar(20) NULL,
-    "role"              varchar(20)    NOT NULL,
-    total_manga_upvotes int8 DEFAULT 0 NOT NULL,
-    total_manga_views   int8 DEFAULT 0 NOT NULL,
-    total_translations  int8 DEFAULT 0 NOT NULL,
-    username            varchar(50)    NOT NULL,
+    "role"              varchar(20)        NOT NULL,
+    total_manga_upvotes int8 DEFAULT 0     NOT NULL,
+    total_manga_views   int8 DEFAULT 0     NOT NULL,
+    total_translations  int8 DEFAULT 0     NOT NULL,
+    username            varchar(50)        NOT NULL,
+    is_locked           bool DEFAULT false NOT NULL,
     CONSTRAINT uk_users_email UNIQUE (email),
     CONSTRAINT uk_users_auth0_id UNIQUE (auth0_id),
     CONSTRAINT uk_users_username UNIQUE (username),
@@ -166,10 +209,10 @@ CREATE TABLE public.activity_logs
     target_id   varchar(255) NULL,
     target_type varchar(255) NULL,
     user_id     uuid         NOT NULL,
-    CONSTRAINT activity_logs_action_type_check CHECK (((action_type)::text = ANY ((ARRAY['LOGIN':: character varying, 'LOGOUT':: character varying, 'CREATE_POST':: character varying, 'UPDATE_POST':: character varying, 'DELETE_POST':: character varying, 'CREATE_COMMENT':: character varying, 'UPDATE_COMMENT':: character varying, 'DELETE_COMMENT':: character varying, 'LIKE_POST':: character varying, 'UNLIKE_POST':: character varying, 'FOLLOW_USER':: character varying, 'UNFOLLOW_USER':: character varying, 'UPDATE_PROFILE':: character varying, 'UPLOAD_TRANSLATION':: character varying, 'PUBLISH_TRANSLATION':: character varying, 'DELETE_TRANSLATION':: character varying])::text[])
-) ),
+    CONSTRAINT activity_logs_action_type_check CHECK (action_type::text = ANY (ARRAY['LOGIN'::text, 'LOGOUT'::text, 'CREATE_POST'::text, 'UPDATE_POST'::text, 'DELETE_POST'::text, 'CREATE_COMMENT'::text, 'UPDATE_COMMENT'::text, 'DELETE_COMMENT'::text, 'LIKE_POST'::text, 'UNLIKE_POST'::text, 'FOLLOW_USER'::text, 'UNFOLLOW_USER'::text, 'UPDATE_PROFILE'::text, 'UPLOAD_TRANSLATION'::text, 'PUBLISH_TRANSLATION'::text, 'DELETE_TRANSLATION'::text, 'BAN_USER'::text, 'UNBAN_USER'::text, 'LOCK_USER'::text, 'UNLOCK_USER'::text, 'UPDATE_USER_ROLE'::text, 'SUBMIT_FEEDBACK'::text, 'RESOLVE_FEEDBACK'::text, 'CLOSE_FEEDBACK'::text, 'MODERATE_POST'::text, 'MODERATE_COMMENT'::text, 'UPDATE_SYSTEM_CONFIG'::text])
+) ,
     CONSTRAINT activity_logs_pkey PRIMARY KEY (id),
-    CONSTRAINT activity_logs_target_type_check CHECK (((target_type)::text = ANY ((ARRAY['USER'::character varying, 'POST'::character varying, 'COMMENT'::character varying, 'IP_ADDRESS'::character varying, 'TRANSLATION'::character varying])::text[]))),
+    CONSTRAINT activity_logs_target_type_check CHECK (target_type::text = ANY (ARRAY['USER'::text, 'POST'::text, 'COMMENT'::text, 'IP_ADDRESS'::text, 'TRANSLATION'::text, 'FEEDBACK'::text, 'SYSTEM_CONFIG'::text])),
     CONSTRAINT fk_activity_logs_user FOREIGN KEY (user_id) REFERENCES public.users(id)
 );
 CREATE INDEX idx_activity_logs_created_at ON public.activity_logs USING btree (created_at);
@@ -352,7 +395,7 @@ CREATE TABLE public.comments
     post_id    uuid NOT NULL,
     user_id    uuid NOT NULL,
     CONSTRAINT comments_pkey PRIMARY KEY (id),
-    CONSTRAINT fk_comments_user FOREIGN KEY (user_id) REFERENCES public.users(id),
+    CONSTRAINT fk_comments_user FOREIGN KEY (user_id) REFERENCES public.users (id),
     CONSTRAINT fk_comments_post FOREIGN KEY (post_id) REFERENCES public.posts (id),
     CONSTRAINT fk_comments_parent FOREIGN KEY (parent_id) REFERENCES public.comments (id)
 );
@@ -452,7 +495,7 @@ CREATE TABLE public.translation_comments
     translation_id uuid          NOT NULL,
     user_id        uuid          NOT NULL,
     CONSTRAINT translation_comments_pkey PRIMARY KEY (id),
-    CONSTRAINT fk_translation_comments_user FOREIGN KEY (user_id) REFERENCES public.users(id),
+    CONSTRAINT fk_translation_comments_user FOREIGN KEY (user_id) REFERENCES public.users (id),
     CONSTRAINT fk_translation_comments_parent FOREIGN KEY (parent_id) REFERENCES public.translation_comments (id),
     CONSTRAINT fk_translation_comments_translation FOREIGN KEY (translation_id) REFERENCES public.translations (id)
 );
@@ -485,4 +528,49 @@ CREATE TABLE public.translation_stats
     view_count     int8 NOT NULL,
     CONSTRAINT translation_stats_pkey PRIMARY KEY (translation_id),
     CONSTRAINT fk_translation_stats_translation FOREIGN KEY (translation_id) REFERENCES public.translations (id)
+);
+
+-- public.feedbacks definition
+CREATE TABLE public.feedbacks
+(
+    id              uuid        NOT NULL,
+    created_at      timestamptz(6) NOT NULL,
+    updated_at      timestamptz(6) NOT NULL,
+    deleted_at      timestamptz(6) NULL,
+    type            varchar(50) NOT NULL,
+    title           varchar(255) NULL,
+    content         text        NOT NULL,
+    target_type     varchar(50) NULL,
+    target_id       varchar(255) NULL,
+    status          varchar(50) NOT NULL,
+    priority        varchar(50) NULL,
+    reason          varchar(50) NULL,
+    moderator_id    uuid NULL,
+    moderator_notes text NULL,
+    reporter_id     uuid NULL,
+    reporter_email  varchar(255) NULL,
+    reporter_name   varchar(255) NULL,
+    is_anonymous    boolean     NOT NULL DEFAULT false,
+
+    CONSTRAINT feedbacks_pkey PRIMARY KEY (id),
+    CONSTRAINT fk_feedbacks_moderator FOREIGN KEY (moderator_id) REFERENCES public.users (id),
+    CONSTRAINT fk_feedbacks_reporter FOREIGN KEY (reporter_id) REFERENCES public.users (id)
+);
+CREATE INDEX idx_feedbacks_reporter_id ON public.feedbacks (reporter_id);
+CREATE INDEX idx_feedbacks_target_id ON public.feedbacks (target_id);
+CREATE INDEX idx_feedbacks_status ON public.feedbacks (status);
+CREATE INDEX idx_feedbacks_type ON public.feedbacks (type);
+
+-- public.system_configs definition
+CREATE TABLE public.system_configs
+(
+    id           uuid         NOT NULL,
+    created_at   timestamptz(6) NOT NULL,
+    deleted_at   timestamptz(6) NULL,
+    updated_at   timestamptz(6) NOT NULL,
+    config_key   varchar(255) NOT NULL,
+    config_value text NULL,
+    description  varchar(255) NULL,
+    CONSTRAINT system_configs_pkey PRIMARY KEY (id),
+    CONSTRAINT uk_system_configs_key UNIQUE (config_key)
 );

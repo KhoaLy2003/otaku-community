@@ -1,5 +1,6 @@
 package com.otaku.community.feature.manga.service;
 
+import com.otaku.community.common.constant.CommonConstant;
 import com.otaku.community.common.dto.PageResponse;
 import com.otaku.community.common.exception.ResourceNotFoundException;
 import com.otaku.community.feature.interaction.entity.Reaction;
@@ -47,9 +48,8 @@ public class TranslationSocialService {
         ensureStatsExist(translationId);
         statsRepository.incrementViewCount(translationId);
 
-        translationRepository.findById(translationId).ifPresent(t -> {
-            userRepository.incrementTotalMangaViews(t.getTranslator().getId());
-        });
+        translationRepository.findById(translationId)
+                .ifPresent(t -> userRepository.incrementTotalMangaViews(t.getTranslator().getId()));
     }
 
     @Transactional
@@ -62,7 +62,7 @@ public class TranslationSocialService {
                 translationId);
 
         Translation translation = translationRepository.findById(translationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Translation not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(CommonConstant.ERR_MSG_TRANSLATION_NOT_FOUND));
 
         if (existingReaction.isPresent()) {
             reactionRepository.delete(existingReaction.get());
@@ -94,9 +94,9 @@ public class TranslationSocialService {
     public TranslationCommentResponse postComment(UUID translationId, UUID userId,
                                                   PostTranslationCommentRequest request) {
         Translation translation = translationRepository.findById(translationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Translation not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(CommonConstant.ERR_MSG_TRANSLATION_NOT_FOUND));
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(CommonConstant.ERR_MSG_USER_NOT_FOUND));
 
         TranslationComment comment = TranslationComment.builder()
                 .translation(translation)
@@ -164,7 +164,7 @@ public class TranslationSocialService {
 
     public UserTranslationsResponse getUserTranslations(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(CommonConstant.ERR_MSG_USER_NOT_FOUND));
 
         List<Translation> translations = translationRepository.findByTranslatorIdAndNotDeleted(user.getId());
 
@@ -196,7 +196,7 @@ public class TranslationSocialService {
     private void ensureStatsExist(UUID translationId) {
         if (!statsRepository.existsById(translationId)) {
             Translation translation = translationRepository.findById(translationId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Translation not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException(CommonConstant.ERR_MSG_TRANSLATION_NOT_FOUND));
             statsRepository.save(TranslationStats.builder()
                     .translation(translation)
                     .updatedAt(Instant.now())

@@ -24,7 +24,7 @@ public class NewsService {
 
     private final NewsRepository newsRepository;
     private final NewsMapper newsMapper;
-    
+
     @Transactional(readOnly = true)
     public PageResponse<NewsResponse> getNews(UUID sourceId, NewsCategory category, int page, int limit) {
         Pageable pageable = PageRequest.of(page - 1, limit);

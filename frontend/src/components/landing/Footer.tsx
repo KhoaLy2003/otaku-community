@@ -1,4 +1,3 @@
-import React from 'react'
 import { Link } from 'react-router-dom'
 import { ROUTES } from '@/constants/routes'
 
@@ -36,6 +35,11 @@ export function Footer() {
               <li>
                 <Link to={ROUTES.REGISTER} className="text-gray-400 hover:text-purple-400 transition-colors">
                   Sign Up
+                </Link>
+              </li>
+              <li>
+                <Link to={ROUTES.FEEDBACK} className="text-gray-400 hover:text-purple-400 transition-colors">
+                  Feedback
                 </Link>
               </li>
             </ul>

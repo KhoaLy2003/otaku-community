@@ -12,7 +12,7 @@ import {
   Tv,
   Book,
   Newspaper,
-  Shield,
+  MessageSquare,
 } from "lucide-react";
 import { Colors } from "../../constants/colors";
 import { cn } from "../../lib/utils";
@@ -33,10 +33,10 @@ const menuItems: MenuItem[] = [
   { id: "manga", label: "Manga", icon: Book, href: ROUTES.MANGA_LIST },
   { id: "ranking", label: "Ranking", icon: TrendingUp, href: ROUTES.RANKINGS },
   { id: "news", label: "News", icon: Newspaper, href: ROUTES.NEWS },
-  { id: "communities", label: "Communities", icon: Users, href: ROUTES.COMMUNITIES },
-  { id: "admin", label: "Admin Panel", icon: Shield, href: ROUTES.ADMIN_DASHBOARD, adminOnly: true },
   { id: "help", label: "Help", icon: HelpCircle, href: ROUTES.HELP },
+  { id: "feedback", label: "Feedback", icon: MessageSquare, href: ROUTES.FEEDBACK },
   { id: "blog", label: "Blog", icon: BookOpen, href: ROUTES.BLOG },
+  { id: "communities", label: "Communities", icon: Users, href: ROUTES.COMMUNITIES },
   { id: "about", label: "About", icon: Info, href: ROUTES.ABOUT },
 ];
 

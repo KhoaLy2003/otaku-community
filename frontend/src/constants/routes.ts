@@ -26,6 +26,7 @@ export const ROUTES = {
   ABOUT: "/about",
   RANKINGS: "/rankings",
   NEWS: "/news",
+  FEEDBACK: "/feedback",
   // Admin Routes
   ADMIN_DASHBOARD: "/admin",
   ADMIN_USERS: "/admin/users",
@@ -35,4 +36,5 @@ export const ROUTES = {
   ADMIN_SETTINGS: "/admin/settings",
   ADMIN_RSS: "/admin/rss",
   ADMIN_NEWS_MANAGEMENT: "/admin/news-management",
+  ADMIN_FEEDBACK: "/admin/feedback",
 } as const;

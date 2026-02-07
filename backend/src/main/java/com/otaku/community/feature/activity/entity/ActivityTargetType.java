@@ -6,6 +6,6 @@ public enum ActivityTargetType {
     COMMENT,
     IP_ADDRESS,
     TRANSLATION,
-    REPORT,
+    FEEDBACK,
     SYSTEM_CONFIG
 }

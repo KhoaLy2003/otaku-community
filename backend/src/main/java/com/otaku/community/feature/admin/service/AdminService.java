@@ -1,6 +1,8 @@
 package com.otaku.community.feature.admin.service;
 
+import com.otaku.community.common.constant.CommonConstant;
 import com.otaku.community.common.dto.PageResponse;
+import com.otaku.community.common.exception.ResourceNotFoundException;
 import com.otaku.community.feature.activity.entity.ActivityLog;
 import com.otaku.community.feature.activity.entity.ActivityType;
 import com.otaku.community.feature.activity.repository.ActivityLogRepository;
@@ -10,14 +12,14 @@ import com.otaku.community.feature.admin.dto.AdminUserListItemDto;
 import com.otaku.community.feature.admin.dto.SystemSettingsDto;
 import com.otaku.community.feature.admin.entity.SystemConfig;
 import com.otaku.community.feature.admin.repository.SystemConfigRepository;
+import com.otaku.community.feature.feedback.dto.FeedbackResponseDto;
+import com.otaku.community.feature.feedback.entity.FeedbackStatus;
+import com.otaku.community.feature.feedback.service.FeedbackService;
 import com.otaku.community.feature.interaction.repository.CommentRepository;
 import com.otaku.community.feature.manga.entity.Translation;
 import com.otaku.community.feature.manga.repository.TranslationRepository;
 import com.otaku.community.feature.post.entity.Post;
 import com.otaku.community.feature.post.repository.PostRepository;
-import com.otaku.community.feature.report.entity.Report;
-import com.otaku.community.feature.report.entity.ReportStatus;
-import com.otaku.community.feature.report.repository.ReportRepository;
 import com.otaku.community.feature.user.entity.User;
 import com.otaku.community.feature.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,13 +40,13 @@ import java.util.UUID;
 public class AdminService {
 
     private final UserRepository userRepository;
-    private final ReportRepository reportRepository;
     private final TranslationRepository translationRepository;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final ActivityLogRepository activityLogRepository;
     private final SystemConfigRepository systemConfigRepository;
     private final Auth0UserService auth0UserService;
+    private final FeedbackService feedbackService;
 
     public AdminDashboardStatsDto getDashboardStats() {
         Instant twentyFourHoursAgo = Instant.now().minus(24, ChronoUnit.HOURS);
@@ -52,7 +54,7 @@ public class AdminService {
         return AdminDashboardStatsDto.builder()
                 .totalUsers(userRepository.count())
                 .newUsers24h(userRepository.countByCreatedAtAfter(twentyFourHoursAgo))
-                .pendingReports(reportRepository.countByStatus(ReportStatus.PENDING))
+                .pendingFeedbacks(feedbackService.countFeedbacksByStatus(FeedbackStatus.NEW))
                 .pendingTranslations(translationRepository.countByStatus(Translation.TranslationStatus.DRAFT))
                 .activePosts(postRepository.countByDeletedAtIsNull())
                 .moderationActions(countModerationActions())
@@ -60,7 +62,8 @@ public class AdminService {
     }
 
     public PageResponse<AdminUserListItemDto> getUsers(String query, User.UserRole role, String status,
-                                                       Pageable pageable) {
+                                                       int page, int limit) {
+        Pageable pageable = org.springframework.data.domain.PageRequest.of(page - 1, limit);
         Page<User> usersPage;
         if (query != null && !query.isEmpty()) {
             usersPage = userRepository.searchByUsername(query, pageable);
@@ -84,14 +87,13 @@ public class AdminService {
                         .build())
                 .toList();
 
-        return PageResponse.of(dtos, pageable.getPageNumber() + 1, pageable.getPageSize(),
-                usersPage.getTotalElements());
+        return PageResponse.of(dtos, page, limit, usersPage.getTotalElements());
     }
 
     @Transactional
     public void updateRole(UUID userId, User.UserRole role) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(CommonConstant.ERR_MSG_USER_NOT_FOUND));
         user.setRole(role);
         userRepository.save(user);
     }
@@ -99,7 +101,7 @@ public class AdminService {
     @Transactional
     public void banUser(UUID userId, String reason) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(CommonConstant.ERR_MSG_USER_NOT_FOUND));
         user.softDelete();
         userRepository.save(user);
 
@@ -109,7 +111,7 @@ public class AdminService {
     @Transactional
     public void unbanUser(UUID userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(CommonConstant.ERR_MSG_USER_NOT_FOUND));
         user.restore();
         userRepository.save(user);
 
@@ -118,7 +120,7 @@ public class AdminService {
 
     public AdminUserDetailDto getUserDetail(UUID userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(CommonConstant.ERR_MSG_USER_NOT_FOUND));
 
         List<ActivityLog> recentActivities = activityLogRepository
                 .findByUserIdOrderByCreatedAtDesc(userId, Pageable.ofSize(10)).getContent();
@@ -145,28 +147,13 @@ public class AdminService {
                 .build();
     }
 
-    public PageResponse<Report> getReports(ReportStatus status, Pageable pageable) {
-        Page<Report> reportsPage;
-        if (status != null) {
-            reportsPage = reportRepository.findByStatus(status, pageable);
-        } else {
-            reportsPage = reportRepository.findAll(pageable);
-        }
-        return PageResponse.of(reportsPage.getContent(), pageable.getPageNumber() + 1, pageable.getPageSize(),
-                reportsPage.getTotalElements());
+    public PageResponse<FeedbackResponseDto> getFeedbacks(FeedbackStatus status, int page, int limit) {
+        return feedbackService.getFeedbacks(status, page, limit);
     }
 
     @Transactional
-    public void resolveReport(UUID reportId, ReportStatus status, String notes, UUID moderatorId) {
-        Report report = reportRepository.findById(reportId)
-                .orElseThrow(() -> new RuntimeException("Report not found"));
-        User moderator = userRepository.findById(moderatorId)
-                .orElseThrow(() -> new RuntimeException("Moderator not found"));
-
-        report.setStatus(status);
-        report.setModeratorNotes(notes);
-        report.setModerator(moderator);
-        reportRepository.save(report);
+    public void resolveFeedback(UUID feedbackId, FeedbackStatus status, String notes, UUID moderatorId) {
+        feedbackService.resolveFeedback(feedbackId, status, notes, moderatorId);
     }
 
     @Transactional
@@ -237,8 +224,8 @@ public class AdminService {
                 ActivityType.LOCK_USER,
                 ActivityType.UNLOCK_USER,
                 ActivityType.UPDATE_USER_ROLE,
-                ActivityType.RESOLVE_REPORT,
-                ActivityType.DISMISS_REPORT,
+                ActivityType.RESOLVE_FEEDBACK,
+                ActivityType.CLOSE_FEEDBACK,
                 ActivityType.MODERATE_POST,
                 ActivityType.MODERATE_COMMENT,
                 ActivityType.UPDATE_SYSTEM_CONFIG);

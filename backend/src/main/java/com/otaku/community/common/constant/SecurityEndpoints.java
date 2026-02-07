@@ -20,7 +20,8 @@ public class SecurityEndpoints {
     };
 
     public static final String[] PUBLIC_POST = {
-            "/api/v1/translations/*/views**"
+            "/api/v1/translations/*/views**",
+            "/api/v1/feedbacks/**"
     };
 
     public static final String[] PUBLIC_ANY = {

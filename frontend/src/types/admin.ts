@@ -30,7 +30,7 @@ export interface AdminUserDetail extends AdminUserListItem {
 export interface AdminDashboardStats {
   totalUsers: number;
   newUsers24h: number;
-  pendingReports: number;
+  pendingFeedbacks: number;
   pendingTranslations: number;
   activePosts: number;
   moderationActions: number;
@@ -44,30 +44,60 @@ export interface SystemSettings {
   announcementActive: boolean;
 }
 
-export type ReportStatus =
-  | "PENDING"
-  | "UNDER_REVIEW"
-  | "RESOLVED"
-  | "DISMISSED";
+export type FeedbackType =
+  | "REPORT"
+  | "SUGGESTION"
+  | "BUG"
+  | "FEATURE_REQUEST"
+  | "COMPLAINT"
+  | "CONTACT"
+  | "OTHER";
 
-export interface AdminReport {
+export type FeedbackStatus =
+  | "NEW"
+  | "IN_PROGRESS"
+  | "WAITING_USER"
+  | "RESOLVED"
+  | "CLOSED";
+
+export type FeedbackPriority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+
+export type ReportReason =
+  | "SPAM"
+  | "HARASSMENT"
+  | "TOXICITY"
+  | "LOW_QUALITY"
+  | "COPYRIGHT"
+  | "NSFW"
+  | "OTHER";
+
+export type FeedbackTargetType =
+  | "USER"
+  | "POST"
+  | "COMMENT"
+  | "TRANSLATION"
+  | "SYSTEM"
+  | "IP_ADDRESS"
+  | "NONE";
+
+export interface AdminFeedback {
   id: string;
-  reporterId: string;
-  reporterUsername: string;
-  targetId: string;
-  targetType:
-    | "POST"
-    | "COMMENT"
-    | "IP_ADDRESS"
-    | "TRANSLATION"
-    | "REPORT"
-    | "SYSTEM_CONFIG";
-  reason: string;
-  details: string;
-  status: ReportStatus;
-  moderatorNotes: string;
+  type: FeedbackType;
+  title: string | null;
+  content: string;
+  targetType: FeedbackTargetType | null;
+  targetId: string | null;
+  status: FeedbackStatus;
+  priority: FeedbackPriority | null;
+  reason: ReportReason | null;
+  moderatorNotes: string | null;
   moderatorId: string | null;
+  reporterId: string | null;
+  reporterEmail: string | null;
+  reporterName: string | null;
+  isAnonymous: boolean;
   createdAt: string;
+  updatedAt: string;
 }
 
 // RSS & News Management Types

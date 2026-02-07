@@ -1,5 +1,6 @@
 package com.otaku.community.feature.user.service;
 
+import com.otaku.community.common.constant.CommonConstant;
 import com.otaku.community.common.dto.PageResponse;
 import com.otaku.community.common.exception.ConflictException;
 import com.otaku.community.common.exception.ResourceNotFoundException;
@@ -56,7 +57,7 @@ public class UserService {
     public UserProfileResponse getUserProfileByUsername(String username) {
         log.debug("Fetching user profile from database for username: {}", username);
         User user = userRepository.findByUsernameAndNotDeleted(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
+                .orElseThrow(() -> new ResourceNotFoundException(CommonConstant.ERR_MSG_USER_NOT_FOUND));
 
         return getProfileResponse(user);
     }
@@ -64,7 +65,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public User getUserByUsername(String username) {
         return userRepository.findByUsernameAndNotDeleted(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
+                .orElseThrow(() -> new ResourceNotFoundException(CommonConstant.ERR_MSG_USER_NOT_FOUND));
     }
 
     private UserProfileResponse getProfileResponse(User user) {
@@ -117,7 +118,7 @@ public class UserService {
         }
 
         User currentUser = userRepository.findByAuth0Id(auth0Id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "auth0Id", auth0Id));
+                .orElseThrow(() -> new ResourceNotFoundException(CommonConstant.ERR_MSG_USER_NOT_FOUND));
 
         if (currentUser.getId().equals(user.getId())) {
             return false; // Owner can see their own profile
@@ -139,7 +140,7 @@ public class UserService {
     public UserResponse updateUser(UpdateUserRequest request) {
         String auth0Id = SecurityUtils.getCurrentAuth0Id();
         User user = userRepository.findByAuth0Id(auth0Id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "auth0Id", auth0Id));
+                .orElseThrow(() -> new ResourceNotFoundException(CommonConstant.ERR_MSG_USER_NOT_FOUND));
 
         // Check username uniqueness if changed
         if (request.getUsername() != null && !request.getUsername().equals(user.getUsername())) {
@@ -174,7 +175,7 @@ public class UserService {
     public UserResponse updateMainFavorite(UpdateMainFavoriteRequest request) {
         String auth0Id = SecurityUtils.getCurrentAuth0Id();
         User user = userRepository.findByAuth0Id(auth0Id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "auth0Id", auth0Id));
+                .orElseThrow(() -> new ResourceNotFoundException(CommonConstant.ERR_MSG_USER_NOT_FOUND));
 
         UserMainFavorite mainFavorite = userMainFavoriteRepository.findByUserId(user.getId())
                 .orElse(UserMainFavorite.builder().user(user).build());
@@ -264,14 +265,14 @@ public class UserService {
     @Transactional(readOnly = true)
     public User findById(UUID id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException(CommonConstant.ERR_MSG_USER_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)
     public User findByAuth0Id() {
         String auth0Id = SecurityUtils.getCurrentAuth0Id();
         return userRepository.findByAuth0Id(auth0Id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "auth0Id", auth0Id));
+                .orElseThrow(() -> new ResourceNotFoundException(CommonConstant.ERR_MSG_USER_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)
@@ -292,7 +293,7 @@ public class UserService {
     public UserSyncResponse getCurrentUserSyncResponse() {
         String auth0Id = SecurityUtils.getCurrentAuth0Id();
         User user = userRepository.findByAuth0Id(auth0Id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "auth0Id", auth0Id));
+                .orElseThrow(() -> new ResourceNotFoundException(CommonConstant.ERR_MSG_USER_NOT_FOUND));
 
         UserSyncResponse response = userMapper.toSyncResponse(user);
         response.setUnreadNotificationCount(notificationService.getUnreadCount(user.getId()).getCount());

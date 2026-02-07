@@ -55,7 +55,7 @@ export const AdminDashboardPage = () => {
     const currentStats = stats || {
         totalUsers: 0,
         newUsers24h: 0,
-        pendingReports: 0,
+        pendingFeedbacks: 0,
         pendingTranslations: 0,
         activePosts: 0,
         moderationActions: 0
@@ -97,13 +97,13 @@ export const AdminDashboardPage = () => {
                     color="orange"
                 />
                 <StatCard
-                    title="Pending Reports"
-                    value={currentStats.pendingReports.toString()}
-                    change={currentStats.pendingReports > 0 ? "Requires attention" : "All clean"}
-                    trend={currentStats.pendingReports > 0 ? "up" : "down"}
+                    title="Pending Feedbacks"
+                    value={currentStats.pendingFeedbacks.toString()}
+                    change={currentStats.pendingFeedbacks > 0 ? "Requires attention" : "All clean"}
+                    trend={currentStats.pendingFeedbacks > 0 ? "up" : "down"}
                     icon={AlertTriangle}
                     color="red"
-                    isUrgent={currentStats.pendingReports > 5}
+                    isUrgent={currentStats.pendingFeedbacks > 5}
                 />
                 <StatCard
                     title="Moderation Actions"
@@ -165,7 +165,7 @@ export const AdminDashboardPage = () => {
                                 <div className="w-8 h-8 bg-red-100 rounded-xl flex items-center justify-center">
                                     <AlertTriangle className="w-4 h-4" />
                                 </div>
-                                Handle Reports ({currentStats.pendingReports})
+                                Handle Feedbacks ({currentStats.pendingFeedbacks})
                             </button>
                             <button className="flex items-center gap-3 p-3 bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-600 rounded-2xl transition-all text-sm font-bold border border-transparent hover:border-blue-100">
                                 <div className="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center">

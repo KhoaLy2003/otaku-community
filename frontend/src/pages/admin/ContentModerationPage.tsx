@@ -11,7 +11,7 @@ import {
     MoreHorizontal,
     FileText
 } from "lucide-react";
-import { mockReports } from "@/data/admin";
+import { mockFeedbacks } from "@/data/admin";
 import { cn } from "@/lib/utils";
 import { Tabs, type TabItem } from "@/components/ui/Tabs";
 import { Card } from "@/components/ui/Card";
@@ -27,7 +27,7 @@ export const ContentModerationPage = () => {
     const [filter, setFilter] = useState("ALL");
     const [search, setSearch] = useState("");
 
-    const filteredReports = mockReports.filter(report => {
+    const filteredFeedbacks = mockFeedbacks.filter(report => {
         const matchesFilter = filter === "ALL" || report.contentType === filter;
         const matchesSearch = report.contentSnippet.toLowerCase().includes(search.toLowerCase()) ||
             report.author.toLowerCase().includes(search.toLowerCase());
@@ -45,7 +45,7 @@ export const ContentModerationPage = () => {
                 <div className="flex items-center gap-2">
                     <div className="px-4 py-2 bg-orange-50 text-orange-600 rounded-xl flex items-center gap-2 text-xs font-bold border border-orange-100">
                         <Flag className="w-4 h-4" />
-                        Pending: {mockReports.filter(r => r.status === "PENDING").length}
+                        Pending: {mockFeedbacks.filter(r => r.status === "PENDING").length}
                     </div>
                 </div>
             </div>
@@ -74,7 +74,7 @@ export const ContentModerationPage = () => {
 
             {/* Report List */}
             <div className="grid grid-cols-1 gap-4">
-                {filteredReports.length === 0 ? (
+                {filteredFeedbacks.length === 0 ? (
                     <Card className="rounded-[2rem] p-20 text-center">
                         <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
                             <CheckCircle className="w-10 h-10 text-green-500" />
@@ -83,7 +83,7 @@ export const ContentModerationPage = () => {
                         <p className="text-gray-500 max-w-xs mx-auto text-sm">Great job keeping the community safe. No pending reports to review currently.</p>
                     </Card>
                 ) : (
-                    filteredReports.map((report) => (
+                    filteredFeedbacks.map((report) => (
                         <ReportCard key={report.id} report={report} />
                     ))
                 )}
@@ -92,7 +92,7 @@ export const ContentModerationPage = () => {
     );
 };
 
-const ReportCard = ({ report }: { report: typeof mockReports[0] }) => {
+const ReportCard = ({ report }: { report: typeof mockFeedbacks[0] }) => {
     return (
         <Card className="rounded-[2rem] p-6 flex flex-col md:flex-row gap-6 hover:shadow-xl hover:shadow-black/5 transition-all group border-l-4 border-l-orange-500">
             {/* Content Meta */}

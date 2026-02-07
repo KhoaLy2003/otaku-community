@@ -5,8 +5,8 @@ import type {
   AdminUserDetail,
   SystemSettings,
   AdminUserRole,
-  AdminReport,
-  ReportStatus,
+  AdminFeedback,
+  FeedbackStatus,
   RssSource,
   CreateRssSourceRequest,
   UpdateRssSourceRequest,
@@ -27,7 +27,7 @@ export const adminApi = {
     role?: AdminUserRole;
     status?: string;
     page?: number;
-    size?: number;
+    limit?: number;
   }) => {
     const queryParams = new URLSearchParams();
     if (params.query) queryParams.append("query", params.query);
@@ -35,8 +35,8 @@ export const adminApi = {
     if (params.status) queryParams.append("status", params.status);
     if (params.page !== undefined)
       queryParams.append("page", params.page.toString());
-    if (params.size !== undefined)
-      queryParams.append("size", params.size.toString());
+    if (params.limit !== undefined)
+      queryParams.append("limit", params.limit.toString());
 
     return apiClient.get<ApiResponse<PaginatedResponse<AdminUserListItem>>>(
       `/admin/users?${queryParams.toString()}`,
@@ -61,30 +61,30 @@ export const adminApi = {
     apiClient.post<ApiResponse<void>>(`/admin/users/${id}/lock?lock=${lock}`),
 
   // Content Moderation
-  getReports: (status?: ReportStatus, page?: number, size?: number) => {
+  getFeedbacks: (status?: FeedbackStatus, page?: number, limit?: number) => {
     const queryParams = new URLSearchParams();
     if (status) queryParams.append("status", status);
     if (page !== undefined) queryParams.append("page", page.toString());
-    if (size !== undefined) queryParams.append("size", size.toString());
+    if (limit !== undefined) queryParams.append("limit", limit.toString());
 
-    return apiClient.get<ApiResponse<PaginatedResponse<AdminReport>>>(
-      `/admin/reports?${queryParams.toString()}`,
+    return apiClient.get<ApiResponse<PaginatedResponse<AdminFeedback>>>(
+      `/admin/feedbacks?${queryParams.toString()}`,
     );
   },
 
-  resolveReport: (id: string, status: ReportStatus, notes?: string) =>
+  resolveFeedback: (id: string, status: FeedbackStatus, notes?: string) =>
     apiClient.post<ApiResponse<void>>(
-      `/admin/reports/${id}/resolve?status=${status}${notes ? `&notes=${encodeURIComponent(notes)}` : ""}`,
+      `/admin/feedbacks/${id}/resolve?status=${status}${notes ? `&notes=${encodeURIComponent(notes)}` : ""}`,
     ),
 
   moderatePost: (postId: string, shouldDelete: boolean) =>
     apiClient.post<ApiResponse<void>>(
-      `/admin/reports/moderate/post/${postId}?delete=${shouldDelete}`,
+      `/admin/feedbacks/moderate/post/${postId}?delete=${shouldDelete}`,
     ),
 
   moderateComment: (commentId: string, shouldDelete: boolean) =>
     apiClient.post<ApiResponse<void>>(
-      `/admin/reports/moderate/comment/${commentId}?delete=${shouldDelete}`,
+      `/admin/feedbacks/moderate/comment/${commentId}?delete=${shouldDelete}`,
     ),
 
   // Translation Management
@@ -131,15 +131,15 @@ export const adminApi = {
     sourceId?: string;
     status?: string;
     page?: number;
-    size?: number;
+    limit?: number;
   }) => {
     const queryParams = new URLSearchParams();
     if (params.sourceId) queryParams.append("sourceId", params.sourceId);
     if (params.status) queryParams.append("status", params.status);
     if (params.page !== undefined)
       queryParams.append("page", params.page.toString());
-    if (params.size !== undefined)
-      queryParams.append("size", params.size.toString());
+    if (params.limit !== undefined)
+      queryParams.append("limit", params.limit.toString());
 
     return apiClient.get<ApiResponse<PaginatedResponse<SyncHistory>>>(
       `/admin/sync-history?${queryParams.toString()}`,
@@ -152,7 +152,7 @@ export const adminApi = {
     category?: string;
     deleted?: boolean;
     page?: number;
-    size?: number;
+    limit?: number;
   }) => {
     const queryParams = new URLSearchParams();
     if (params.source) queryParams.append("source", params.source);
@@ -161,8 +161,8 @@ export const adminApi = {
       queryParams.append("deleted", params.deleted.toString());
     if (params.page !== undefined)
       queryParams.append("page", params.page.toString());
-    if (params.size !== undefined)
-      queryParams.append("size", params.size.toString());
+    if (params.limit !== undefined)
+      queryParams.append("limit", params.limit.toString());
 
     return apiClient.get<ApiResponse<PaginatedResponse<AdminNewsItem>>>(
       `/admin/news?${queryParams.toString()}`,

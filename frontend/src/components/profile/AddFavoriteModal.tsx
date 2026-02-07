@@ -4,6 +4,7 @@ import { animeApi } from "../../lib/api/anime";
 import { mangaApi } from "../../lib/api/manga";
 import { type FavoriteResponse, favoritesApi, type PostReferenceType } from "../../lib/api/favorites";
 import { Alert } from "../ui/Alert";
+import { useDebounce } from "../../hooks/useDebounce";
 
 interface AddFavoriteModalProps {
     onClose: () => void;
@@ -24,6 +25,7 @@ export const AddFavoriteModal = ({ onClose, onAdded }: AddFavoriteModalProps) =>
     const [loading, setLoading] = useState(false);
     const [addingId, setAddingId] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const debouncedQuery = useDebounce(query, 500);
 
     const search = useCallback(async (q: string, type: PostReferenceType) => {
         if (!q.trim()) {
@@ -63,11 +65,8 @@ export const AddFavoriteModal = ({ onClose, onAdded }: AddFavoriteModalProps) =>
     }, []);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            search(query, activeTab);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [query, activeTab, search]);
+        search(debouncedQuery, activeTab);
+    }, [debouncedQuery, activeTab, search]);
 
     const handleAdd = async (item: SearchResult) => {
         setAddingId(item.externalId);
