@@ -26,4 +26,15 @@ export const ROUTES = {
   ABOUT: "/about",
   RANKINGS: "/rankings",
   NEWS: "/news",
+  FEEDBACK: "/feedback",
+  // Admin Routes
+  ADMIN_DASHBOARD: "/admin",
+  ADMIN_USERS: "/admin/users",
+  ADMIN_USER_DETAIL: (id: string | number) => `/admin/users/${id}`,
+  ADMIN_CONTENT: "/admin/content",
+  ADMIN_DATABASE: "/admin/database",
+  ADMIN_SETTINGS: "/admin/settings",
+  ADMIN_RSS: "/admin/rss",
+  ADMIN_NEWS_MANAGEMENT: "/admin/news-management",
+  ADMIN_FEEDBACK: "/admin/feedback",
 } as const;

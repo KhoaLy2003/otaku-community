@@ -44,6 +44,7 @@ export interface User {
   totalMangaViews?: number;
   totalMangaUpvotes?: number;
   totalTranslations?: number;
+  role?: string;
 }
 
 export interface UserProfile extends User {

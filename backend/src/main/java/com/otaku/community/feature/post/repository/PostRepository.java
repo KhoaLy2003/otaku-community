@@ -132,4 +132,6 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
             @Param("type") PostReferenceType type,
             @Param("externalId") Long externalId,
             Pageable pageable);
+
+    long countByDeletedAtIsNull();
 }

@@ -2,7 +2,6 @@ package com.otaku.community.feature.news.repository;
 
 import com.otaku.community.feature.news.entity.News;
 import com.otaku.community.feature.news.entity.NewsCategory;
-import com.otaku.community.feature.news.entity.NewsSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,12 +21,24 @@ public interface NewsRepository extends JpaRepository<News, UUID> {
     @Query("""
             SELECT n FROM News n
             WHERE n.deletedAt IS NULL
-            AND (:source IS NULL OR n.source = :source)
+            AND (:sourceId IS NULL OR n.rssSource.id = :sourceId)
+            AND (n.rssSource.enabled = true)
             AND (:category IS NULL OR n.category = :category)
             ORDER BY n.publishedAt DESC
             """)
+    Page<News> findNewsWithSource(
+            @Param("sourceId") UUID sourceId,
+            @Param("category") NewsCategory category,
+            Pageable pageable);
+
+    @Query("""
+            SELECT n FROM News n
+            WHERE n.deletedAt IS NULL
+            AND (:category IS NULL OR n.category = :category)
+            AND (n.rssSource.enabled = true)
+            ORDER BY n.publishedAt DESC
+            """)
     Page<News> findNews(
-            @Param("source") NewsSource source,
             @Param("category") NewsCategory category,
             Pageable pageable);
 

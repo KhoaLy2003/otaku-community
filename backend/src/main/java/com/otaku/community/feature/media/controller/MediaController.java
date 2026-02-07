@@ -69,7 +69,6 @@ public class MediaController {
             )
     })
     @SecurityRequirement(name = "bearerAuth")
-    //@PreAuthorize("hasRole('USER')")
     public ResponseEntity<ApiResponse<Object>> uploadMedia(
             @Parameter(
                     description = "Media file to upload (JPEG, PNG, GIF, WebP, MP4 - max 5MB)",
@@ -110,7 +109,6 @@ public class MediaController {
             )
     })
     @SecurityRequirement(name = "bearerAuth")
-    //@PreAuthorize("hasRole('USER')")
     public ResponseEntity<ApiResponse<String>> deleteMedia(
             @Parameter(description = "Public ID of the media to delete", required = true)
             @PathVariable String publicId

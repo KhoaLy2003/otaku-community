@@ -2,7 +2,6 @@ package com.otaku.community.feature.news.service;
 
 import com.otaku.community.feature.news.dto.RssItemDto;
 import com.otaku.community.feature.news.entity.News;
-import com.otaku.community.feature.news.entity.NewsSource;
 import com.otaku.community.feature.news.entity.RssSource;
 import com.otaku.community.feature.news.repository.NewsRepository;
 import com.otaku.community.feature.news.repository.RssSourceRepository;
@@ -37,8 +36,7 @@ public class NewsSyncService {
     public void syncSource(RssSource source) {
         log.info("Syncing source: {}", source.getName());
         try {
-            NewsSource newsSource = NewsSource.valueOf(source.getName());
-            List<RssItemDto> items = rssFeedParser.parseRssFeed(source.getUrl(), newsSource);
+            List<RssItemDto> items = rssFeedParser.parseRssFeed(source.getUrl(), source);
 
             int newCount = 0;
             for (RssItemDto item : items) {
@@ -50,7 +48,7 @@ public class NewsSyncService {
                     news.setLink(item.getLink());
                     news.setImageUrl(item.getImageUrl());
                     news.setAuthor(item.getAuthor());
-                    news.setSource(item.getSource());
+                    news.setRssSource(item.getSource());
                     news.setCategory(categoryClassifier.classify(item));
                     news.setPublishedAt(item.getPublishedAt());
                     news.setFetchedAt(Instant.now());

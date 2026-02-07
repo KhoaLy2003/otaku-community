@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>System Settings &amp; CMS Configuration</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#135bec",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-size: 24px; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#0d121b] dark:text-white font-display">
+<div class="flex flex-col min-h-screen">
+<!-- TopNavBar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#e7ebf3] dark:border-gray-800 bg-white dark:bg-background-dark px-10 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 text-primary">
+<div class="size-6">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M42.4379 44C42.4379 44 36.0744 33.9038 41.1692 24C46.8624 12.9336 42.2078 4 42.2078 4L7.01134 4C7.01134 4 11.6577 12.932 5.96912 23.9969C0.876273 33.9029 7.27094 44 7.27094 44L42.4379 44Z" fill="currentColor"></path>
+</svg>
+</div>
+<h2 class="text-[#0d121b] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">AniAdmin</h2>
+</div>
+<label class="flex flex-col min-w-40 !h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+<div class="text-[#4c669a] flex border-none bg-background-light dark:bg-gray-800 items-center justify-center pl-4 rounded-l-lg border-r-0">
+<span class="material-symbols-outlined text-xl">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d121b] dark:text-white focus:outline-0 focus:ring-0 border-none bg-background-light dark:bg-gray-800 focus:border-none h-full placeholder:text-[#4c669a] px-4 rounded-l-none border-l-0 pl-2 text-sm" placeholder="Search components..." value=""/>
+</div>
+</label>
+</div>
+<div class="flex flex-1 justify-end gap-8">
+<div class="flex items-center gap-9">
+<a class="text-[#0d121b] dark:text-white text-sm font-medium leading-normal" href="#">Dashboard</a>
+<a class="text-[#0d121b] dark:text-white text-sm font-medium leading-normal" href="#">Content</a>
+<a class="text-[#0d121b] dark:text-white text-sm font-medium leading-normal" href="#">Users</a>
+<a class="text-primary text-sm font-bold leading-normal" href="#">Settings</a>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border border-gray-200" data-alt="Avatar of the administrator" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBXM0RXVXsdZ5ujgEu6KGCFU8kw8J-tlb7-VgeUiBBEanwcFuKKIGXWXiOyqlUEpPkZ0H_wT86nAkz8d7FhfXd48E4ZkuafpNzN7O2ZRsuMLTtcIP0fXKSPt5TEYZusjPDPCR3Vhz-HKprQf5_X9-4rhcNImtpD1wF7_Uo2uNIoBLE4i2jcGSw7Dwjqwvo1cti29f3qUeskQ5RjER8dgsnxw4ZPTGHmjgKVOxKrtwLxTMHYpQGV-MkrkZUoE6IBNaNa-4MDg9sBIopx");'></div>
+</div>
+</header>
+<div class="flex flex-1">
+<!-- SideNavBar -->
+<aside class="w-64 border-r border-[#e7ebf3] dark:border-gray-800 bg-white dark:bg-background-dark p-4 flex flex-col gap-4 sticky top-[65px] h-[calc(100vh-65px)] overflow-y-auto">
+<div class="flex flex-col mb-4">
+<h1 class="text-[#0d121b] dark:text-white text-base font-bold leading-normal">CMS Admin</h1>
+<p class="text-[#4c669a] text-xs font-normal leading-normal">v2.4.0 Build 102</p>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-[#4c669a] dark:text-gray-400 hover:bg-background-light dark:hover:bg-gray-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-medium leading-normal">Overview</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-[#4c669a] dark:text-gray-400 hover:bg-background-light dark:hover:bg-gray-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">database</span>
+<p class="text-sm font-medium leading-normal">Anime DB</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-[#4c669a] dark:text-gray-400 hover:bg-background-light dark:hover:bg-gray-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">book</span>
+<p class="text-sm font-medium leading-normal">Manga DB</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-[#4c669a] dark:text-gray-400 hover:bg-background-light dark:hover:bg-gray-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">group</span>
+<p class="text-sm font-medium leading-normal">User Management</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-[#4c669a] dark:text-gray-400 hover:bg-background-light dark:hover:bg-gray-800 rounded-lg" href="#">
+<span class="material-symbols-outlined">security_update_good</span>
+<p class="text-sm font-medium leading-normal">Moderation</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary" href="#">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-sm font-bold leading-normal">System Settings</p>
+</a>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 bg-background-light dark:bg-background-dark pb-24">
+<div class="max-w-5xl mx-auto px-8 py-6">
+<!-- Breadcrumbs -->
+<div class="flex flex-wrap gap-2 mb-4">
+<a class="text-[#4c669a] text-sm font-medium leading-normal hover:text-primary" href="#">Dashboard</a>
+<span class="text-[#4c669a] text-sm font-medium leading-normal">/</span>
+<span class="text-[#0d121b] dark:text-white text-sm font-medium leading-normal">System Settings</span>
+</div>
+<!-- PageHeading -->
+<div class="flex flex-wrap justify-between items-end gap-3 mb-8">
+<div class="flex flex-col gap-2">
+<h2 class="text-[#0d121b] dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">System Settings &amp; CMS Configuration</h2>
+<p class="text-[#4c669a] text-base font-normal leading-normal">Manage global platform features, limits, and static content.</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Feature Flags -->
+<div class="bg-white dark:bg-background-dark border border-[#e7ebf3] dark:border-gray-800 rounded-xl p-6 shadow-sm">
+<h2 class="text-[#0d121b] dark:text-white text-xl font-bold leading-tight flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary">toggle_on</span>
+                                Feature Flags
+                            </h2>
+<div class="flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-sm font-semibold text-[#0d121b] dark:text-white">Maintenance Mode</p>
+<p class="text-xs text-[#4c669a]">Restricts public access to the platform</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<div>
+<p class="text-sm font-semibold text-[#0d121b] dark:text-white">User Registration</p>
+<p class="text-xs text-[#4c669a]">Allow new users to create accounts</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<div>
+<p class="text-sm font-semibold text-[#0d121b] dark:text-white">Public API Access</p>
+<p class="text-xs text-[#4c669a]">Enable third-party developer endpoints</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</div>
+<!-- Limits Config -->
+<div class="bg-white dark:bg-background-dark border border-[#e7ebf3] dark:border-gray-800 rounded-xl p-6 shadow-sm">
+<h2 class="text-[#0d121b] dark:text-white text-xl font-bold leading-tight flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary">data_usage</span>
+                                Limits Config
+                            </h2>
+<div class="grid grid-cols-1 gap-4">
+<div>
+<label class="text-xs font-semibold text-[#4c669a] block mb-1">Max Upload Size (MB)</label>
+<input class="w-full rounded-lg border-[#e7ebf3] dark:border-gray-700 bg-background-light dark:bg-gray-800 text-sm focus:ring-primary focus:border-primary" type="number" value="10"/>
+</div>
+<div>
+<label class="text-xs font-semibold text-[#4c669a] block mb-1">Items Per Page (Frontend)</label>
+<input class="w-full rounded-lg border-[#e7ebf3] dark:border-gray-700 bg-background-light dark:bg-gray-800 text-sm focus:ring-primary focus:border-primary" type="number" value="24"/>
+</div>
+<div>
+<label class="text-xs font-semibold text-[#4c669a] block mb-1">User Watchlist Limit</label>
+<input class="w-full rounded-lg border-[#e7ebf3] dark:border-gray-700 bg-background-light dark:bg-gray-800 text-sm focus:ring-primary focus:border-primary" type="number" value="5000"/>
+</div>
+</div>
+</div>
+<!-- Announcement Banner -->
+<div class="md:col-span-2 bg-white dark:bg-background-dark border border-[#e7ebf3] dark:border-gray-800 rounded-xl p-6 shadow-sm">
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-[#0d121b] dark:text-white text-xl font-bold leading-tight flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">campaign</span>
+                                    Announcement Banner
+                                </h2>
+<div class="flex items-center gap-3">
+<span class="text-sm font-medium text-[#4c669a]">Status: Active</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+<div class="border border-[#e7ebf3] dark:border-gray-700 rounded-lg overflow-hidden">
+<div class="bg-background-light dark:bg-gray-800 border-b border-[#e7ebf3] dark:border-gray-700 p-2 flex gap-2">
+<button class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"><span class="material-symbols-outlined text-sm">format_bold</span></button>
+<button class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"><span class="material-symbols-outlined text-sm">format_italic</span></button>
+<button class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"><span class="material-symbols-outlined text-sm">link</span></button>
+<button class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded ml-2 border-l pl-2 dark:border-gray-600"><span class="material-symbols-outlined text-sm">format_list_bulleted</span></button>
+</div>
+<textarea class="w-full p-4 text-sm bg-white dark:bg-background-dark border-none focus:ring-0 placeholder:text-gray-400" placeholder="Type banner message here... (e.g. New Seasonal Update available!)" rows="3">Winter 2024 Anime Lineup is now live! Check out the latest simulcasts. [Link to Seasonal Page]</textarea>
+</div>
+</div>
+<!-- Static Pages -->
+<div class="md:col-span-2 bg-white dark:bg-background-dark border border-[#e7ebf3] dark:border-gray-800 rounded-xl p-6 shadow-sm mb-12">
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-[#0d121b] dark:text-white text-xl font-bold leading-tight flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">description</span>
+                                    Static Pages
+                                </h2>
+<button class="flex items-center gap-2 text-primary font-semibold text-sm hover:underline">
+<span class="material-symbols-outlined text-sm">add</span> Add New Page
+                                </button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="border-b border-[#e7ebf3] dark:border-gray-800">
+<th class="py-3 px-4 text-xs font-semibold text-[#4c669a] uppercase tracking-wider">Page Name</th>
+<th class="py-3 px-4 text-xs font-semibold text-[#4c669a] uppercase tracking-wider">Slug</th>
+<th class="py-3 px-4 text-xs font-semibold text-[#4c669a] uppercase tracking-wider">Last Edited</th>
+<th class="py-3 px-4 text-xs font-semibold text-[#4c669a] uppercase tracking-wider text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#e7ebf3] dark:divide-gray-800">
+<tr class="hover:bg-background-light dark:hover:bg-gray-800/50 transition-colors">
+<td class="py-4 px-4 font-medium text-sm">About Us</td>
+<td class="py-4 px-4 text-sm text-[#4c669a]">/about</td>
+<td class="py-4 px-4 text-sm text-[#4c669a]">2 days ago</td>
+<td class="py-4 px-4 text-right">
+<button class="text-primary hover:text-primary/80 transition-colors mr-3">
+<span class="material-symbols-outlined text-xl">edit</span>
+</button>
+<button class="text-red-500 hover:text-red-600 transition-colors">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-background-light dark:hover:bg-gray-800/50 transition-colors">
+<td class="py-4 px-4 font-medium text-sm">Privacy Policy</td>
+<td class="py-4 px-4 text-sm text-[#4c669a]">/privacy-policy</td>
+<td class="py-4 px-4 text-sm text-[#4c669a]">1 week ago</td>
+<td class="py-4 px-4 text-right">
+<button class="text-primary hover:text-primary/80 transition-colors mr-3">
+<span class="material-symbols-outlined text-xl">edit</span>
+</button>
+<button class="text-red-500 hover:text-red-600 transition-colors">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-background-light dark:hover:bg-gray-800/50 transition-colors">
+<td class="py-4 px-4 font-medium text-sm">Terms of Service</td>
+<td class="py-4 px-4 text-sm text-[#4c669a]">/terms</td>
+<td class="py-4 px-4 text-sm text-[#4c669a]">1 month ago</td>
+<td class="py-4 px-4 text-right">
+<button class="text-primary hover:text-primary/80 transition-colors mr-3">
+<span class="material-symbols-outlined text-xl">edit</span>
+</button>
+<button class="text-red-500 hover:text-red-600 transition-colors">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<!-- Pinned Save Button Area -->
+<div class="fixed bottom-0 left-64 right-0 bg-white dark:bg-background-dark border-t border-[#e7ebf3] dark:border-gray-800 px-8 py-4 flex justify-end gap-4 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-40">
+<button class="px-6 py-2 rounded-lg border border-[#e7ebf3] dark:border-gray-700 text-[#4c669a] hover:bg-background-light dark:hover:bg-gray-800 text-sm font-semibold transition-colors">Discard Changes</button>
+<button class="px-8 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 text-sm font-bold shadow-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">save</span>
+                        Save Configuration
+                    </button>
+</div>
+</main>
+</div>
+</div>
+</body></html>

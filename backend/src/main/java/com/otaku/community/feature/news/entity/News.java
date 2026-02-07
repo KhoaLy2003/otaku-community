@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,7 +19,7 @@ import java.time.Instant;
 @Entity
 @Table(name = "news", indexes = {
         @Index(name = "idx_news_published_at", columnList = "published_at"),
-        @Index(name = "idx_news_source", columnList = "source"),
+        @Index(name = "idx_news_source", columnList = "rss_source_id"),
         @Index(name = "idx_news_category", columnList = "category"),
         @Index(name = "idx_news_link", columnList = "link", unique = true)
 })
@@ -45,12 +47,12 @@ public class News extends BaseEntity {
     @Column(name = "author", length = 255)
     private String author;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "source", nullable = false, length = 50)
-    private NewsSource source;
+    @ManyToOne
+    @JoinColumn(name = "rss_source_id", nullable = false)
+    private RssSource rssSource;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "category", length = 50)
+    @Column(name = "category", length = 100)
     private NewsCategory category;
 
     @Column(name = "published_at", nullable = false)

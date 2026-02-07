@@ -1,4 +1,4 @@
-package com.otaku.community.feature.post.service.impl;
+package com.otaku.community.feature.post.service;
 
 import com.otaku.community.common.dto.CursorInfo;
 import com.otaku.community.common.exception.ResourceNotFoundException;
@@ -13,7 +13,6 @@ import com.otaku.community.feature.post.entity.PostMedia;
 import com.otaku.community.feature.post.mapper.PostMediaMapper;
 import com.otaku.community.feature.post.repository.PostMediaRepository;
 import com.otaku.community.feature.post.repository.PostRepository;
-import com.otaku.community.feature.post.service.PostMedialService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -29,7 +28,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PostMediaServiceImpl implements PostMedialService {
+public class PostMediaService {
 
     private final PostMediaRepository postMediaRepository;
     private final PostRepository postRepository;
@@ -39,7 +38,6 @@ public class PostMediaServiceImpl implements PostMedialService {
     /**
      * Upload and save media files for a post
      */
-    @Override
     @Transactional()
     public List<PostMediaResponse> uploadPostMedia(UUID postId, List<MultipartFile> files) {
         log.debug("Uploading {} media files for post {}", files.size(), postId);
@@ -106,9 +104,7 @@ public class PostMediaServiceImpl implements PostMedialService {
                     .orderIndex(i)
                     .build();
 
-            PostMedia savedMedia = postMediaRepository.save(postMedia);
-            // PostMediaResponse response = postMediaMapper.toResponse(savedMedia);
-            // responses.add(response);
+            postMediaRepository.save(postMedia);
         }
 
         log.debug("Successfully added {} media URLs for post {}", mediaRequests.size(), postId);
@@ -249,7 +245,6 @@ public class PostMediaServiceImpl implements PostMedialService {
         return null;
     }
 
-    @Override
     @Transactional(readOnly = true)
     public UserMediaResponse getUserMedia(UUID userId, String cursor, Integer limit) {
         log.debug("Getting media for user: {}, cursor: {}, limit: {}", userId, cursor, limit);

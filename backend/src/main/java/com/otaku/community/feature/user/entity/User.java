@@ -68,6 +68,10 @@ public class User extends BaseEntity {
     @Column(name = "group_name", length = 100)
     private String groupName;
 
+    @Column(name = "is_locked", nullable = false)
+    @Builder.Default
+    private boolean isLocked = false;
+
     @Column(name = "total_manga_views", nullable = false, columnDefinition = "bigint default 0")
     @Builder.Default
     private Long totalMangaViews = 0L;
@@ -82,5 +86,16 @@ public class User extends BaseEntity {
 
     public enum UserRole {
         USER, ADMIN
+    }
+
+    public enum UserStatus {
+        ACTIVE, LOCKED, BANNED
+    }
+
+    public UserStatus getStatus() {
+        if (getDeletedAt() != null) {
+            return UserStatus.BANNED;
+        }
+        return isLocked ? UserStatus.LOCKED : UserStatus.ACTIVE;
     }
 }

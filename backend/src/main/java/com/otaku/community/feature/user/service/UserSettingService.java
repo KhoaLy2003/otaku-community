@@ -1,5 +1,6 @@
 package com.otaku.community.feature.user.service;
 
+import com.otaku.community.common.constant.CommonConstant;
 import com.otaku.community.common.exception.ResourceNotFoundException;
 import com.otaku.community.common.util.SecurityUtils;
 import com.otaku.community.feature.activity.entity.ActivityTargetType;
@@ -33,7 +34,7 @@ public class UserSettingService {
     public UserResponse updateProfileImages(MultipartFile avatarFile, MultipartFile coverFile) {
         String auth0Id = SecurityUtils.getCurrentAuth0Id();
         User user = userRepository.findByAuth0Id(auth0Id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "auth0Id", auth0Id));
+                .orElseThrow(() -> new ResourceNotFoundException(CommonConstant.ERR_MSG_USER_NOT_FOUND));
 
         if (avatarFile != null && !avatarFile.isEmpty()) {
             MediaUploadResponse response = mediaService.uploadMedia(avatarFile);
@@ -57,7 +58,7 @@ public class UserSettingService {
     public UserResponse updatePrivacy(UpdatePrivacyRequest request) {
         String auth0Id = SecurityUtils.getCurrentAuth0Id();
         User user = userRepository.findByAuth0Id(auth0Id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "auth0Id", auth0Id));
+                .orElseThrow(() -> new ResourceNotFoundException(CommonConstant.ERR_MSG_USER_NOT_FOUND));
 
         user.setProfileVisibility(request.getProfileVisibility());
         eventPublisher

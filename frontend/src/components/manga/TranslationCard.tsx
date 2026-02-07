@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, Eye, ThumbsUp, MessageSquare, Clock } from 'lucide-react';
-import { cn } from '../../lib/cn';
 import { timeAgo } from '../../lib/utils';
 import type { TranslationSummary } from '../../types/manga';
 

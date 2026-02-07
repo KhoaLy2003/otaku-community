@@ -4,7 +4,8 @@ import { newsApi } from "../lib/api";
 import { NewsCard } from "../components/news/NewsCard";
 import { Pagination } from "../components/anime/Pagination";
 import { Dropdown } from "../components/ui/Dropdown";
-import { type NewsResponse, type NewsSource, type NewsCategory, NEWS_SOURCES, NEWS_CATEGORIES } from "../types/news";
+import { type NewsResponse, type NewsCategory, NEWS_CATEGORIES } from "../types/news";
+import { type RssSource } from "../types/admin";
 import { Search, RefreshCw } from "lucide-react";
 
 const NewsPage = () => {
@@ -15,9 +16,10 @@ const NewsPage = () => {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [totalPages, setTotalPages] = useState(1);
     const [totalElements, setTotalElements] = useState(0);
+    const [sources, setSources] = useState<RssSource[]>([]);
 
     const currentPage = parseInt(searchParams.get("page") || "1", 10);
-    const selectedSource = (searchParams.get("source") as NewsSource) || undefined;
+    const selectedSourceId = searchParams.get("sourceId") || undefined;
     const selectedCategory = (searchParams.get("category") as NewsCategory) || undefined;
 
     const fetchNews = async (isManual = false) => {
@@ -28,7 +30,7 @@ const NewsPage = () => {
             const response = await newsApi.getNews({
                 page: currentPage,
                 limit: 20,
-                source: selectedSource,
+                sourceId: selectedSourceId,
                 category: selectedCategory,
             });
 
@@ -45,9 +47,24 @@ const NewsPage = () => {
         }
     };
 
+    const fetchSources = async () => {
+        try {
+            const response = await newsApi.getSources();
+            if (response.success) {
+                setSources(response.data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch sources:", error);
+        }
+    };
+
     useEffect(() => {
         fetchNews();
-    }, [currentPage, selectedSource, selectedCategory]);
+    }, [currentPage, selectedSourceId, selectedCategory]);
+
+    useEffect(() => {
+        fetchSources();
+    }, []);
 
     const handlePageChange = (page: number) => {
         const newParams = new URLSearchParams(searchParams);
@@ -95,13 +112,13 @@ const NewsPage = () => {
             <div className="flex flex-wrap gap-4 mb-8">
                 <Dropdown
                     className="flex-1 min-w-[200px] md:max-w-xs"
-                    value={selectedSource || ""}
-                    onChange={(value) => handleFilterChange("source", value)}
+                    value={selectedSourceId || ""}
+                    onChange={(value) => handleFilterChange("sourceId", value)}
                     items={[
                         { label: "All Sources", value: "" },
-                        ...NEWS_SOURCES.map((source) => ({
-                            label: source.replace("_", " "),
-                            value: source,
+                        ...sources.map((source) => ({
+                            label: source.name,
+                            value: source.id,
                         })),
                     ]}
                 />

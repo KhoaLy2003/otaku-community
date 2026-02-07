@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, User, Settings, LogOut, BookOpen } from "lucide-react";
+import { ChevronDown, User, Settings, LogOut, BookOpen, Shield } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { Colors } from "../../constants/colors";
 import { ROUTES } from "../../constants/routes";
@@ -47,11 +47,17 @@ export function UserMenu() {
     setIsOpen(false);
   };
 
+  const handleAdminPanel = () => {
+    navigate(ROUTES.ADMIN_DASHBOARD);
+    setIsOpen(false);
+  };
+
   if (!auth0User) return null;
 
   const displayName = user?.displayName || user?.username || auth0User.name || auth0User.nickname;
   const username = user?.username || auth0User.nickname;
   const avatarUrl = user?.avatarUrl || auth0User.picture;
+  const isAdmin = user?.role === "ADMIN";
 
   return (
     <div className="relative" ref={menuRef}>
@@ -89,7 +95,7 @@ export function UserMenu() {
 
       {isOpen && (
         <div
-          className="absolute right-0 mt-2 w-56 rounded-lg border bg-white shadow-lg"
+          className="absolute right-0 mt-2 w-56 rounded-lg border bg-white shadow-lg z-50"
           style={{ borderColor: Colors.Grey[20] }}
         >
           <div
@@ -100,6 +106,9 @@ export function UserMenu() {
               {displayName}
             </p>
             <p className="text-sm text-[#7c7c7c]">{username}</p>
+            {isAdmin && (
+              <p className="text-[10px] font-black text-orange-600 uppercase tracking-widest mt-1">Administrator</p>
+            )}
           </div>
 
           <div className="py-2">
@@ -110,6 +119,16 @@ export function UserMenu() {
               <User className="h-4 w-4" />
               <span>Profile</span>
             </button>
+
+            {isAdmin && (
+              <button
+                onClick={handleAdminPanel}
+                className="flex w-full items-center gap-3 px-4 py-2 text-sm text-orange-600 hover:bg-orange-50 transition"
+              >
+                <Shield className="h-4 w-4" />
+                <span className="font-bold">Admin Panel</span>
+              </button>
+            )}
 
             <button
               onClick={handleSettings}

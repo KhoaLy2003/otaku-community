@@ -3,7 +3,7 @@ import type { Notification } from '@/types/notification';
 import { cn } from '@/lib/utils';
 import { useNotificationStore } from '@/store/useNotificationStore';
 import { notificationApi } from '@/lib/api/notification';
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
+import { Avatar } from "@/components/ui/Avatar";
 
 interface NotificationItemProps {
   notification: Notification;

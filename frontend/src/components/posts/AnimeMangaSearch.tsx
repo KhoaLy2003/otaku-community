@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { createPortal } from 'react-dom'
 import { Search, Loader2, X } from 'lucide-react';
 import { animeApi } from '@/lib/api/anime';
 import { mangaApi } from '@/lib/api/manga';
 import { TextInput } from '@/components/ui/TextInput';
 import { Card } from '@/components/ui/Card';
+import { useDebounce } from '@/hooks/useDebounce';
 import type { Anime } from '@/types/anime';
 import type { Manga } from '@/types/manga';
 import type { PostReferenceRequest } from '@/types/post';
@@ -20,6 +20,7 @@ const AnimeMangaSearch: React.FC<AnimeMangaSearchProps> = ({ onSelect, selectedR
     const [type, setType] = useState<'ANIME' | 'MANGA'>('ANIME');
     const [results, setResults] = useState<(Anime | Manga)[]>([]);
     const [loading, setLoading] = useState(false);
+    const debouncedQuery = useDebounce(query, 500);
     const inputRef = useRef<HTMLDivElement>(null);
     const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
 
@@ -62,11 +63,8 @@ const AnimeMangaSearch: React.FC<AnimeMangaSearchProps> = ({ onSelect, selectedR
     }, []);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            search(query, type);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [query, type, search]);
+        search(debouncedQuery, type);
+    }, [debouncedQuery, type, search]);
 
     const handleSelect = (item: Anime | Manga) => {
         const isAnime = 'type' in item; // Simple check, Anime type usually has 'type'

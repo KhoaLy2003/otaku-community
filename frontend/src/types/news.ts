@@ -1,6 +1,4 @@
-export const NEWS_SOURCES = ["CRUNCHYROLL", "ANIME_NEWS_NETWORK"] as const;
-
-export type NewsSource = (typeof NEWS_SOURCES)[number];
+import type { RssSource } from "./admin";
 
 export const NEWS_CATEGORIES = [
   "ANIME",
@@ -24,7 +22,7 @@ export interface NewsResponse {
   link: string;
   imageUrl?: string;
   author?: string;
-  source: NewsSource;
+  source: RssSource;
   category: NewsCategory;
   publishedAt: string;
   fetchedAt: string;
@@ -32,7 +30,7 @@ export interface NewsResponse {
 }
 
 export interface NewsFilters {
-  source?: NewsSource;
+  sourceId?: string;
   category?: NewsCategory;
   page?: number;
   limit?: number;

@@ -72,6 +72,7 @@ public class UserFavoriteController {
 
     @GetMapping()
     @Operation(summary = "Get user favorites", description = "Get list of favorite anime/manga for a user")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<PageResponse<FavoriteResponse>>> getUserFavorites(
             @CurrentUserId UUID userId,
             @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
