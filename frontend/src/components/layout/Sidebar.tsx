@@ -11,16 +11,20 @@ import {
   ChevronRight,
   Tv,
   Book,
+  Newspaper,
+  MessageSquare,
 } from "lucide-react";
 import { Colors } from "../../constants/colors";
 import { cn } from "../../lib/utils";
 import { ROUTES } from "@/constants/routes";
+import { useAuth } from "@/hooks/useAuth";
 
 interface MenuItem {
   id: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   href: string;
+  adminOnly?: boolean;
 }
 
 const menuItems: MenuItem[] = [
@@ -28,15 +32,19 @@ const menuItems: MenuItem[] = [
   { id: "anime", label: "Anime", icon: Tv, href: ROUTES.ANIME_LIST },
   { id: "manga", label: "Manga", icon: Book, href: ROUTES.MANGA_LIST },
   { id: "ranking", label: "Ranking", icon: TrendingUp, href: ROUTES.RANKINGS },
-  { id: "communities", label: "Communities", icon: Users, href: ROUTES.COMMUNITIES },
+  { id: "news", label: "News", icon: Newspaper, href: ROUTES.NEWS },
   { id: "help", label: "Help", icon: HelpCircle, href: ROUTES.HELP },
+  { id: "feedback", label: "Feedback", icon: MessageSquare, href: ROUTES.FEEDBACK },
   { id: "blog", label: "Blog", icon: BookOpen, href: ROUTES.BLOG },
+  { id: "communities", label: "Communities", icon: Users, href: ROUTES.COMMUNITIES },
   { id: "about", label: "About", icon: Info, href: ROUTES.ABOUT },
 ];
 
 export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "ADMIN";
 
   return (
     <aside
@@ -78,50 +86,52 @@ export function Sidebar() {
         {/* Menu items */}
         <nav className="flex-1 p-2">
           <ul className="space-y-1">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive =
-                item.href === "/"
-                  ? location.pathname === item.href
-                  : location.pathname.startsWith(item.href);
+            {menuItems
+              .filter(item => !item.adminOnly || isAdmin)
+              .map((item) => {
+                const Icon = item.icon;
+                const isActive =
+                  item.href === "/"
+                    ? location.pathname === item.href
+                    : location.pathname.startsWith(item.href);
 
-              return (
-                <li key={item.id}>
-                  <Link
-                    to={item.href}
-                    onClick={(e) => {
-                      if (isActive && item.id === "home") {
-                        e.preventDefault();
-                        window.dispatchEvent(new CustomEvent("REFRESH_FEED"));
-                      }
-                    }}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2 rounded-md transition",
-                      "hover:bg-[#F6F7F8]",
-                      isActive && "bg-[#F6F7F8]"
-                    )}
-                    title={isCollapsed ? item.label : undefined}
-                  >
-                    <Icon
+                return (
+                  <li key={item.id}>
+                    <Link
+                      to={item.href}
+                      onClick={(e) => {
+                        if (isActive && item.id === "home") {
+                          e.preventDefault();
+                          window.dispatchEvent(new CustomEvent("REFRESH_FEED"));
+                        }
+                      }}
                       className={cn(
-                        "h-5 w-5 flex-shrink-0",
-                        isActive ? "text-[#1a1a1b]" : "text-[#7c7c7c]"
+                        "flex items-center gap-3 px-3 py-2 rounded-md transition",
+                        "hover:bg-[#F6F7F8]",
+                        isActive && "bg-[#F6F7F8]"
                       )}
-                    />
-                    {!isCollapsed && (
-                      <span
+                      title={isCollapsed ? item.label : undefined}
+                    >
+                      <Icon
                         className={cn(
-                          "text-sm font-medium",
+                          "h-5 w-5 flex-shrink-0",
                           isActive ? "text-[#1a1a1b]" : "text-[#7c7c7c]"
                         )}
-                      >
-                        {item.label}
-                      </span>
-                    )}
-                  </Link>
-                </li>
-              );
-            })}
+                      />
+                      {!isCollapsed && (
+                        <span
+                          className={cn(
+                            "text-sm font-medium",
+                            isActive ? "text-[#1a1a1b]" : "text-[#7c7c7c]"
+                          )}
+                        >
+                          {item.label}
+                        </span>
+                      )}
+                    </Link>
+                  </li>
+                );
+              })}
           </ul>
         </nav>
       </div>

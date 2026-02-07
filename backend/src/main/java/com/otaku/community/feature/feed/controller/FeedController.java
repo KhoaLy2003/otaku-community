@@ -37,13 +37,14 @@ public class FeedController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Authentication required")
     })
     public ResponseEntity<ApiResponse<FeedResponse>> getHomeFeed(
-            @Parameter(description = "Cursor for pagination") @RequestParam(required = false) String cursor,
-            @Parameter(description = "Number of posts to return (max 50)") @RequestParam(required = false) Integer limit,
+            @Parameter(description = "Post cursor for pagination") @RequestParam(required = false) String postCursor,
+            @Parameter(description = "News cursor for pagination") @RequestParam(required = false) String newsCursor,
+            @Parameter(description = "Number of posts/news to return") @RequestParam(required = false) Integer limit,
             @CurrentUserId UUID currentUserId) {
 
-        log.debug("Getting home feed with cursor: {}, limit: {}", cursor, limit);
+        log.debug("Getting home feed with postCursor: {}, newsCursor: {}, limit: {}", postCursor, newsCursor, limit);
 
-        FeedResponse feed = feedService.getHomeFeed(cursor, limit, currentUserId);
+        FeedResponse feed = feedService.getHomeFeed(postCursor, newsCursor, limit, currentUserId);
 
         return ResponseEntity.ok(ApiResponse.success(feed));
     }
@@ -54,14 +55,15 @@ public class FeedController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Explore feed retrieved successfully")
     })
     public ResponseEntity<ApiResponse<FeedResponse>> getExploreFeed(
-            @Parameter(description = "Cursor for pagination") @RequestParam(required = false) String cursor,
-            @Parameter(description = "Number of posts to return (max 50)") @RequestParam(required = false) Integer limit,
+            @Parameter(description = "Post cursor for pagination") @RequestParam(required = false) String postCursor,
+            @Parameter(description = "News cursor for pagination") @RequestParam(required = false) String newsCursor,
+            @Parameter(description = "Number of items to return") @RequestParam(required = false) Integer limit,
             @Parameter(description = "Filter posts by topic IDs") @RequestParam(required = false) List<UUID> topicIds,
             @CurrentUserId UUID currentUserId) {
 
-        log.debug("Getting explore feed with cursor: {}, limit: {}", cursor, limit);
+        log.debug("Getting explore feed with postCursor: {}, newsCursor: {}, limit: {}", postCursor, newsCursor, limit);
 
-        FeedResponse feed = feedService.getExploreFeed(cursor, limit, topicIds, currentUserId);
+        FeedResponse feed = feedService.getExploreFeed(postCursor, newsCursor, limit, topicIds, currentUserId);
 
         return ResponseEntity.ok(ApiResponse.success(feed));
     }

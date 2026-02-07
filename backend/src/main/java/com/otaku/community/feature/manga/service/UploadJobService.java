@@ -1,5 +1,6 @@
 package com.otaku.community.feature.manga.service;
 
+import com.otaku.community.common.exception.AsyncJobProcessingException;
 import com.otaku.community.common.exception.BadRequestException;
 import com.otaku.community.common.exception.ConflictException;
 import com.otaku.community.common.exception.ResourceNotFoundException;
@@ -36,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -124,44 +126,6 @@ public class UploadJobService {
         return mapper.toUploadJobResponse(job);
     }
 
-    @Transactional
-    public UploadJobResponse uploadPage(UUID jobId, MultipartFile file, Integer pageIndex, UUID userId) {
-        UploadJob job = uploadJobRepository.findByIdAndNotDeleted(jobId)
-                .orElseThrow(() -> new ResourceNotFoundException("Upload job not found: " + jobId));
-
-        if (!job.getUser().getId().equals(userId)) {
-            throw new BadRequestException("Access denied: You are not the owner of this upload job");
-        }
-
-        if (job.getStatus() == UploadJob.UploadJobStatus.COMPLETED ||
-                job.getStatus() == UploadJob.UploadJobStatus.CANCELLED) {
-            throw new ConflictException("Cannot upload to a job in status: " + job.getStatus());
-        }
-
-        job.setStatus(UploadJob.UploadJobStatus.UPLOADING);
-
-        // Upload to Cloudinary
-        MediaUploadResponse mediaResponse = mediaService.uploadMedia(file);
-
-        // Create Translation Page
-        TranslationPage page = TranslationPage.builder()
-                .translation(job.getTranslation())
-                .pageIndex(pageIndex)
-                .imageUrl(mediaResponse.getUrl())
-                .width(mediaResponse.getWidth())
-                .height(mediaResponse.getHeight())
-                .build();
-        translationPageRepository.save(page);
-
-        // Update Job progress
-        job.setUploadedPages(job.getUploadedPages() + 1);
-        if (job.getTotalPages() < job.getUploadedPages()) {
-            job.setTotalPages(job.getUploadedPages());
-        }
-
-        return mapper.toUploadJobResponse(uploadJobRepository.save(job));
-    }
-
     /**
      * Phase 2: Event-driven batch upload
      * Creates the job and publishes an event for async processing AFTER transaction
@@ -171,7 +135,11 @@ public class UploadJobService {
     @LogExecutionTime
     public UploadJobResponse uploadPagesBatch(UUID jobId, MultipartFile[] files, Integer startPageIndex, UUID userId) {
         UploadJob job = uploadJobRepository.findByIdAndNotDeleted(jobId)
-                .orElseThrow(() -> new ResourceNotFoundException("Upload job not found: " + jobId));
+                .orElse(null);
+
+        if (Objects.isNull(job)) {
+            return new UploadJobResponse();
+        }
 
         if (!job.getUser().getId().equals(userId)) {
             throw new BadRequestException("Access denied: You are not the owner of this upload job");
@@ -208,14 +176,23 @@ public class UploadJobService {
     @Transactional
     public UploadJobResponse getJobStatus(UUID jobId) {
         UploadJob job = uploadJobRepository.findByIdAndNotDeleted(jobId)
-                .orElseThrow(() -> new ResourceNotFoundException("Upload job not found: " + jobId));
+                .orElse(null);
+
+        if (Objects.isNull(job)) {
+            return new UploadJobResponse();
+        }
+
         return mapper.toUploadJobResponse(job);
     }
 
     @Transactional
     public UploadJobResponse cancelJob(UUID jobId, UUID userId) {
         UploadJob job = uploadJobRepository.findByIdAndNotDeleted(jobId)
-                .orElseThrow(() -> new ResourceNotFoundException("Upload job not found: " + jobId));
+                .orElse(null);
+
+        if (Objects.isNull(job)) {
+            return new UploadJobResponse();
+        }
 
         if (!job.getUser().getId().equals(userId)) {
             throw new BadRequestException("Access denied: You are not the owner of this upload job");
@@ -228,20 +205,6 @@ public class UploadJobService {
         translationRepository.delete(job.getTranslation());
 
         return mapper.toUploadJobResponse(uploadJobRepository.save(job));
-    }
-
-    @Transactional
-    public void completeJob(UUID jobId, UUID userId) {
-        UploadJob job = uploadJobRepository.findByIdAndNotDeleted(jobId)
-                .orElseThrow(() -> new ResourceNotFoundException("Upload job not found: " + jobId));
-
-        if (!job.getUser().getId().equals(userId)) {
-            throw new BadRequestException("Access denied: You are not the owner of this upload job");
-        }
-
-        job.setStatus(UploadJob.UploadJobStatus.COMPLETED);
-        uploadJobRepository.save(job);
-        sendProgressUpdate(job);
     }
 
     /**
@@ -305,7 +268,10 @@ public class UploadJobService {
 
                         } catch (Exception e) {
                             log.error("Failed to upload page at index {} for job: {}", i, jobId, e);
-                            throw new RuntimeException(e);
+                            throw new AsyncJobProcessingException(
+                                    jobId,
+                                    "Upload job was cancelled"
+                            );
                         }
                     }, uploadExecutor).exceptionally(ex -> {
                         log.error("Failed to process upload for job: {}", jobId, ex);

@@ -16,8 +16,8 @@ import com.otaku.community.feature.post.dto.UpdatePostRequest;
 import com.otaku.community.feature.post.dto.UserMediaResponse;
 import com.otaku.community.feature.post.dto.UserPostResponse;
 import com.otaku.community.feature.post.entity.PostStatus;
-import com.otaku.community.feature.post.service.impl.PostMediaServiceImpl;
-import com.otaku.community.feature.post.service.impl.PostServiceImpl;
+import com.otaku.community.feature.post.service.PostMediaService;
+import com.otaku.community.feature.post.service.PostService;
 import com.otaku.community.feature.user.dto.UserSummaryResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -50,8 +50,8 @@ import java.util.UUID;
 @Tag(name = "Posts", description = "Post management endpoints")
 public class PostController {
 
-    private final PostServiceImpl postServiceImpl;
-    private final PostMediaServiceImpl postMediaServiceImpl;
+    private final PostService postService;
+    private final PostMediaService postMediaService;
     private final InteractionService interactionService;
 
     @PostMapping(consumes = "multipart/form-data")
@@ -92,11 +92,11 @@ public class PostController {
                 .references(references)
                 .build();
 
-        PostResponse response = postServiceImpl.createPost(request, userId);
+        PostResponse response = postService.createPost(request, userId);
 
         // Upload files if provided
         if (files != null && !files.isEmpty()) {
-            List<PostMediaResponse> mediaResponses = postMediaServiceImpl.uploadPostMedia(response.getId(),
+            List<PostMediaResponse> mediaResponses = postMediaService.uploadPostMedia(response.getId(),
                     files);
             response.setMedia(mediaResponses);
         }
@@ -120,7 +120,7 @@ public class PostController {
             @Valid @RequestBody UpdatePostRequest request) {
         log.debug("Updating post with ID: {}", postId);
 
-        PostResponse response = postServiceImpl.updatePost(postId, request);
+        PostResponse response = postService.updatePost(postId, request);
         return ResponseEntity.ok(ApiResponse.success("Post updated successfully", response));
     }
 
@@ -137,7 +137,7 @@ public class PostController {
             @Parameter(description = "Post ID") @PathVariable UUID postId) {
         log.debug("Deleting post with ID: {}", postId);
 
-        postServiceImpl.deletePost(postId);
+        postService.deletePost(postId);
         return ResponseEntity.ok(ApiResponse.success("Post deleted successfully", null));
     }
 
@@ -153,7 +153,7 @@ public class PostController {
             @PathVariable UUID postId) {
         log.debug("Retrieving detailed post information for ID: {}", postId);
 
-        PostDetailResponse response = postServiceImpl.getPostDetail(postId, userId);
+        PostDetailResponse response = postService.getPostDetail(postId, userId);
         return ResponseEntity.ok(ApiResponse.success("Post details retrieved successfully", response));
     }
 
@@ -170,7 +170,7 @@ public class PostController {
         log.debug("Retrieving posts for user: {} with status: {}, cursor: {}, limit: {}", username, status,
                 cursor, limit);
 
-        UserPostResponse response = postServiceImpl.getPostsByUserName(username, status, cursor, limit);
+        UserPostResponse response = postService.getPostsByUserName(username, status, cursor, limit);
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
@@ -188,7 +188,7 @@ public class PostController {
             @CurrentUserId UUID userId) {
         log.debug("Retrieving media for user: {} with cursor: {}, limit: {}", username, cursor, limit);
 
-        UserMediaResponse response = postMediaServiceImpl.getUserMedia(userId, cursor, limit);
+        UserMediaResponse response = postMediaService.getUserMedia(userId, cursor, limit);
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
@@ -206,7 +206,7 @@ public class PostController {
             @Parameter(description = "Post ID") @PathVariable UUID postId) {
         log.debug("Publishing post with ID: {}", postId);
 
-        PostResponse response = postServiceImpl.publishPost(postId);
+        PostResponse response = postService.publishPost(postId);
         return ResponseEntity.ok(ApiResponse.success("Post published successfully", response));
     }
 
@@ -223,7 +223,7 @@ public class PostController {
             @Parameter(description = "Post ID") @PathVariable UUID postId) {
         log.debug("Converting post to draft with ID: {}", postId);
 
-        PostResponse response = postServiceImpl.makeDraft(postId);
+        PostResponse response = postService.makeDraft(postId);
         return ResponseEntity.ok(ApiResponse.success("Post converted to draft successfully", response));
     }
 
@@ -238,7 +238,7 @@ public class PostController {
             @Parameter(description = "Post ID") @PathVariable UUID postId) {
         log.debug("Checking ownership for post with ID: {}", postId);
 
-        boolean isOwner = postServiceImpl.isPostOwner(postId);
+        boolean isOwner = postService.isPostOwner(postId);
         return ResponseEntity.ok(ApiResponse.success(isOwner));
     }
 
@@ -278,12 +278,12 @@ public class PostController {
         log.debug("Uploading {} media files for post {}", files.size(), postId);
 
         // Verify post ownership
-        if (!postServiceImpl.isPostOwner(postId)) {
+        if (!postService.isPostOwner(postId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ApiResponse.error("Access denied - not post owner"));
         }
 
-        List<PostMediaResponse> responses = postMediaServiceImpl.uploadPostMedia(postId, files);
+        List<PostMediaResponse> responses = postMediaService.uploadPostMedia(postId, files);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Media uploaded successfully", responses));
     }
@@ -304,12 +304,12 @@ public class PostController {
         log.debug("Adding {} media items for post {}", mediaRequests.size(), postId);
 
         // Verify post ownership
-        if (!postServiceImpl.isPostOwner(postId)) {
+        if (!postService.isPostOwner(postId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ApiResponse.error("Access denied - not post owner"));
         }
 
-        List<PostMediaResponse> responses = postMediaServiceImpl.addPostMediaFromUrls(postId, mediaRequests);
+        List<PostMediaResponse> responses = postMediaService.addPostMediaFromUrls(postId, mediaRequests);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Media added successfully", responses));
     }
@@ -324,7 +324,7 @@ public class PostController {
             @Parameter(description = "Post ID") @PathVariable UUID postId) {
         log.debug("Retrieving media for post {}", postId);
 
-        List<PostMediaResponse> responses = postMediaServiceImpl.getPostMedia(postId);
+        List<PostMediaResponse> responses = postMediaService.getPostMedia(postId);
         return ResponseEntity.ok(ApiResponse.success("Media retrieved successfully", responses));
     }
 
@@ -344,12 +344,12 @@ public class PostController {
         log.debug("Updating media order for post {}", postId);
 
         // Verify post ownership
-        if (!postServiceImpl.isPostOwner(postId)) {
+        if (!postService.isPostOwner(postId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ApiResponse.error("Access denied - not post owner"));
         }
 
-        List<PostMediaResponse> responses = postMediaServiceImpl.updateMediaOrder(postId, mediaIds);
+        List<PostMediaResponse> responses = postMediaService.updateMediaOrder(postId, mediaIds);
         return ResponseEntity.ok(ApiResponse.success("Media order updated successfully", responses));
     }
 
@@ -368,12 +368,12 @@ public class PostController {
         log.debug("Deleting media {} from post {}", mediaId, postId);
 
         // Verify post ownership
-        if (!postServiceImpl.isPostOwner(postId)) {
+        if (!postService.isPostOwner(postId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ApiResponse.error("Access denied - not post owner"));
         }
 
-        postMediaServiceImpl.deletePostMedia(postId, mediaId);
+        postMediaService.deletePostMedia(postId, mediaId);
         return ResponseEntity.ok(ApiResponse.success("Media deleted successfully", null));
     }
 }

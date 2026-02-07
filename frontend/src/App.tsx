@@ -25,11 +25,22 @@ import MangaListPage from "./pages/MangaListPage";
 import MangaDetailPage from "./pages/MangaDetailPage";
 import MangaDashboardPage from "./pages/MangaDashboardPage";
 import MangaUploadPage from "./pages/MangaUploadPage";
-import MangaModerationPage from "./pages/MangaModerationPage";
 import ComingSoonPage from "./pages/ComingSoonPage";
 import AboutPage from "./pages/AboutPage";
 import HelpPage from "./pages/HelpPage";
 import RankingPage from "./pages/RankingPage";
+import NewsPage from "./pages/NewsPage";
+import FeedbackPage from "./pages/FeedbackPage";
+
+// Admin pages
+import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
+import { UserManagementPage } from "./pages/admin/UserManagementPage";
+import { UserDetailPage } from "./pages/admin/UserDetailPage";
+import { SystemSettingsPage } from "./pages/admin/SystemSettingsPage";
+import { RssSourcePage } from "./pages/admin/RssSourcePage";
+import { FeedbackManagementPage } from "./pages/admin/FeedbackManagementPage";
+import { NewsManagementPage } from "./pages/admin/NewsManagementPage";
+import { NotFoundPage } from "./pages/NotFoundPage";
 
 // Auth components
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
@@ -42,6 +53,7 @@ import WebSocketProvider from "./components/socket/WebSocketProvider";
 import { ToastProvider } from "./components/ui/ToastProvider";
 import { MainLayout } from "./components/layout/MainLayout";
 import { PublicLayout } from "./components/layout/PublicLayout";
+import { AdminLayout } from "./components/layout/AdminLayout";
 
 import { ChatSocketListener } from "./components/socket/ChatSocketListener";
 
@@ -152,6 +164,27 @@ function App() {
                   <Route path={ROUTES.BLOG} element={<ComingSoonPage />} />
                   <Route path={ROUTES.ABOUT} element={<AboutPage />} />
                   <Route path={ROUTES.RANKINGS} element={<RankingPage />} />
+                  <Route path={ROUTES.NEWS} element={<NewsPage />} />
+                  <Route path={ROUTES.FEEDBACK} element={<FeedbackPage />} />
+                </Route>
+
+                {/* Admin Routes */}
+                <Route
+                  element={
+                    <ProtectedRoute roles={["ADMIN"]}>
+                      <AdminLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route path={ROUTES.ADMIN_DASHBOARD} element={<AdminDashboardPage />} />
+                  <Route path={ROUTES.ADMIN_USERS} element={<UserManagementPage />} />
+                  <Route path="/admin/users/:id" element={<UserDetailPage />} />
+                  {/* <Route path={ROUTES.ADMIN_CONTENT} element={<ContentModerationPage />} /> */}
+                  <Route path={ROUTES.ADMIN_FEEDBACK} element={<FeedbackManagementPage />} />
+                  {/* <Route path={ROUTES.ADMIN_DATABASE} element={<DatabaseManagementPage />} /> */}
+                  <Route path={ROUTES.ADMIN_SETTINGS} element={<SystemSettingsPage />} />
+                  <Route path={ROUTES.ADMIN_RSS} element={<RssSourcePage />} />
+                  <Route path={ROUTES.ADMIN_NEWS_MANAGEMENT} element={<NewsManagementPage />} />
                 </Route>
 
                 <Route element={<PublicLayout />}>
@@ -198,22 +231,7 @@ function App() {
                 {/* Catch-all route for 404 */}
                 <Route
                   path="*"
-                  element={
-                    <div className="flex items-center justify-center min-h-screen">
-                      <div className="text-center">
-                        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                          404
-                        </h1>
-                        <p className="text-gray-600 mb-4">Page not found</p>
-                        <a
-                          href={ROUTES.HOME}
-                          className="text-orange-600 hover:text-orange-700 underline"
-                        >
-                          Go back home
-                        </a>
-                      </div>
-                    </div>
-                  }
+                  element={<NotFoundPage />}
                 />
               </Routes>
             </div>

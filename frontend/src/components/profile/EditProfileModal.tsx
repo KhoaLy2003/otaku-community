@@ -10,6 +10,7 @@ import type { Character } from '../../types/anime';
 import { FavoriteType } from '../../types/user';
 import { Badge } from '../ui/Badge';
 import { X, Search } from 'lucide-react';
+import { useDebounce } from '../../hooks/useDebounce';
 
 interface EditProfileModalProps {
     isOpen: boolean;
@@ -46,15 +47,14 @@ export function EditProfileModal({ isOpen, onClose, user, onUpdate }: EditProfil
     const [searchResults, setSearchResults] = useState<Character[]>([]);
     const [isSearching, setIsSearching] = useState(false);
 
-    // Simple debounce effect
+    const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
+    // Debounced search effect
     useEffect(() => {
-        const timer = setTimeout(() => {
-            if (searchQuery.length >= 3) {
-                handleSearch();
-            }
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [searchQuery]);
+        if (debouncedSearchQuery.length >= 3) {
+            handleSearch();
+        }
+    }, [debouncedSearchQuery]);
 
     useEffect(() => {
         if (isOpen) {

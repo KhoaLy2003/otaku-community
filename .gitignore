@@ -4,5 +4,6 @@
 .cursor/
 .gemini/
 .vite/
-config/
+auth0-config/
 .agent/
+doc/requirements/secret

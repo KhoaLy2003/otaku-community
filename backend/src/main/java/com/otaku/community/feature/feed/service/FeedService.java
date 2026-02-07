@@ -8,6 +8,8 @@ import com.otaku.community.feature.feed.mapper.FeedMapper;
 import com.otaku.community.feature.feed.repository.UserFeedRepository;
 import com.otaku.community.feature.interaction.entity.Reaction;
 import com.otaku.community.feature.interaction.repository.ReactionRepository;
+import com.otaku.community.feature.news.entity.News;
+import com.otaku.community.feature.news.repository.NewsRepository;
 import com.otaku.community.feature.post.entity.Post;
 import com.otaku.community.feature.post.entity.PostStatus;
 import com.otaku.community.feature.post.repository.PostRepository;
@@ -18,6 +20,7 @@ import com.otaku.community.feature.user.repository.UserFollowRepository;
 import com.otaku.community.feature.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -46,6 +49,13 @@ public class FeedService {
     private final UserFollowRepository userFollowRepository;
     private final ReactionRepository reactionRepository;
     private final UserRepository userRepository;
+    private final NewsRepository newsRepository;
+
+    @Value("${app.feed.posts-limit:10}")
+    private int defaultPostsLimit;
+
+    @Value("${app.feed.news-limit:5}")
+    private int defaultNewsLimit;
 
     /**
      * Get home feed for authenticated user (followed users and topics)
@@ -54,98 +64,148 @@ public class FeedService {
      * 2. If empty (new user/no follows), fallback to Explore Feed (Fan-out on
      * Read).
      */
-    public FeedResponse getHomeFeed(String cursor, Integer limit, UUID currentUserId) {
+    public FeedResponse getHomeFeed(String postCursor, String newsCursor, Integer limit, UUID currentUserId) {
         log.debug("Getting home feed for user: {}", currentUserId);
 
-        int pageSize = PaginationUtils.validateAndGetPageSize(limit);
-        Pageable pageable = PageRequest.of(0, pageSize + 1,
-                Sort.by(Sort.Direction.DESC, "score", "createdAt"));
+        int postsLimit = limit != null ? limit : defaultPostsLimit;
+        int newsLimit = defaultNewsLimit;
 
-        // 1. Try to fetch from pre-computed feed
-        Slice<UserFeed> userFeedSlice;
-        if (cursor == null) {
-            userFeedSlice = userFeedRepository.findAllByUserId(currentUserId, pageable);
-        } else {
-            // Next pages – dùng cursor-based query
-            CursorInfo cursorInfo = PaginationUtils.parseCursor(cursor);
+        // 1. Fetch Posts
+        List<Post> posts = new ArrayList<>();
+        boolean hasMorePosts = false;
+        String nextPostCursor = "END";
 
-            userFeedSlice = userFeedRepository.findHomeFeedByCursor(
-                    currentUserId,
-                    cursorInfo.createdAt(),
-                    cursorInfo.id(),
-                    pageable);
-        }
+        if (!"END".equals(postCursor)) {
+            Pageable postPageable = PageRequest.of(0, postsLimit + 1,
+                    Sort.by(Sort.Direction.DESC, "score", "createdAt"));
+            Slice<UserFeed> userFeedSlice;
+            if (postCursor == null) {
+                userFeedSlice = userFeedRepository.findAllByUserId(currentUserId, postPageable);
+            } else {
+                CursorInfo postCursorInfo = PaginationUtils.parseCursor(postCursor);
+                userFeedSlice = userFeedRepository.findHomeFeedByCursor(currentUserId, postCursorInfo.createdAt(),
+                        postCursorInfo.id(), postPageable);
+            }
 
-        if (userFeedSlice.isEmpty()) {
-            log.debug("User {} has empty feed, falling back to Explore Feed", currentUserId);
-            return getExploreFeed(cursor, limit, null, currentUserId);
-        }
+            if (!userFeedSlice.isEmpty()) {
+                List<UUID> postIds = userFeedSlice.getContent().stream().map(UserFeed::getPostId).toList();
+                List<Post> hydratedPosts = postRepository.findAllById(postIds);
+                var postMap = hydratedPosts.stream().collect(Collectors.toMap(Post::getId, p -> p));
+                for (UserFeed entry : userFeedSlice.getContent()) {
+                    Post post = postMap.get(entry.getPostId());
+                    if (post != null && post.getStatus() == PostStatus.PUBLISHED && post.getDeletedAt() == null) {
+                        posts.add(post);
+                    }
+                }
+            }
 
-        List<UserFeed> feedEntries = userFeedSlice.getContent();
-
-        // 3. Hydrate posts (Filter on Read for consistency)
-        List<UUID> postIds = feedEntries.stream().map(UserFeed::getPostId).toList();
-        List<Post> posts = postRepository.findAllById(postIds);
-
-        var postMap = posts.stream().collect(Collectors.toMap(Post::getId, p -> p));
-        List<Post> orderedPosts = new ArrayList<>();
-
-        for (UserFeed entry : feedEntries) {
-            Post post = postMap.get(entry.getPostId());
-            // Filter out deleted or non-published posts (Lazy Filtering)
-            if (post != null && post.getStatus() == PostStatus.PUBLISHED && post.getDeletedAt() == null) {
-                orderedPosts.add(post);
+            hasMorePosts = posts.size() > postsLimit;
+            if (hasMorePosts) {
+                posts = posts.subList(0, postsLimit);
+                nextPostCursor = PaginationUtils.generateCursor(posts.get(posts.size() - 1));
             }
         }
 
-        // 4. Handle Pagination
-        return getFeedResponse(pageSize, orderedPosts, currentUserId);
-    }
-
-    private FeedResponse getFeedResponse(int pageSize, List<Post> orderedPosts, UUID currentUserId) {
-        boolean hasMore = orderedPosts.size() > pageSize;
-        if (hasMore) {
-            orderedPosts = orderedPosts.subList(0, pageSize);
+        // 2. Fallback to Explore if home feed is empty
+        if (posts.isEmpty() && postCursor == null) {
+            log.debug("User {} has empty home feed posts, falling back to Explore", currentUserId);
+            return getExploreFeed(null, newsCursor, limit, null, currentUserId);
         }
 
-        String nextCursor = hasMore && !orderedPosts.isEmpty()
-                ? PaginationUtils.generateCursor(orderedPosts.get(orderedPosts.size() - 1))
-                : null;
+        // 3. Fetch News separately
+        List<News> newsList = new ArrayList<>();
+        boolean hasMoreNews = false;
+        String nextNewsCursor = "END";
+        if (!"END".equals(newsCursor)) {
+            newsList = fetchNewsWithCursor(newsCursor, newsLimit);
+            hasMoreNews = newsList.size() > newsLimit;
+            if (hasMoreNews) {
+                newsList = newsList.subList(0, newsLimit);
+                News lastNews = newsList.get(newsList.size() - 1);
+                nextNewsCursor = PaginationUtils.generateCursor(lastNews.getPublishedAt(), lastNews.getId());
+            }
+        }
 
-        // Determine which posts are liked by the current user
+        return buildFeedResponse(posts, nextPostCursor, hasMorePosts, newsList, nextNewsCursor, hasMoreNews,
+                currentUserId);
+    }
+
+    private List<News> fetchNewsWithCursor(String newsCursor, int limit) {
+        Pageable newsPageable = PageRequest.of(0, limit + 1);
+        CursorInfo newsCursorInfo = PaginationUtils.parseCursor(newsCursor);
+        if (newsCursorInfo.createdAt() == null) {
+            return newsRepository.findLatestNews(newsPageable);
+        } else {
+            return newsRepository.findNewsAfterCursor(newsCursorInfo.createdAt(), newsCursorInfo.id(), newsPageable);
+        }
+    }
+
+    private FeedResponse buildFeedResponse(List<Post> posts, String postCursor, boolean hasMorePosts,
+                                           List<News> news, String newsCursor, boolean hasMoreNews, UUID currentUserId) {
+
+        // Hydrate liked posts
         Set<UUID> likedPostIds = new HashSet<>();
-        if (currentUserId != null && !orderedPosts.isEmpty()) {
-            List<UUID> postIds = orderedPosts.stream().map(Post::getId).toList();
+        if (currentUserId != null && !posts.isEmpty()) {
             likedPostIds = reactionRepository.findLikedTargetIds(
-                    currentUserId,
-                    Reaction.TargetType.POST,
-                    Reaction.ReactionType.LIKE,
-                    postIds);
+                    currentUserId, Reaction.TargetType.POST, Reaction.ReactionType.LIKE,
+                    posts.stream().map(Post::getId).toList());
         }
 
         final Set<UUID> finalLikedPostIds = likedPostIds;
 
         return FeedResponse.builder()
-                .posts(orderedPosts.stream()
-                        .map(post -> feedMapper.toFeedPostResponse(post, finalLikedPostIds.contains(post.getId())))
+                .posts(posts.stream().map(p -> feedMapper.toFeedPostResponse(p, finalLikedPostIds.contains(p.getId())))
                         .toList())
-                .nextCursor(nextCursor)
-                .hasMore(hasMore)
+                .postCursor(postCursor)
+                .hasMorePosts(hasMorePosts)
+                .news(news.stream().map(feedMapper.getNewsMapper()::toResponse).toList())
+                .newsCursor(newsCursor)
+                .hasMoreNews(hasMoreNews)
+                .totalPosts(posts.size())
+                .totalNews(news.size())
                 .build();
     }
 
-    /**
-     * Get explore feed (all published posts)
-     */
-    public FeedResponse getExploreFeed(String cursor, Integer limit, List<UUID> topicIds, UUID currentUserId) {
-        log.debug("Getting explore feed with cursor: {}, limit: {}", cursor, limit);
+    public FeedResponse getExploreFeed(String postCursor, String newsCursor, Integer limit, List<UUID> topicIds,
+                                       UUID currentUserId) {
+        log.debug("Getting explore feed. postCursor: {}, newsCursor: {}", postCursor, newsCursor);
 
-        int pageSize = PaginationUtils.validateAndGetPageSize(limit);
-        CursorInfo cursorInfo = PaginationUtils.parseCursor(cursor);
+        int postsLimit = limit != null ? limit : defaultPostsLimit;
+        int newsLimit = defaultNewsLimit;
 
-        List<Post> posts = getPublishedPostsWithCursor(cursorInfo, pageSize + 1, topicIds);
+        // Fetch Posts
+        List<Post> posts = new ArrayList<>();
+        boolean hasMorePosts = false;
+        String nextPostCursor = "END";
 
-        return getFeedResponse(pageSize, posts, currentUserId);
+        if (!"END".equals(postCursor)) {
+            CursorInfo postCursorInfo = PaginationUtils.parseCursor(postCursor);
+            posts = getPublishedPostsWithCursor(postCursorInfo, postsLimit + 1, topicIds);
+            hasMorePosts = posts.size() > postsLimit;
+            if (hasMorePosts) {
+                posts = posts.subList(0, postsLimit);
+                nextPostCursor = PaginationUtils.generateCursor(posts.get(posts.size() - 1));
+            }
+        }
+
+        // Fetch News (only if no topics or topics empty, as news doesn't have topic
+        // yet)
+        List<News> newsList = new ArrayList<>();
+        boolean hasMoreNews = false;
+        String nextNewsCursor = "END";
+
+        if (!"END".equals(newsCursor) && (topicIds == null || topicIds.isEmpty())) {
+            newsList = fetchNewsWithCursor(newsCursor, newsLimit);
+            hasMoreNews = newsList.size() > newsLimit;
+            if (hasMoreNews) {
+                newsList = newsList.subList(0, newsLimit);
+                News lastNews = newsList.get(newsList.size() - 1);
+                nextNewsCursor = PaginationUtils.generateCursor(lastNews.getPublishedAt(), lastNews.getId());
+            }
+        }
+
+        return buildFeedResponse(posts, nextPostCursor, hasMorePosts, newsList, nextNewsCursor, hasMoreNews,
+                currentUserId);
     }
 
     /**

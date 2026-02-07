@@ -121,6 +121,7 @@ The module provides comprehensive error handling:
 ## Usage Example
 
 ```java
+
 @Autowired
 private MediaService mediaService;
 

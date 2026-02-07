@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>User Management List</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#135bec",
+                "background-light": "#f6f6f8",
+                "background-dark": "#101622",
+              },
+              fontFamily: {
+                "display": ["Inter"]
+              },
+              borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-size: 20px; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<div class="flex min-h-screen">
+<!-- Sidebar -->
+<aside class="w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark flex flex-col h-screen sticky top-0">
+<div class="p-6">
+<div class="flex items-center gap-3">
+<div class="bg-primary rounded-lg size-10 flex items-center justify-center text-white">
+<span class="material-symbols-outlined">auto_awesome</span>
+</div>
+<div class="flex flex-col">
+<h1 class="text-slate-900 dark:text-white text-base font-bold leading-none">Admin Panel</h1>
+<p class="text-slate-500 text-xs mt-1">Anime Platform</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-medium">Dashboard</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary cursor-pointer">
+<span class="material-symbols-outlined">group</span>
+<p class="text-sm font-medium">Users</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
+<span class="material-symbols-outlined">gavel</span>
+<p class="text-sm font-medium">Content Moderation</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
+<span class="material-symbols-outlined">database</span>
+<p class="text-sm font-medium">Database Tools</p>
+</div>
+</nav>
+<div class="p-4 border-t border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
+<span class="material-symbols-outlined">logout</span>
+<p class="text-sm font-medium">Logout</p>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col">
+<!-- Top Nav -->
+<header class="h-16 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark px-8 sticky top-0 z-10">
+<div class="flex items-center gap-2">
+<h2 class="text-lg font-bold tracking-tight">User Management</h2>
+</div>
+<div class="flex items-center gap-3">
+<button class="size-10 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="size-10 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-8 w-[1px] bg-slate-200 dark:bg-slate-700 mx-1"></div>
+<div class="size-8 rounded-full bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">person</span>
+</div>
+</div>
+</header>
+<div class="p-8 max-w-7xl mx-auto w-full space-y-6">
+<!-- Page Heading -->
+<div class="flex flex-col gap-1">
+<h1 class="text-3xl font-bold text-slate-900 dark:text-white">Active Users</h1>
+<p class="text-slate-500 dark:text-slate-400 text-sm">Manage platform users, roles, and account statuses from a central dashboard.</p>
+</div>
+<!-- Filters & Search -->
+<div class="bg-white dark:bg-background-dark rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+<div class="p-4 flex flex-col md:flex-row gap-4 items-center justify-between border-b border-slate-100 dark:border-slate-800">
+<div class="w-full md:w-96">
+<label class="relative block">
+<span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+<span class="material-symbols-outlined">search</span>
+</span>
+<input class="w-full h-10 pl-10 pr-4 bg-slate-50 dark:bg-slate-900 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary/20" placeholder="Search users by username, email..." type="text"/>
+</label>
+</div>
+<div class="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
+<button class="flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg bg-slate-50 dark:bg-slate-900 px-4 border border-slate-200 dark:border-slate-800">
+<span class="text-sm font-medium">Role: All</span>
+<span class="material-symbols-outlined text-slate-400">expand_more</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg bg-slate-50 dark:bg-slate-900 px-4 border border-slate-200 dark:border-slate-800">
+<span class="text-sm font-medium">Status: All</span>
+<span class="material-symbols-outlined text-slate-400">expand_more</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg bg-slate-50 dark:bg-slate-900 px-4 border border-slate-200 dark:border-slate-800">
+<span class="text-sm font-medium">Join Date: All</span>
+<span class="material-symbols-outlined text-slate-400">calendar_month</span>
+</button>
+</div>
+</div>
+<!-- Table Area -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800">
+<th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">User</th>
+<th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Email</th>
+<th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Role</th>
+<th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+<th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Joined</th>
+<th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<!-- User Row 1 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-gradient-to-tr from-orange-400 to-red-500" data-alt="User avatar with orange and red gradient pattern"></div>
+<span class="font-medium text-slate-900 dark:text-white">Goku_San23</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">goku.kakarot@capsulecorp.com</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">Moderator</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-green-500">
+<span class="size-2 rounded-full bg-green-500"></span>
+<span class="text-xs font-medium">Active</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500">Oct 12, 2023</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- User Row 2 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-gradient-to-tr from-blue-400 to-indigo-500" data-alt="User avatar with blue and indigo gradient pattern"></div>
+<span class="font-medium text-slate-900 dark:text-white">StrawHat_Luffy</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">luffy@grandline.com</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">User</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-green-500">
+<span class="size-2 rounded-full bg-green-500"></span>
+<span class="text-xs font-medium">Active</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500">Nov 05, 2023</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- User Row 3 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-gradient-to-tr from-purple-400 to-pink-500" data-alt="User avatar with purple and pink gradient pattern"></div>
+<span class="font-medium text-slate-900 dark:text-white">Uchiha_Sauske</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">sasuke@leaf.com</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">User</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-red-500">
+<span class="size-2 rounded-full bg-red-500"></span>
+<span class="text-xs font-medium">Banned</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500">Sep 20, 2023</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- User Row 4 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-gradient-to-tr from-yellow-400 to-amber-600" data-alt="User avatar with yellow and amber gradient pattern"></div>
+<span class="font-medium text-slate-900 dark:text-white">Admin_Kirito</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">kirito@sao.com</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">SuperAdmin</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-green-500">
+<span class="size-2 rounded-full bg-green-500"></span>
+<span class="text-xs font-medium">Active</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500">Jan 15, 2023</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- User Row 5 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-gradient-to-tr from-green-400 to-teal-600" data-alt="User avatar with green and teal gradient pattern"></div>
+<span class="font-medium text-slate-900 dark:text-white">Deku_Might</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">izuku@ua.edu</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">User</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-slate-400">
+<span class="size-2 rounded-full bg-slate-300"></span>
+<span class="text-xs font-medium">Inactive</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500">Dec 01, 2023</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+<p class="text-sm text-slate-500">Showing 1 to 5 of 2,451 users</p>
+<div class="flex gap-2">
+<button class="h-8 w-8 flex items-center justify-center rounded border border-slate-200 dark:border-slate-800 text-slate-500 disabled:opacity-50">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="h-8 w-8 flex items-center justify-center rounded bg-primary text-white text-sm font-medium">1</button>
+<button class="h-8 w-8 flex items-center justify-center rounded border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 text-sm font-medium">2</button>
+<button class="h-8 w-8 flex items-center justify-center rounded border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 text-sm font-medium">3</button>
+<button class="h-8 w-8 flex items-center justify-center rounded border border-slate-200 dark:border-slate-800 text-slate-500">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

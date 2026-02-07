@@ -15,11 +15,13 @@ public class SecurityEndpoints {
             "/api/v1/manga/**",
             "/api/v1/chapters/**",
             "/api/v1/translations/**",
-            "/api/users/username/**"
+            "/api/users/username/**",
+            "/api/v1/news/**",
     };
 
     public static final String[] PUBLIC_POST = {
-            "/api/v1/translations/*/views**"
+            "/api/v1/translations/*/views**",
+            "/api/v1/feedbacks/**"
     };
 
     public static final String[] PUBLIC_ANY = {
@@ -40,6 +42,7 @@ public class SecurityEndpoints {
     };
 
     public static final String[] ADMIN = {
+            "/api/admin/**",
             "/admin/**"
     };
 }

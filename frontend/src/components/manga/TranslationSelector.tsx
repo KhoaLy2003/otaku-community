@@ -1,6 +1,5 @@
 import React from "react";
 import { X, Globe, User, Calendar, Eye, ThumbsUp } from "lucide-react";
-import { cn } from "../../lib/cn";
 import type { TranslationSummary } from "../../types/manga";
 import { Avatar } from "../ui/Avatar";
 

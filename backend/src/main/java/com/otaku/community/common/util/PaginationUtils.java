@@ -23,8 +23,17 @@ public class PaginationUtils {
      * Generate cursor from entity
      */
     public static String generateCursor(BaseEntity entity) {
-        String cursorData = entity.getCreatedAt().toEpochMilli()
-                + ":" + entity.getId();
+        return generateCursor(entity.getCreatedAt(), entity.getId());
+    }
+
+    /**
+     * Generate cursor from raw components (useful for DTOs)
+     */
+    public static String generateCursor(Instant timestamp, UUID id) {
+        if (timestamp == null || id == null) {
+            return null;
+        }
+        String cursorData = timestamp.toEpochMilli() + ":" + id;
         return Base64.getEncoder().encodeToString(cursorData.getBytes(StandardCharsets.UTF_8));
     }
 
