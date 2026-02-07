@@ -12,6 +12,10 @@ This is a full-stack web application for a community of otaku (people who love a
 - **Comments:** Users can comment on posts.
 - **User Profiles:** Users can view and edit their profiles.
 
+## Architecture
+
+![Container Diagram](doc/container-diagram.svg)
+
 ## Tech Stack
 
 ### Backend
