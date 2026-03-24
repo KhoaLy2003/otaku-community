@@ -17,6 +17,8 @@ public class SecurityEndpoints {
             "/api/v1/translations/**",
             "/api/users/username/**",
             "/api/v1/news/**",
+            "/api/v1/rankings/**",
+            "/api/posts/*/detail"
     };
 
     public static final String[] PUBLIC_POST = {

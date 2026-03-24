@@ -91,7 +91,7 @@ const MangaListPage = () => {
     }, [debouncedSearchQuery, selectedType, selectedStatus, activeTab]);
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="w-full max-w-[1280px] mx-auto px-2 sm:px-4 py-4 sm:py-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Alert } from "@/components/ui/Alert";
@@ -13,6 +13,7 @@ import { timeAgo } from "@/lib/utils";
 import type { PostWithDetails } from "@/types/post";
 import type { Comment } from "@/types/comment";
 import { useAuth } from '@/hooks/useAuth';
+import { ROUTES } from "@/constants/routes";
 
 // Interface for comments to be passed to CommentCard
 interface CommentCardData {
@@ -50,6 +51,7 @@ const buildCommentTree = (
 export default function PostDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const currentUserId = user?.id;
@@ -64,6 +66,7 @@ export default function PostDetailPage() {
   const [commentsData, setCommentsData] = useState<CommentCardData[]>([]);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
@@ -104,7 +107,11 @@ export default function PostDetailPage() {
   };
 
   const handleAddComment = async (value: string, image?: File) => {
-    if (!id || !user) return;
+    if (!id) return;
+    if (!user) {
+      setShowAuthDialog(true);
+      return;
+    }
 
     let optimisticImageUrl = undefined;
     if (image) {
@@ -137,7 +144,11 @@ export default function PostDetailPage() {
   };
 
   const handleReply = async (parentId: string, content: string, image?: File) => {
-    if (!id || !user) return;
+    if (!id) return;
+    if (!user) {
+      setShowAuthDialog(true);
+      return;
+    }
 
     let optimisticImageUrl = undefined;
     if (image) {
@@ -355,7 +366,7 @@ export default function PostDetailPage() {
   };
 
   return (
-    <div className="mx-auto flex flex-col gap-4">
+    <div className="mx-auto flex flex-col gap-4 w-full max-w-4xl">
       <Button
         variant="outline"
         color="grey"
@@ -406,6 +417,7 @@ export default function PostDetailPage() {
             onReply={handleReply}
             onLike={handleLikeComment}
             onUnlike={handleUnlikeComment}
+            onAuthRequired={() => setShowAuthDialog(true)}
           />
         ))}
       </div>
@@ -420,6 +432,17 @@ export default function PostDetailPage() {
         cancelText="Cancel"
         variant="danger"
         isLoading={isDeleting}
+      />
+
+      <ConfirmDialog
+        isOpen={showAuthDialog}
+        onClose={() => setShowAuthDialog(false)}
+        onConfirm={() => navigate(ROUTES.LOGIN, { state: { from: location } })}
+        title="Login Required"
+        message="You must be logged in to post a comment or reply."
+        confirmText="Login"
+        cancelText="Maybe later"
+        variant="info"
       />
     </div>
   );

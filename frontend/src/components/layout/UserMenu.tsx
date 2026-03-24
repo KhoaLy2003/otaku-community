@@ -63,13 +63,13 @@ export function UserMenu() {
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded border px-3 py-2 text-left transition hover:border-gray-300"
+        className="flex items-center gap-2 rounded border px-1 sm:px-3 py-1 sm:py-2 text-left transition hover:border-gray-300 border-transparent sm:border-gray-100"
         style={{
-          borderColor: isOpen ? Colors.Grey[30] : "transparent",
+          borderColor: isOpen ? Colors.Grey[30] : undefined,
           color: Colors.Grey[70],
         }}
       >
-        <span className="flex h-9 w-9 items-center justify-center text-white rounded-full overflow-hidden bg-orange-500">
+        <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center text-white rounded-full overflow-hidden bg-orange-500 shrink-0">
           {avatarUrl ? (
             <img
               src={avatarUrl}
@@ -85,10 +85,11 @@ export function UserMenu() {
           )}
         </span>
         <div className="hidden text-sm md:block">
-          <p className="font-semibold text-[#1a1a1b]">{displayName}</p>
+          <p className="font-semibold text-[#1a1a1b] leading-tight">{displayName}</p>
+          <p className="text-[10px] text-[#7c7c7c]">u/{username}</p>
         </div>
         <ChevronDown
-          className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""
+          className={`h-4 w-4 hidden sm:block transition-transform ${isOpen ? "rotate-180" : ""
             }`}
         />
       </button>

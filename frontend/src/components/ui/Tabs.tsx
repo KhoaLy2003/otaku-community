@@ -51,7 +51,7 @@ export function Tabs({
   return (
     <div
       className={cn(
-        "flex items-center gap-0",
+        "flex items-center gap-0 overflow-x-auto no-scrollbar",
         variant === 'folder' ? "border-b" : "gap-6",
         className
       )}
@@ -66,7 +66,7 @@ export function Tabs({
               key={tab.id}
               onClick={() => onChange(tab.id)}
               className={cn(
-                "relative flex items-center gap-2 py-3 text-sm font-semibold transition-colors",
+                "relative flex items-center gap-2 py-3 text-sm font-semibold transition-colors flex-shrink-0",
                 isActive ? "text-[#1A1A1B] dark:text-white" : "text-[#7c7c7c] hover:text-[#1A1A1B]"
               )}
             >
@@ -88,7 +88,7 @@ export function Tabs({
             key={tab.id}
             onClick={() => onChange(tab.id)}
             className={cn(
-              "relative flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors",
+              "relative flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors flex-shrink-0",
               "hover:bg-[#F6F7F8]",
               index !== tabs.length - 1 && "border-r",
               isActive && "text-[#1A1A1B]"

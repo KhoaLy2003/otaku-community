@@ -12,6 +12,7 @@ import {
   Edit,
   Trash2,
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface CommentCardProps {
   id: string;
@@ -26,6 +27,7 @@ interface CommentCardProps {
   onReply?: (id: string, content: string, image?: File) => void;
   onLike?: (id: string) => void;
   onUnlike?: (id: string) => void;
+  onAuthRequired?: () => void;
   replies?: CommentCardProps[];
 }
 
@@ -42,6 +44,7 @@ export function CommentCard({
   onReply,
   onLike,
   onUnlike,
+  onAuthRequired,
   replies = [],
 }: CommentCardProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -50,6 +53,7 @@ export function CommentCard({
   const [isDisliked, setIsDisliked] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showReplyForm, setShowReplyForm] = useState(false);
+  const { user } = useAuth();
 
   const handleLike = () => {
     if (isLiked) {
@@ -238,7 +242,13 @@ export function CommentCard({
 
             {/* Reply button */}
             <button
-              onClick={() => setShowReplyForm(!showReplyForm)}
+              onClick={() => {
+                if (!user) {
+                  onAuthRequired?.();
+                } else {
+                  setShowReplyForm(!showReplyForm);
+                }
+              }}
               className="flex items-center gap-1 px-2 py-1 rounded hover:bg-[#F6F7F8]"
             >
               <Reply className="h-4 w-4" />
@@ -278,6 +288,7 @@ export function CommentCard({
               onReply={onReply}
               onLike={onLike}
               onUnlike={onUnlike}
+              onAuthRequired={onAuthRequired}
             />
           ))}
         </div>

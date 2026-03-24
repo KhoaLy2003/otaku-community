@@ -85,6 +85,7 @@ function App() {
                   <Route path="/anime/:id" element={<AnimeDetailPage />} />
                   <Route path={ROUTES.MANGA_LIST} element={<MangaListPage />} />
                   <Route path="/manga/:id" element={<MangaDetailPage />} />
+                  <Route path="/posts/:id" element={<PostDetailPage />} />
                   <Route
                     path={ROUTES.MANGA_DASHBOARD}
                     element={
@@ -129,14 +130,6 @@ function App() {
                     element={
                       <ProtectedRoute>
                         <CreatePostPage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/posts/:id"
-                    element={
-                      <ProtectedRoute>
-                        <PostDetailPage />
                       </ProtectedRoute>
                     }
                   />

@@ -3,6 +3,8 @@ import { useSearchParams } from "react-router-dom";
 import { ChatList } from "./ChatList";
 import { ChatWindow } from "./ChatWindow";
 import { useChatStore } from "@/store/useChatStore";
+import { cn } from "@/lib/utils";
+import { ChevronLeft } from "lucide-react";
 import type { Chat } from "@/types/chat";
 
 export function ChatPage() {
@@ -45,9 +47,12 @@ export function ChatPage() {
   };
 
   return (
-    <div className="flex h-full max-h-[80vh] border border-gray-200 rounded-lg overflow-hidden bg-white">
+    <div className="flex h-[calc(100vh-140px)] md:h-[calc(100vh-120px)] max-h-[100%] border border-gray-200 rounded-lg overflow-hidden bg-white relative">
       {/* Chat list sidebar */}
-      <div className="w-80 border-r border-gray-200 flex flex-col">
+      <div className={cn(
+        "w-full md:w-80 border-r border-gray-200 flex flex-col transition-all duration-300",
+        selectedChat && "hidden md:flex"
+      )}>
         <div className="p-4 border-b border-gray-200">
           <h2 className="text-xl font-bold">Messages</h2>
         </div>
@@ -60,8 +65,17 @@ export function ChatPage() {
       </div>
 
       {/* Chat window */}
-      <div className="flex-1 flex flex-col">
-        <ChatWindow chat={selectedChat} />
+      <div className={cn(
+        "flex-1 flex flex-col transition-all duration-300",
+        !selectedChat && "hidden md:flex"
+      )}>
+        <ChatWindow
+          chat={selectedChat}
+          onBack={() => {
+            setSelectedChat(null);
+            setSearchParams({});
+          }}
+        />
       </div>
     </div>
   );

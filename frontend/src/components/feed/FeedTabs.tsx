@@ -25,8 +25,10 @@ interface FeedTabsProps {
 
 export function FeedTabs({ activeTab, onChange }: FeedTabsProps) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded border bg-white p-3 shadow-sm">
-      <Tabs tabs={tabItems} activeTab={activeTab} onChange={onChange} />
+    <div className="flex items-center justify-between gap-3 rounded border bg-white p-3 shadow-sm">
+      <div className="flex-1 min-w-0">
+        <Tabs tabs={tabItems} activeTab={activeTab} onChange={onChange} />
+      </div>
       <Button variant="outline" color="grey" size="sm">
         More
       </Button>

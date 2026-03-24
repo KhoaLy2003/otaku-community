@@ -59,8 +59,8 @@ const HomePage: React.FC = () => {
         </div>
       )}
 
-      <div className="flex-1 mx-auto flex gap-6 py-4">
-        <section className="flex-1 space-y-4">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 py-2 sm:py-4 w-full">
+        <section className="flex-1 min-w-0 space-y-4">
           <CreatePostCard />
           <FeedTabs activeTab={activeTab} onChange={setActiveTab} />
           {activeTab === 'translations' ? (
@@ -69,7 +69,7 @@ const HomePage: React.FC = () => {
             <FeedList />
           )}
         </section>
-        <aside className="hidden w-full max-w-[312px] space-y-4 lg:block">
+        <aside className="hidden w-[312px] shrink-0 space-y-4 lg:block">
           <HomeCard />
           <RecentPostsCard />
         </aside>

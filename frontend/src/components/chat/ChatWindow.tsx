@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useChatStore } from "@/store/useChatStore";
 import { MessageBubble } from "./MessageBubble";
 import { MessageInput } from "./MessageInput";
-import { Loader2 } from "lucide-react";
+import { Loader2, ChevronLeft } from "lucide-react";
 import { chatApi } from "@/lib/api/chat";
 import { useChatWebSocket } from "@/hooks/useChatWebSocket";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,9 +11,10 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 interface ChatWindowProps {
   chat: Chat | null;
+  onBack?: () => void;
 }
 
-export function ChatWindow({ chat }: ChatWindowProps) {
+export function ChatWindow({ chat, onBack }: ChatWindowProps) {
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const {
@@ -186,12 +187,27 @@ export function ChatWindow({ chat }: ChatWindowProps) {
     <div className="flex-1 flex flex-col h-full">
       {/* Header */}
       <div className="p-4 border-b border-gray-100 flex items-center gap-3">
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="md:hidden p-1 hover:bg-gray-100 rounded-lg mr-1"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+        )}
         <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
-          {chat.participant.avatarUrl && (
-            <img src={chat.participant.avatarUrl} alt={chat.participant.username} className="w-full h-full object-cover" />
+          {(chat.participant.avatarUrl || chat.participant.avatarUrl) && (
+            <img
+              src={chat.participant.avatarUrl || chat.participant.avatarUrl}
+              alt={chat.participant.username}
+              className="w-full h-full object-cover"
+            />
           )}
         </div>
-        <span className="font-semibold">{chat.participant.username}</span>
+        <div className="flex flex-col">
+          <span className="font-semibold leading-none">{chat.participant.username || chat.participant.username}</span>
+          <span className="text-xs text-gray-500 mt-1">@{chat.participant.username}</span>
+        </div>
       </div>
 
       {/* Messages area */}
